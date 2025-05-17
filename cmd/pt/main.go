@@ -1,7 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"github.com/markelca/prioritty/cmd/pt/cli"
+)
 
 func main() {
-	fmt.Println("Hi!")
+	cli.Execute()
 }
