@@ -2,16 +2,19 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"os"
+	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 	tui "github.com/markelca/prioritty/internal/tui"
 )
 
 func main() {
-	p := tea.NewProgram(tui.InitialModel())
-	if _, err := p.Run(); err != nil {
-		fmt.Printf("Alas, there's been an error: %v", err)
+	rand.Seed(time.Now().UTC().UnixNano())
+
+	if _, err := tea.NewProgram(tui.NewModel(), tea.WithAltScreen()).Run(); err != nil {
+		fmt.Println("Error running program:", err)
 		os.Exit(1)
 	}
 }
