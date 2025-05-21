@@ -1,3 +1,3 @@
 build:
-	go build -o bin/pt cmd/pt/*.go
+	go build -o bin/pt cmd/*.go
 
