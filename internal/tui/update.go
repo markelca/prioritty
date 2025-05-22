@@ -1,6 +1,9 @@
 package tui
 
-import tea "github.com/charmbracelet/bubbletea"
+import (
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/markelca/prioritty/pkg/tasks"
+)
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
@@ -30,13 +33,22 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// The "enter" key and the spacebar (a literal space) toggle
 		// the selected state for the item that the cursor is pointing at.
 		case "enter", " ", "d":
-			_, ok := m.done[m.cursor]
-			if ok {
-				delete(m.done, m.cursor)
+			task := &m.tasks[m.cursor]
+			if task.Status == tasks.Done {
+				task.Status = tasks.Todo
 			} else {
-				m.done[m.cursor] = struct{}{}
+				task.Status = tasks.Done
 			}
+		case "p":
+			task := &m.tasks[m.cursor]
+			if task.Status == tasks.InProgress {
+				task.Status = tasks.Todo
+			} else {
+				task.Status = tasks.InProgress
+			}
+
 		}
+
 	}
 
 	// Return the updated model to the Bubble Tea runtime for processing.

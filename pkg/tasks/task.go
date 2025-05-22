@@ -1,6 +1,15 @@
 package tasks
 
+type Status int
+
+const (
+	Todo Status = iota
+	InProgress
+	Blocked
+	Done
+)
+
 type Task struct {
-	title  string
-	status bool
+	Title  string
+	Status Status
 }
