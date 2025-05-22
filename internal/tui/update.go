@@ -29,7 +29,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		// The "enter" key and the spacebar (a literal space) toggle
 		// the selected state for the item that the cursor is pointing at.
-		case "enter", " ":
+		case "enter", " ", "d":
 			_, ok := m.done[m.cursor]
 			if ok {
 				delete(m.done, m.cursor)

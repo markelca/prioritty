@@ -1,33 +1,43 @@
 package tui
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/charmbracelet/lipgloss"
+)
+
+var defaultStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("white"))
+
+var successStyle = lipgloss.NewStyle().
+	Foreground(lipgloss.Color("#04B575"))
+
+var greyStyle = lipgloss.NewStyle().
+	Foreground(lipgloss.Color("#595a70"))
 
 func (m model) View() string {
-	// The header
-	s := "What should we buy at the market?\n\n"
+	s := ""
 
-	// Iterate over our choices
 	for i, choice := range m.tasks {
-
-		// Is the cursor pointing at this choice?
-		cursor := " " // no cursor
+		cursor := " "
 		if m.cursor == i {
-			cursor = ">" // cursor!
+			cursor = ">"
 		}
 
-		// Is this choice selected?
-		checked := " " // not selected
 		if _, ok := m.done[i]; ok {
-			checked = "x" // selected!
+			s += fmt.Sprintf("%s %s %s %s\n",
+				defaultStyle.Render(cursor),
+				greyStyle.Render(fmt.Sprintf("%d.", i+1)),
+				successStyle.Render("✔"),
+				greyStyle.Render(choice))
+		} else {
+			s += fmt.Sprintf("%s %s %s %s\n",
+				defaultStyle.Render(cursor),
+				greyStyle.Render(fmt.Sprintf("%d.", i+1)),
+				defaultStyle.Render("☐"),
+				choice)
 		}
-
-		// Render the row
-		s += fmt.Sprintf("%s [%s] %s\n", cursor, checked, choice)
 	}
 
-	// The footer
-	s += "\nPress q to quit.\n"
-
-	// Send the UI for rendering
+	s += greyStyle.Render("\nPress q to quit.\n")
 	return s
 }
