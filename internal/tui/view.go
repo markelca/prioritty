@@ -18,7 +18,7 @@ var greyStyle = lipgloss.NewStyle().
 var blueStyle = lipgloss.NewStyle().
 	Foreground(lipgloss.Color("#7aa0df"))
 
-func (m model) View() string {
+func (m Model) View() string {
 	s := ""
 
 	for i, task := range m.tasks {
@@ -51,6 +51,7 @@ func (m model) View() string {
 
 	}
 
-	s += greyStyle.Render("\nPress q to quit.\n")
-	return s
+	helpView := m.help.View(m.Keys)
+
+	return s + "\n" + helpView
 }

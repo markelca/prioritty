@@ -5,13 +5,18 @@ import (
 	"os"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/markelca/prioritty/internal/cli"
 	tui "github.com/markelca/prioritty/internal/tui"
 )
 
 func main() {
-	p := tea.NewProgram(tui.InitialModel())
-	if _, err := p.Run(); err != nil {
-		fmt.Printf("Alas, there's been an error: %v", err)
-		os.Exit(1)
+	if len(os.Args) < 2 {
+		p := tea.NewProgram(tui.InitialModel())
+		if _, err := p.Run(); err != nil {
+			fmt.Printf("Alas, there's been an error: %v", err)
+			os.Exit(1)
+		}
+	} else {
+		cli.Execute()
 	}
 }
