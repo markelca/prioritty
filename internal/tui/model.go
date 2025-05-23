@@ -8,17 +8,18 @@ import (
 )
 
 type Model struct {
+	withTui    bool
 	Keys       keyMap
 	help       help.Model
 	inputStyle lipgloss.Style
-	quitting   bool
 	tasks      []tasks.Task     // items on the to-do list
 	cursor     int              // which to-do list item our cursor is pointing at
 	done       map[int]struct{} // which to-do items are checked
 }
 
-func InitialModel() Model {
+func InitialModel(withTui bool) Model {
 	return Model{
+		withTui:    withTui,
 		Keys:       keys,
 		help:       help.New(),
 		inputStyle: lipgloss.NewStyle().Foreground(lipgloss.Color("#FF75B7")),

@@ -9,12 +9,16 @@ import (
 // keyMap defines a set of keybindings. To work for help it must satisfy
 // key.Map. It could also very easily be a map[string]key.Binding.
 type keyMap struct {
-	Up    key.Binding
-	Down  key.Binding
-	Left  key.Binding
-	Right key.Binding
-	Help  key.Binding
-	Quit  key.Binding
+	Up         key.Binding
+	Down       key.Binding
+	Left       key.Binding
+	Right      key.Binding
+	Help       key.Binding
+	Quit       key.Binding
+	Check      key.Binding
+	InProgress key.Binding
+	Done       key.Binding
+	ToDo       key.Binding
 }
 
 // ShortHelp returns keybindings to be shown in the mini help view. It's part
@@ -28,7 +32,8 @@ func (k keyMap) ShortHelp() []key.Binding {
 func (k keyMap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
 		{k.Up, k.Down, k.Left, k.Right}, // first column
-		{k.Help, k.Quit},                // second column
+		{k.Check, k.InProgress, k.ToDo, k.Done},
+		{k.Help, k.Quit}, // second column
 	}
 }
 
@@ -57,6 +62,22 @@ var keys = keyMap{
 		key.WithKeys("q", "esc", "ctrl+c"),
 		key.WithHelp("q", "quit"),
 	),
+	Check: key.NewBinding(
+		key.WithKeys("enter"),
+		key.WithHelp("enter", "Check/uncheck task"),
+	),
+	InProgress: key.NewBinding(
+		key.WithKeys("p"),
+		key.WithHelp("p", "In progress"),
+	),
+	Done: key.NewBinding(
+		key.WithKeys("d"),
+		key.WithHelp("d", "Done"),
+	),
+	ToDo: key.NewBinding(
+		key.WithKeys("t"),
+		key.WithHelp("t", "To do"),
+	),
 }
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -65,39 +86,32 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// Is it a key press?
 	case tea.KeyMsg:
 		switch {
+
 		case key.Matches(msg, m.Keys.Help):
 			m.help.ShowAll = !m.help.ShowAll
-		}
 
-		// Cool, what was the actual key pressed?
-		switch msg.String() {
-
-		// These keys should exit the program.
-		case "ctrl+c", "q":
+		case key.Matches(msg, m.Keys.Quit):
 			return m, tea.Quit
 
-		// The "up" and "k" keys move the cursor up
-		case "up", "k":
+		case key.Matches(msg, m.Keys.Up):
 			if m.cursor > 0 {
 				m.cursor--
 			}
 
-		// The "down" and "j" keys move the cursor down
-		case "down", "j":
+		case key.Matches(msg, m.Keys.Down):
 			if m.cursor < len(m.tasks)-1 {
 				m.cursor++
 			}
 
-		// The "enter" key and the spacebar (a literal space) toggle
-		// the selected state for the item that the cursor is pointing at.
-		case "enter", " ", "d":
+		case key.Matches(msg, m.Keys.Check):
 			task := &m.tasks[m.cursor]
 			if task.Status == tasks.Done {
 				task.Status = tasks.Todo
 			} else {
 				task.Status = tasks.Done
 			}
-		case "p":
+
+		case key.Matches(msg, m.Keys.InProgress):
 			task := &m.tasks[m.cursor]
 			if task.Status == tasks.InProgress {
 				task.Status = tasks.Todo
@@ -105,6 +119,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				task.Status = tasks.InProgress
 			}
 
+		case key.Matches(msg, m.Keys.ToDo):
+			task := &m.tasks[m.cursor]
+			task.Status = tasks.Todo
+
+		case key.Matches(msg, m.Keys.Done):
+			task := &m.tasks[m.cursor]
+			task.Status = tasks.Done
 		}
 
 	}

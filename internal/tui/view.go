@@ -2,7 +2,6 @@ package tui
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/markelca/prioritty/pkg/tasks"
@@ -24,7 +23,7 @@ func (m Model) View() string {
 
 	for i, task := range m.tasks {
 		cursor := " "
-		if m.cursor == i {
+		if m.withTui && m.cursor == i {
 			cursor = ">"
 		}
 
@@ -53,7 +52,7 @@ func (m Model) View() string {
 	}
 
 	var helpView string
-	if len(os.Args) < 2 {
+	if m.withTui {
 		helpView = m.help.View(m.Keys)
 
 	}

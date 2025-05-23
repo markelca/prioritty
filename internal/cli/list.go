@@ -17,7 +17,7 @@ var listCmd = &cobra.Command{
 	Short:   "Shows all the tasks",
 	Long:    `[Long description]`,
 	Run: func(cmd *cobra.Command, args []string) {
-		m := tui.InitialModel()
+		m := tui.InitialModel(false)
 		fmt.Print(m.View())
 	},
 }
