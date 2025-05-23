@@ -2,6 +2,7 @@ package tui
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/markelca/prioritty/pkg/tasks"
@@ -51,7 +52,11 @@ func (m Model) View() string {
 
 	}
 
-	helpView := m.help.View(m.Keys)
+	var helpView string
+	if len(os.Args) < 2 {
+		helpView = m.help.View(m.Keys)
+
+	}
 
 	return s + "\n" + helpView
 }
