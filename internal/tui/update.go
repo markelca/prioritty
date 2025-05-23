@@ -80,7 +80,16 @@ var keys = keyMap{
 	),
 }
 
+func setStatus(task *tasks.Task, status tasks.Status) {
+	if task.Status == status {
+		task.Status = tasks.Todo
+	} else {
+		task.Status = status
+	}
+}
+
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	task := &m.tasks[m.cursor]
 	switch msg := msg.(type) {
 
 	// Is it a key press?
@@ -103,29 +112,15 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.cursor++
 			}
 
-		case key.Matches(msg, m.Keys.Check):
-			task := &m.tasks[m.cursor]
-			if task.Status == tasks.Done {
-				task.Status = tasks.Todo
-			} else {
-				task.Status = tasks.Done
-			}
-
 		case key.Matches(msg, m.Keys.InProgress):
-			task := &m.tasks[m.cursor]
-			if task.Status == tasks.InProgress {
-				task.Status = tasks.Todo
-			} else {
-				task.Status = tasks.InProgress
-			}
+			setStatus(task, tasks.InProgress)
 
 		case key.Matches(msg, m.Keys.ToDo):
-			task := &m.tasks[m.cursor]
 			task.Status = tasks.Todo
 
-		case key.Matches(msg, m.Keys.Done):
-			task := &m.tasks[m.cursor]
-			task.Status = tasks.Done
+		case key.Matches(msg, m.Keys.Done),
+			key.Matches(msg, m.Keys.Check):
+			setStatus(task, tasks.Done)
 		}
 
 	}
