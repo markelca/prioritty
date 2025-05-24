@@ -1,0 +1,3 @@
+database_path: "./data/prioritty.db"
+log_file_path: "./logs/prioritty.log"
+default_command: "ls"
