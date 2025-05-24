@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 
@@ -14,31 +15,30 @@ type Config struct {
 	DefaultCommand string `mapstructure:"default_command"`
 }
 
-var GlobalConfig *Config
+var config *Config
 
 func InitConfig(cfgFile string) error {
-	home, err := os.UserHomeDir()
+	configPath, err := os.UserConfigDir()
 	if err != nil {
 		return fmt.Errorf("failed to get home directory: %w", err)
 	}
+
+	configDir := filepath.Join(configPath, "prioritty")
 
 	if cfgFile != "" {
 		// Use config file from the flag
 		viper.SetConfigFile(cfgFile)
 	} else {
-
-		configDir := filepath.Join(home, ".config", "prioritty")
-
 		// Search config in home directory with name "prioritty" (without extension)
-		viper.AddConfigPath(".")
-		viper.AddConfigPath(home)
+		// viper.AddConfigPath(".")
+		// viper.AddConfigPath(home)
 		viper.AddConfigPath(configDir)
+
 		viper.SetConfigName("prioritty")
 		viper.SetConfigType("yaml")
 	}
 
-	// Set defaults
-	setDefaults(home)
+	setDefaults(configDir)
 
 	// Enable environment variable support
 	viper.AutomaticEnv()
@@ -47,39 +47,39 @@ func InitConfig(cfgFile string) error {
 	// Read config file
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			// Config file not found; ignore error if desired
-			fmt.Println("No config file found, using defaults")
+			if err := createConfigFile(configDir); err != nil {
+				return fmt.Errorf("Failed to create the config file: %w", err)
+			}
 		} else {
 			// Config file was found but another error was produced
 			return fmt.Errorf("error reading config file: %w", err)
 		}
-	} else {
-		fmt.Printf("Using config file: %s\n", viper.ConfigFileUsed())
 	}
 
 	// Unmarshal config into struct
-	GlobalConfig = &Config{}
-	if err := viper.Unmarshal(GlobalConfig); err != nil {
+	if err := viper.Unmarshal(config); err != nil {
 		return fmt.Errorf("unable to decode config: %w", err)
 	}
 
 	return nil
 }
 
-func setDefaults(homeDir string) {
-	// Database defaults
-	viper.SetDefault("database_path", filepath.Join(homeDir, "share", "prioritty", "prioritty.db"))
+func createConfigFile(configDir string) error {
+	fmt.Println("Config file not found, creating with defaults...")
 
-	// Log file defaults
-	viper.SetDefault("log_file_path", filepath.Join(homeDir, "config", "prioritty", "prioritty.logs"))
-
-	// Default command to run when no subcommand is specified
-	viper.SetDefault("default_command", "tui")
+	if err := os.MkdirAll(configDir, 0755); err != nil {
+		return fmt.Errorf("failed to create config directory: %w", err)
+	}
+	// Create the config file with default values
+	if err := viper.SafeWriteConfig(); err != nil {
+		log.Fatalf("Error creating config file: %v", err)
+	}
+	fmt.Println("Config file created successfully")
+	return nil
 }
 
-func GetConfig() *Config {
-	if GlobalConfig == nil {
-		panic("Config not initialized. Call InitConfig() first.")
-	}
-	return GlobalConfig
+func setDefaults(configDir string) {
+	viper.SetDefault("database_path", filepath.Join(configDir, "prioritty.db"))
+	viper.SetDefault("log_file_path", filepath.Join(configDir, "prioritty.log"))
+	viper.SetDefault("default_command", "ls")
 }

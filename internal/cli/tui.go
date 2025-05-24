@@ -9,6 +9,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+func init() {
+	rootCmd.AddCommand(tuiCmd)
+}
+
 var tuiCmd = &cobra.Command{
 	Use:   "tui",
 	Short: "Launch the interactive TUI",

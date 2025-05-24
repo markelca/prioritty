@@ -1,0 +1,3 @@
+database_path: /home/markel/.config/prioritty/prioritty/prioritty.db
+default_command: ls
+log_file_path: /home/markel/.config/prioritty/prioritty/prioritty.logs
