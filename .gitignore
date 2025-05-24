@@ -8,6 +8,9 @@
 *.so
 *.dylib
 
+# Database files for the application
+/data
+
 # Binaries for the application
 /bin
 

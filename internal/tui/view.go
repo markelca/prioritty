@@ -25,7 +25,7 @@ func (m Model) View() string {
 	countInProgress := 0
 	countDone := 0
 
-	for i, task := range m.tasks {
+	for i, task := range m.Tasks {
 		cursor := " "
 		if m.withTui && m.cursor == i {
 			cursor = ">"
@@ -58,13 +58,13 @@ func (m Model) View() string {
 
 	}
 
-	if len(m.tasks) > 0 {
+	if len(m.Tasks) > 0 {
 
 	}
 
 	s += fmt.Sprintf("\n  %s %s",
 		successStyle.Render(
-			fmt.Sprintf("%.f%%", float64(countDone)/float64(len(m.tasks))*100),
+			fmt.Sprintf("%.f%%", float64(countDone)/float64(len(m.Tasks))*100),
 		),
 		greyStyle.Render("of all tasks completed."),
 	)

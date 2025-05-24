@@ -89,7 +89,7 @@ func setStatus(task *tasks.Task, status tasks.Status) {
 }
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	task := &m.tasks[m.cursor]
+	task := &m.Tasks[m.cursor]
 	switch msg := msg.(type) {
 
 	// Is it a key press?
@@ -108,7 +108,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 		case key.Matches(msg, m.Keys.Down):
-			if m.cursor < len(m.tasks)-1 {
+			if m.cursor < len(m.Tasks)-1 {
 				m.cursor++
 			}
 

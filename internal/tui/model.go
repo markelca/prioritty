@@ -12,9 +12,8 @@ type Model struct {
 	Keys       keyMap
 	help       help.Model
 	inputStyle lipgloss.Style
-	tasks      []tasks.Task     // items on the to-do list
-	cursor     int              // which to-do list item our cursor is pointing at
-	done       map[int]struct{} // which to-do items are checked
+	Tasks      []tasks.Task // items on the to-do list
+	cursor     int          // which to-do list item our cursor is pointing at
 }
 
 func InitialModel(withTui bool) Model {
@@ -24,7 +23,7 @@ func InitialModel(withTui bool) Model {
 		help:       help.New(),
 		inputStyle: lipgloss.NewStyle().Foreground(lipgloss.Color("#FF75B7")),
 		// Our to-do list is a grocery list
-		tasks: []tasks.Task{
+		Tasks: []tasks.Task{
 			{Title: "Build TUI", Status: tasks.Done},
 			{Title: "Add commands", Status: tasks.InProgress},
 			{Title: "Organize packages", Status: tasks.Todo},

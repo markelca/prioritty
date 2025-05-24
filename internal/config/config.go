@@ -56,7 +56,6 @@ func InitConfig(cfgFile string) error {
 		}
 	}
 
-	// Unmarshal config into struct
 	if err := viper.Unmarshal(config); err != nil {
 		return fmt.Errorf("unable to decode config: %w", err)
 	}
