@@ -25,7 +25,6 @@ var listCmd = &cobra.Command{
 		}
 
 		tasks := repo.FindAll()
-		fmt.Printf("Found %d tasks:\n", len(tasks))
 
 		m := tui.InitialModel(false)
 		m.Tasks = tasks

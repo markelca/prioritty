@@ -14,10 +14,8 @@ func main() {
 	}
 
 	tasks := repo.FindAll()
-	fmt.Printf("Found %d tasks:\n", len(tasks))
 
 	for _, task := range tasks {
 		fmt.Printf("ID: %d, Title: %s, Status: %d\n", task.Id, task.Title, task.Status)
 	}
 }
-
