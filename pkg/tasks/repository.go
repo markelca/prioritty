@@ -9,6 +9,7 @@ import (
 
 type Repository interface {
 	FindAll() ([]Task, error)
+	UpdateStatus(Task, Status) error
 }
 
 type SQLiteRepository struct {
@@ -52,4 +53,14 @@ func (r *SQLiteRepository) FindAll() ([]Task, error) {
 	}
 
 	return tasks, nil
+}
+
+func (r *SQLiteRepository) UpdateStatus(t Task, s Status) error {
+	query := `
+		UPDATE task
+		SET status_id = ?
+		WHERE id = ?
+	`
+	r.db.Exec(query, s, t.Id)
+	return nil
 }

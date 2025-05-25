@@ -14,3 +14,11 @@ type Task struct {
 	Title  string
 	Status Status
 }
+
+func (t *Task) SetStatus(s Status) {
+	if t.Status == s {
+		t.Status = Todo
+	} else {
+		t.Status = s
+	}
+}

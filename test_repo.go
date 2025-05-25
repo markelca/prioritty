@@ -1,21 +1,19 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/markelca/prioritty/pkg/tasks"
 )
 
 func main() {
-	repo, err := tasks.NewSQLiteRepository("data/test.db")
+	repo, err := tasks.NewSQLiteRepository("/home/markel/.config/prioritty/prioritty.db")
 	if err != nil {
 		log.Fatal("Failed to create repository:", err)
 	}
 
-	tasks := repo.FindAll()
-
-	for _, task := range tasks {
-		fmt.Printf("ID: %d, Title: %s, Status: %d\n", task.Id, task.Title, task.Status)
+	err = repo.UpdateStatus(tasks.Task{Id: 1}, tasks.InProgress)
+	if err != nil {
+		log.Fatal("Failed to update task:", err)
 	}
 }
