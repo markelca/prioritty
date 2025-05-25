@@ -15,7 +15,7 @@ func (m Model) View() string {
 	countDone := 0
 	countCancelled := 0
 
-	for i, task := range m.Tasks {
+	for i, task := range m.tasks {
 		cursor := " "
 		if m.withTui && m.cursor == i {
 			cursor = ">"
@@ -56,8 +56,8 @@ func (m Model) View() string {
 	}
 
 	var donePercentage float64
-	if len(m.Tasks) > 0 {
-		donePercentage = float64(countDone) / float64(len(m.Tasks)) * 100
+	if len(m.tasks) > 0 {
+		donePercentage = float64(countDone) / float64(len(m.tasks)) * 100
 	} else {
 		donePercentage = 0
 	}
@@ -81,7 +81,7 @@ func (m Model) View() string {
 
 	var helpView string
 	if m.withTui {
-		helpView = m.help.View(m.Keys)
+		helpView = m.help.View(m.keys)
 
 	}
 

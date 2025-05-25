@@ -14,22 +14,26 @@ import (
 
 type Model struct {
 	withTui    bool
-	Keys       keyMap
+	keys       keyMap
 	help       help.Model
 	inputStyle lipgloss.Style
-	Tasks      []tasks.Task // items on the to-do list
+	service    tasks.Service
+	tasks      []tasks.Task // items on the to-do list
 	cursor     int          // which to-do list item our cursor is pointing at
 }
 
 func InitialModel(withTui bool) Model {
 	dbFilePath := viper.GetString(config.KEY_DATABASE_PATH)
+
 	repo, err := tasks.NewSQLiteRepository(dbFilePath)
 	if err != nil {
 		fmt.Println("Error - Failed to create repository:", err)
 		os.Exit(3)
 	}
 
-	tasks, err := repo.FindAll()
+	service := tasks.NewService(repo)
+
+	tasks, err := service.FindAll()
 	if err != nil {
 		fmt.Println("Error - Failed to get the tasks:", err)
 		os.Exit(4)
@@ -37,10 +41,11 @@ func InitialModel(withTui bool) Model {
 
 	return Model{
 		withTui:    withTui,
-		Keys:       keys,
+		keys:       keys,
 		help:       help.New(),
 		inputStyle: lipgloss.NewStyle().Foreground(lipgloss.Color("#FF75B7")),
-		Tasks:      tasks,
+		service:    service,
+		tasks:      tasks,
 	}
 }
 

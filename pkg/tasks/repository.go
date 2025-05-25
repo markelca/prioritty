@@ -8,7 +8,7 @@ import (
 )
 
 type Repository interface {
-	FindAll() []Task
+	FindAll() ([]Task, error)
 }
 
 type SQLiteRepository struct {

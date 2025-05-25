@@ -94,40 +94,40 @@ func setStatus(task *tasks.Task, status tasks.Status) {
 }
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	task := &m.Tasks[m.cursor]
+	task := &m.tasks[m.cursor]
 	switch msg := msg.(type) {
 
 	// Is it a key press?
 	case tea.KeyMsg:
 		switch {
 
-		case key.Matches(msg, m.Keys.Help):
+		case key.Matches(msg, m.keys.Help):
 			m.help.ShowAll = !m.help.ShowAll
 
-		case key.Matches(msg, m.Keys.Quit):
+		case key.Matches(msg, m.keys.Quit):
 			return m, tea.Quit
 
-		case key.Matches(msg, m.Keys.Up):
+		case key.Matches(msg, m.keys.Up):
 			if m.cursor > 0 {
 				m.cursor--
 			}
 
-		case key.Matches(msg, m.Keys.Down):
-			if m.cursor < len(m.Tasks)-1 {
+		case key.Matches(msg, m.keys.Down):
+			if m.cursor < len(m.tasks)-1 {
 				m.cursor++
 			}
 
-		case key.Matches(msg, m.Keys.InProgress):
+		case key.Matches(msg, m.keys.InProgress):
 			setStatus(task, tasks.InProgress)
 
-		case key.Matches(msg, m.Keys.ToDo):
+		case key.Matches(msg, m.keys.ToDo):
 			task.Status = tasks.Todo
 
-		case key.Matches(msg, m.Keys.Done),
-			key.Matches(msg, m.Keys.Check):
+		case key.Matches(msg, m.keys.Done),
+			key.Matches(msg, m.keys.Check):
 			setStatus(task, tasks.Done)
 
-		case key.Matches(msg, m.Keys.Cancelled):
+		case key.Matches(msg, m.keys.Cancelled):
 			setStatus(task, tasks.Cancelled)
 		}
 
