@@ -109,17 +109,17 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 		case key.Matches(msg, m.keys.InProgress):
-			m.service.UpdateStatus(task, tasks.InProgress)
+			m.Service.UpdateStatus(task, tasks.InProgress)
 
 		case key.Matches(msg, m.keys.ToDo):
-			m.service.UpdateStatus(task, tasks.Todo)
+			m.Service.UpdateStatus(task, tasks.Todo)
 
 		case key.Matches(msg, m.keys.Done),
 			key.Matches(msg, m.keys.Check):
-			m.service.UpdateStatus(task, tasks.Done)
+			m.Service.UpdateStatus(task, tasks.Done)
 
 		case key.Matches(msg, m.keys.Cancelled):
-			m.service.UpdateStatus(task, tasks.Cancelled)
+			m.Service.UpdateStatus(task, tasks.Cancelled)
 		}
 
 	}

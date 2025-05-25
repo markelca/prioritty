@@ -10,6 +10,7 @@ import (
 type Repository interface {
 	FindAll() ([]Task, error)
 	UpdateStatus(Task, Status) error
+	CreateTask(Task) error
 }
 
 type SQLiteRepository struct {
@@ -63,4 +64,13 @@ func (r *SQLiteRepository) UpdateStatus(t Task, s Status) error {
 	`
 	r.db.Exec(query, s, t.Id)
 	return nil
+}
+
+func (r *SQLiteRepository) CreateTask(t Task) error {
+	query := `
+		INSERT INTO task (title, status_id)
+		VALUES (?, ?)
+	`
+	_, err := r.db.Exec(query, t.Title, t.Status)
+	return err
 }

@@ -17,7 +17,7 @@ type Model struct {
 	keys       keyMap
 	help       help.Model
 	inputStyle lipgloss.Style
-	service    tasks.Service
+	Service    tasks.Service
 	tasks      []tasks.Task // items on the to-do list
 	cursor     int          // which to-do list item our cursor is pointing at
 }
@@ -44,7 +44,7 @@ func InitialModel(withTui bool) Model {
 		keys:       keys,
 		help:       help.New(),
 		inputStyle: lipgloss.NewStyle().Foreground(lipgloss.Color("#FF75B7")),
-		service:    service,
+		Service:    service,
 		tasks:      tasks,
 	}
 }

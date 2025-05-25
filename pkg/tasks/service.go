@@ -20,3 +20,8 @@ func (s Service) UpdateStatus(t *Task, status Status) error {
 	t.SetStatus(status)
 	return nil
 }
+
+func (s Service) AddTask(title string) error {
+	t := Task{Title: title}
+	return s.repository.CreateTask(t)
+}
