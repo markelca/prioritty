@@ -25,3 +25,7 @@ func (s Service) AddTask(title string) error {
 	t := Task{Title: title}
 	return s.repository.CreateTask(t)
 }
+
+func (s Service) RemoveTask(id int) error {
+	return s.repository.RemoveTask(id)
+}

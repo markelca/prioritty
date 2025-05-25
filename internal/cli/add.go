@@ -1,8 +1,6 @@
 package cli
 
 import (
-	"fmt"
-
 	"github.com/markelca/prioritty/internal/tui"
 	"github.com/spf13/cobra"
 )
@@ -20,6 +18,5 @@ var addCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		m := tui.InitialModel(false)
 		m.Service.AddTask(args[0])
-		fmt.Print(m.View())
 	},
 }

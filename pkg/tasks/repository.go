@@ -11,6 +11,7 @@ type Repository interface {
 	FindAll() ([]Task, error)
 	UpdateStatus(Task, Status) error
 	CreateTask(Task) error
+	RemoveTask(int) error
 }
 
 type SQLiteRepository struct {
@@ -72,5 +73,14 @@ func (r *SQLiteRepository) CreateTask(t Task) error {
 		VALUES (?, ?)
 	`
 	_, err := r.db.Exec(query, t.Title, t.Status)
+	return err
+}
+
+func (r *SQLiteRepository) RemoveTask(id int) error {
+	query := `
+		DELETE FROM task
+		WHERE id = ?
+	`
+	_, err := r.db.Exec(query, id)
 	return err
 }
