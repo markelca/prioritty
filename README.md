@@ -5,7 +5,7 @@ A Terminal User Interface (TUI) and CLI application for managing your tasks. Foc
 - Nice defaults
 - Autocompletion support
 
-![image](https://github.com/user-attachments/assets/338cc588-0e92-4dc1-92bb-6c12667d6a2b)
+![image](https://github.com/user-attachments/assets/8eab8bfe-134f-470c-a45a-ba7cfc3fcda6)
 
 ---
 Inspired by [taskbook](https://github.com/klaudiosinani/taskbook)
