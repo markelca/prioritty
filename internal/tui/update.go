@@ -19,6 +19,7 @@ type keyMap struct {
 	InProgress key.Binding
 	Done       key.Binding
 	ToDo       key.Binding
+	Cancelled  key.Binding
 }
 
 // ShortHelp returns keybindings to be shown in the mini help view. It's part
@@ -32,7 +33,7 @@ func (k keyMap) ShortHelp() []key.Binding {
 func (k keyMap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
 		{k.Up, k.Down, k.Left, k.Right}, // first column
-		{k.Check, k.InProgress, k.ToDo, k.Done},
+		{k.Check, k.InProgress, k.ToDo, k.Done, k.Cancelled},
 		{k.Help, k.Quit}, // second column
 	}
 }
@@ -78,6 +79,10 @@ var keys = keyMap{
 		key.WithKeys("t"),
 		key.WithHelp("t", "To do"),
 	),
+	Cancelled: key.NewBinding(
+		key.WithKeys("c"),
+		key.WithHelp("c", "Cancelled"),
+	),
 }
 
 func setStatus(task *tasks.Task, status tasks.Status) {
@@ -121,6 +126,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, m.Keys.Done),
 			key.Matches(msg, m.Keys.Check):
 			setStatus(task, tasks.Done)
+
+		case key.Matches(msg, m.Keys.Cancelled):
+			setStatus(task, tasks.Cancelled)
 		}
 
 	}

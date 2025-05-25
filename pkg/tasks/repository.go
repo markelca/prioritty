@@ -23,16 +23,16 @@ func NewSQLiteRepository(dbPath string) (*SQLiteRepository, error) {
 	return &SQLiteRepository{db: db}, nil
 }
 
-func (r *SQLiteRepository) FindAll() []Task {
+func (r *SQLiteRepository) FindAll() ([]Task, error) {
 	query := `
 		SELECT t.id, t.title, t.status_id 
 		FROM task t
 	`
-	
+
 	rows, err := r.db.Query(query)
 	if err != nil {
 		log.Printf("Error querying tasks: %v", err)
-		return []Task{}
+		return []Task{}, err
 	}
 	defer rows.Close()
 
@@ -40,16 +40,16 @@ func (r *SQLiteRepository) FindAll() []Task {
 	for rows.Next() {
 		var task Task
 		var statusId int
-		
+
 		err := rows.Scan(&task.Id, &task.Title, &statusId)
 		if err != nil {
 			log.Printf("Error scanning task: %v", err)
 			continue
 		}
-		
+
 		task.Status = Status(statusId)
 		tasks = append(tasks, task)
 	}
-	
-	return tasks
+
+	return tasks, nil
 }

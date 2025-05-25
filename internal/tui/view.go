@@ -3,20 +3,9 @@ package tui
 import (
 	"fmt"
 
-	"github.com/charmbracelet/lipgloss"
+	"github.com/markelca/prioritty/internal/tui/styles"
 	"github.com/markelca/prioritty/pkg/tasks"
 )
-
-var defaultStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("white"))
-
-var successStyle = lipgloss.NewStyle().
-	Foreground(lipgloss.Color("#a6e3a1"))
-
-var greyStyle = lipgloss.NewStyle().
-	Foreground(lipgloss.Color("#595a70"))
-
-var blueStyle = lipgloss.NewStyle().
-	Foreground(lipgloss.Color("#7aa0df"))
 
 func (m Model) View() string {
 	s := ""
@@ -24,6 +13,7 @@ func (m Model) View() string {
 	countToDo := 0
 	countInProgress := 0
 	countDone := 0
+	countCancelled := 0
 
 	for i, task := range m.Tasks {
 		cursor := " "
@@ -35,46 +25,58 @@ func (m Model) View() string {
 		case tasks.Done:
 			countDone += 1
 			s += fmt.Sprintf("%s %s %s %s\n",
-				defaultStyle.Render(cursor),
-				greyStyle.Render(fmt.Sprintf("%d.", i+1)),
-				successStyle.Render("✔"),
-				greyStyle.Render(task.Title))
+				styles.Default.Render(cursor),
+				styles.Secondary.Render(fmt.Sprintf("%d.", i+1)),
+				styles.Done.Render("✔"),
+				styles.Secondary.Render(task.Title))
 
 		case tasks.Todo:
 			countToDo += 1
 			s += fmt.Sprintf("%s %s %s %s\n",
-				defaultStyle.Render(cursor),
-				greyStyle.Render(fmt.Sprintf("%d.", i+1)),
-				defaultStyle.Render("☐"),
+				styles.Default.Render(cursor),
+				styles.Secondary.Render(fmt.Sprintf("%d.", i+1)),
+				styles.Default.Render("☐"),
 				task.Title)
 		case tasks.InProgress:
 			countInProgress += 1
 			s += fmt.Sprintf("%s %s %s %s\n",
-				defaultStyle.Render(cursor),
-				greyStyle.Render(fmt.Sprintf("%d.", i+1)),
-				blueStyle.Render("◐"),
+				styles.Default.Render(cursor),
+				styles.Secondary.Render(fmt.Sprintf("%d.", i+1)),
+				styles.InProgress.Render("◐"),
 				task.Title)
+		case tasks.Cancelled:
+			countCancelled += 1
+			s += fmt.Sprintf("%s %s %s %s\n",
+				styles.Default.Render(cursor),
+				styles.Secondary.Render(fmt.Sprintf("%d.", i+1)),
+				styles.Cancelled.Render("x"),
+				styles.Secondary.Render(task.Title))
 		}
 
 	}
 
+	var donePercentage float64
 	if len(m.Tasks) > 0 {
-
+		donePercentage = float64(countDone) / float64(len(m.Tasks)) * 100
+	} else {
+		donePercentage = 0
 	}
 
 	s += fmt.Sprintf("\n  %s %s",
-		successStyle.Render(
-			fmt.Sprintf("%.f%%", float64(countDone)/float64(len(m.Tasks))*100),
+		styles.Done.Render(
+			fmt.Sprintf("%.f%%", donePercentage),
 		),
-		greyStyle.Render("of all tasks completed."),
+		styles.Secondary.Render("of all tasks completed."),
 	)
-	s += fmt.Sprintf("\n  %s %s %s %s %s %s\n",
-		successStyle.Render(fmt.Sprintf("%d", countDone)),
-		greyStyle.Render("done ·"),
-		blueStyle.Render(fmt.Sprintf("%d", countInProgress)),
-		greyStyle.Render("in-progress ·"),
-		defaultStyle.Render(fmt.Sprintf("%d", countToDo)),
-		greyStyle.Render("pending"),
+	s += fmt.Sprintf("\n  %s %s %s %s %s %s %s %s\n",
+		styles.Done.Render(fmt.Sprintf("%d", countDone)),
+		styles.Secondary.Render("done ·"),
+		styles.InProgress.Render(fmt.Sprintf("%d", countInProgress)),
+		styles.Secondary.Render("in-progress ·"),
+		styles.Default.Render(fmt.Sprintf("%d", countToDo)),
+		styles.Secondary.Render("pending"),
+		styles.Cancelled.Render(fmt.Sprintf("%d", countCancelled)),
+		styles.Secondary.Render("cancelled"),
 	)
 
 	var helpView string

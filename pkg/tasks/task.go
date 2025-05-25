@@ -5,8 +5,8 @@ type Status int
 const (
 	Todo Status = iota
 	InProgress
-	Blocked
 	Done
+	Cancelled
 )
 
 type Task struct {

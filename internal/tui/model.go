@@ -1,10 +1,15 @@
 package tui
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/charmbracelet/bubbles/help"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/markelca/prioritty/internal/config"
 	"github.com/markelca/prioritty/pkg/tasks"
+	"github.com/spf13/viper"
 )
 
 type Model struct {
@@ -17,17 +22,25 @@ type Model struct {
 }
 
 func InitialModel(withTui bool) Model {
+	dbFilePath := viper.GetString(config.KEY_DATABASE_PATH)
+	repo, err := tasks.NewSQLiteRepository(dbFilePath)
+	if err != nil {
+		fmt.Println("Error - Failed to create repository:", err)
+		os.Exit(3)
+	}
+
+	tasks, err := repo.FindAll()
+	if err != nil {
+		fmt.Println("Error - Failed to get the tasks:", err)
+		os.Exit(4)
+	}
+
 	return Model{
 		withTui:    withTui,
 		Keys:       keys,
 		help:       help.New(),
 		inputStyle: lipgloss.NewStyle().Foreground(lipgloss.Color("#FF75B7")),
-		// Our to-do list is a grocery list
-		Tasks: []tasks.Task{
-			{Title: "Build TUI", Status: tasks.Done},
-			{Title: "Add commands", Status: tasks.InProgress},
-			{Title: "Organize packages", Status: tasks.Todo},
-		},
+		Tasks:      tasks,
 	}
 }
 
