@@ -13,6 +13,9 @@ func (s Service) FindAll() ([]Task, error) {
 }
 
 func (s Service) UpdateStatus(t *Task, status Status) error {
+	if t.Status == status {
+		status = Todo
+	}
 	err := s.repository.UpdateStatus(*t, status)
 	if err != nil {
 		return err

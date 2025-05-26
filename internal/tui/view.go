@@ -74,7 +74,7 @@ func (m Model) View() string {
 		styles.InProgress.Render(fmt.Sprintf("%d", countInProgress)),
 		styles.Secondary.Render("in-progress ·"),
 		styles.Default.Render(fmt.Sprintf("%d", countToDo)),
-		styles.Secondary.Render("pending"),
+		styles.Secondary.Render("pending ·"),
 		styles.Cancelled.Render(fmt.Sprintf("%d", countCancelled)),
 		styles.Secondary.Render("cancelled"),
 	)
