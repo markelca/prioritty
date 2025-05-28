@@ -28,7 +28,7 @@ func NewSQLiteRepository(dbPath string) (*SQLiteRepository, error) {
 
 func (r *SQLiteRepository) FindAll() ([]Task, error) {
 	query := `
-		SELECT t.id, t.title, t.status_id 
+		SELECT t.id, t.title, t.body, t.status_id 
 		FROM task t
 	`
 
@@ -42,12 +42,17 @@ func (r *SQLiteRepository) FindAll() ([]Task, error) {
 	var tasks []Task
 	for rows.Next() {
 		var task Task
+		var body *string
 		var statusId int
 
-		err := rows.Scan(&task.Id, &task.Title, &statusId)
+		err := rows.Scan(&task.Id, &task.Title, &body, &statusId)
 		if err != nil {
 			log.Printf("Error scanning task: %v", err)
 			continue
+		}
+
+		if body != nil {
+			task.Body = *body
 		}
 
 		task.Status = Status(statusId)
