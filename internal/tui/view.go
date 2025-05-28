@@ -106,7 +106,7 @@ func (m Model) View() string {
 
 	var donePercentage float64
 	if len(m.tasks) > 0 {
-		donePercentage = float64(countDone) / float64(len(m.tasks)) * 100
+		donePercentage = float64(countDone+countCancelled) / float64(len(m.tasks)) * 100
 	} else {
 		donePercentage = 0
 	}
