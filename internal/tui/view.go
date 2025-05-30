@@ -12,10 +12,10 @@ func (m Model) View() string {
 	view := ""
 	counts := make(map[tasks.Status]int)
 
-	for i, task := range m.tasks {
+	for i, task := range m.state.tasks {
 		counts[task.Status] += 1
 		cursor := " "
-		if m.withTui && m.cursor == i {
+		if m.params.withTui && m.state.cursor == i {
 			cursor = ">"
 		}
 
@@ -26,13 +26,13 @@ func (m Model) View() string {
 		view += renderTask(task)
 	}
 
-	view += renderDonePercentage(m.tasks, counts)
+	view += renderDonePercentage(m.state.tasks, counts)
 	view += renderSummary(counts)
 
-	if m.withTui {
+	if m.params.withTui {
 		view += styles.Default.
 			MarginTop(1).
-			SetString(m.help.View(m.keys)).
+			SetString(Help.View(keys)).
 			Render()
 	}
 

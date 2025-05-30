@@ -6,21 +6,27 @@ import (
 
 	"github.com/charmbracelet/bubbles/help"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 	"github.com/markelca/prioritty/internal/config"
 	"github.com/markelca/prioritty/pkg/tasks"
 	"github.com/spf13/viper"
 )
 
-type Model struct {
-	withTui    bool
-	keys       keyMap
-	help       help.Model
-	inputStyle lipgloss.Style
-	Service    tasks.Service
-	tasks      []tasks.Task // items on the to-do list
-	cursor     int          // which to-do list item our cursor is pointing at
+type State struct {
+	cursor int
+	tasks  []tasks.Task
 }
+
+type Params struct {
+	withTui bool
+}
+
+type Model struct {
+	params  Params
+	state   State
+	Service tasks.Service
+}
+
+var Help = help.New()
 
 func InitialModel(withTui bool) Model {
 	dbFilePath := viper.GetString(config.KEY_DATABASE_PATH)
@@ -40,12 +46,9 @@ func InitialModel(withTui bool) Model {
 	}
 
 	return Model{
-		withTui:    withTui,
-		keys:       keys,
-		help:       help.New(),
-		inputStyle: lipgloss.NewStyle().Foreground(lipgloss.Color("#FF75B7")),
-		Service:    service,
-		tasks:      tasks,
+		state:   State{tasks: tasks},
+		params:  Params{withTui: withTui},
+		Service: service,
 	}
 }
 
