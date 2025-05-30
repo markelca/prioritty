@@ -2,6 +2,7 @@ package tui
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/markelca/prioritty/internal/tui/styles"
@@ -34,6 +35,10 @@ func (m Model) View() string {
 			MarginTop(1).
 			SetString(Help.View(keys)).
 			Render()
+	}
+
+	if m.state.taskContent.ready {
+		view = fmt.Sprintf("%s\n%s\n%s", m.headerView(), m.state.taskContent.viewport.View(), m.footerView())
 	}
 
 	return view
@@ -98,4 +103,17 @@ func renderSummary(counts map[tasks.Status]int) string {
 		styles.Cancelled.Render(fmt.Sprintf("%d", counts[tasks.Cancelled])),
 		styles.Secondary.Render("cancelled"),
 	)
+}
+
+func (m Model) headerView() string {
+	task := &m.state.tasks[m.state.cursor]
+	title := styles.TitleStyle.Render(task.Title)
+	line := strings.Repeat("─", max(0, m.state.taskContent.viewport.Width-lipgloss.Width(title)))
+	return lipgloss.JoinHorizontal(lipgloss.Center, title, line)
+}
+
+func (m Model) footerView() string {
+	info := styles.InfoStyle.Render(fmt.Sprintf("%3.f%%", m.state.taskContent.viewport.ScrollPercent()*100))
+	line := strings.Repeat("─", max(0, m.state.taskContent.viewport.Width-lipgloss.Width(info)))
+	return lipgloss.JoinHorizontal(lipgloss.Center, line, info)
 }

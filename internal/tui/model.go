@@ -5,15 +5,23 @@ import (
 	"os"
 
 	"github.com/charmbracelet/bubbles/help"
+	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/markelca/prioritty/internal/config"
 	"github.com/markelca/prioritty/pkg/tasks"
 	"github.com/spf13/viper"
 )
 
+type TaskContentState struct {
+	content  string
+	ready    bool
+	viewport viewport.Model
+}
+
 type State struct {
-	cursor int
-	tasks  []tasks.Task
+	cursor      int
+	tasks       []tasks.Task
+	taskContent TaskContentState
 }
 
 type Params struct {
@@ -45,8 +53,9 @@ func InitialModel(withTui bool) Model {
 		os.Exit(4)
 	}
 
+	taskContent := TaskContentState{}
 	return Model{
-		state:   State{tasks: tasks},
+		state:   State{tasks: tasks, taskContent: taskContent},
 		params:  Params{withTui: withTui},
 		Service: service,
 	}

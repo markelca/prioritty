@@ -76,4 +76,16 @@ var (
 
 		return icon + cIcon + title + "\n"
 	}
+
+	TitleStyle = func() lipgloss.Style {
+		b := lipgloss.RoundedBorder()
+		b.Right = "├"
+		return lipgloss.NewStyle().BorderStyle(b).Padding(0, 1)
+	}()
+
+	InfoStyle = func() lipgloss.Style {
+		b := lipgloss.RoundedBorder()
+		b.Left = "┤"
+		return TitleStyle.BorderStyle(b)
+	}()
 )
