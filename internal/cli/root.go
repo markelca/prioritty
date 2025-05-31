@@ -15,13 +15,15 @@ import (
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "pt",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
+	Short: "Task list and productivity tool in the terminal",
+	Long: `A Terminal User Interface (TUI) and CLI application for managing your tasks. Focused on:
+	- Good looks
+	- Performance
+	- Nice defaults
+	- Customization
+	- Autocompletion support
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+🚧 Disclaimer: This project is still under development.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		defaultCommand := viper.GetString("default_command")
 		if subCmd, _, err := cmd.Find([]string{defaultCommand}); err == nil {
