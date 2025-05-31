@@ -60,7 +60,7 @@ Use "pt [command] --help" for more information about a command.
 ```
 ### TUI
 You can also press the `?` key to toggle the full help in TUI mode:
-![image](https://github.com/user-attachments/assets/eec74247-bfff-45be-9d6c-6addb877e65c)
+![image](https://github.com/user-attachments/assets/bcc53f9c-8250-45e8-bb2d-edaaeebdbf95)
 
 
 ---
