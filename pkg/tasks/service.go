@@ -2,12 +2,15 @@ package tasks
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"runtime"
 	"strings"
+
+	tea "github.com/charmbracelet/bubbletea"
 )
+
+type EditorFinishedMsg struct{ Err error }
 
 type Service struct {
 	repository Repository
@@ -50,51 +53,43 @@ func (s Service) RemoveTask(id int) error {
 	return s.repository.RemoveTask(id)
 }
 
-func (s Service) EditWithEditor(t *Task) error {
+func (s Service) EditWithEditor(t *Task) (tea.Cmd, error) {
 	// Create temporary file with current task content
-	tempFile, err := ioutil.TempFile("", "task_*.txt")
+	tempFile, err := os.CreateTemp(os.TempDir(), "task_*.txt")
 	if err != nil {
-		return fmt.Errorf("failed to create temp file: %w", err)
+		return nil, fmt.Errorf("failed to create temp file: %w", err)
 	}
-	defer os.Remove(tempFile.Name())
 
 	// Write current task content to temp file
 	content := t.Title + "\n\n" + t.Body
 	if _, err := tempFile.WriteString(content); err != nil {
 		tempFile.Close()
-		return fmt.Errorf("failed to write to temp file: %w", err)
+		return nil, fmt.Errorf("failed to write to temp file: %w", err)
 	}
 	tempFile.Close()
 
 	// Get the editor command
 	editor := getEditor()
 
-	// Open the editor
-	cmd := exec.Command(editor, tempFile.Name())
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	return tea.Sequence(
+		tea.ExecProcess(exec.Command(editor, tempFile.Name()), func(err error) tea.Msg {
+			defer os.Remove(tempFile.Name())
+			modifiedContent, err := os.ReadFile(tempFile.Name())
+			if err != nil {
+				return EditorFinishedMsg{Err: fmt.Errorf("failed to read modified file: %w", err)}
+			}
 
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("failed to run editor: %w", err)
-	}
+			if err := t.parseContent(string(modifiedContent)); err != nil {
+				return EditorFinishedMsg{Err: fmt.Errorf("failed to parse content: %w", err)}
+			}
 
-	// Read the modified content
-	modifiedContent, err := ioutil.ReadFile(tempFile.Name())
-	if err != nil {
-		return fmt.Errorf("failed to read modified file: %w", err)
-	}
+			if err := s.UpdateTask(*t); err != nil {
+				return EditorFinishedMsg{Err: fmt.Errorf("failed updating task: %w", err)}
+			}
 
-	// Parse the content back into title and body
-	if err := t.parseContent(string(modifiedContent)); err != nil {
-		return fmt.Errorf("failed to parse content: %w", err)
-	}
-
-	if err := s.UpdateTask(*t); err != nil {
-		return fmt.Errorf("failed to update task: %w", err)
-	}
-
-	return nil
+			return EditorFinishedMsg{Err: nil}
+		}),
+	), nil
 }
 
 // parseContent parses the editor content into title and body
@@ -156,50 +151,6 @@ func getEditor() string {
 		// Ultimate fallback
 		return "vi"
 	}
-}
-
-// CreateTaskFromEditor creates a new task using the editor
-func CreateTaskFromEditor() (*Task, error) {
-	task := &Task{}
-
-	// Create temp file with template
-	tempFile, err := ioutil.TempFile("", "new_task_*.txt")
-	if err != nil {
-		return nil, fmt.Errorf("failed to create temp file: %w", err)
-	}
-	defer os.Remove(tempFile.Name())
-
-	// Write template to temp file
-	template := "# Enter task title here\n\n# Enter task description here (optional)\n# Lines starting with # are comments and will be ignored"
-	if _, err := tempFile.WriteString(template); err != nil {
-		tempFile.Close()
-		return nil, fmt.Errorf("failed to write template: %w", err)
-	}
-	tempFile.Close()
-
-	// Open editor
-	editor := getEditor()
-	cmd := exec.Command(editor, tempFile.Name())
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	if err := cmd.Run(); err != nil {
-		return nil, fmt.Errorf("failed to run editor: %w", err)
-	}
-
-	// Read and parse content
-	content, err := ioutil.ReadFile(tempFile.Name())
-	if err != nil {
-		return nil, fmt.Errorf("failed to read file: %w", err)
-	}
-
-	// Parse content, ignoring comment lines
-	if err := task.parseContentIgnoringComments(string(content)); err != nil {
-		return nil, err
-	}
-
-	return task, nil
 }
 
 // parseContentIgnoringComments parses content while ignoring comment lines

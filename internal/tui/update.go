@@ -59,16 +59,24 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.state.taskContent.viewport.SetContent(content)
 
 		case key.Matches(msg, keys.InProgress):
-			m.Service.UpdateStatus(task, tasks.InProgress)
+			if !m.state.taskContent.ready {
+				m.Service.UpdateStatus(task, tasks.InProgress)
+			}
 
 		case key.Matches(msg, keys.ToDo):
-			m.Service.UpdateStatus(task, tasks.Todo)
+			if !m.state.taskContent.ready {
+				m.Service.UpdateStatus(task, tasks.Todo)
+			}
 
 		case key.Matches(msg, keys.Done):
-			m.Service.UpdateStatus(task, tasks.Done)
+			if !m.state.taskContent.ready {
+				m.Service.UpdateStatus(task, tasks.Done)
+			}
 
 		case key.Matches(msg, keys.Cancelled):
-			m.Service.UpdateStatus(task, tasks.Cancelled)
+			if !m.state.taskContent.ready {
+				m.Service.UpdateStatus(task, tasks.Cancelled)
+			}
 
 		case key.Matches(msg, keys.Show):
 			if m.state.taskContent.ready {
@@ -80,8 +88,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.state.taskContent.ready = true
 			}
 		case key.Matches(msg, keys.Edit):
-			m.Service.EditWithEditor(task)
-			// fmt.Print(m.View())
+			msg, _ := m.Service.EditWithEditor(task)
+			return m, msg
 		}
 	case tea.WindowSizeMsg:
 		headerHeight := lipgloss.Height(m.headerView())
@@ -100,6 +108,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.state.taskContent.viewport.Width = msg.Width
 			m.state.taskContent.viewport.Height = msg.Height - verticalMarginHeight
 		}
+	case tasks.EditorFinishedMsg:
+		// Editor finished, refresh the view
+		return m, tea.ClearScreen
 	}
 
 	// Return the updated model to the Bubble Tea runtime for processing.
