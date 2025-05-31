@@ -12,6 +12,10 @@ func (s Service) FindAll() ([]Task, error) {
 	return s.repository.FindAll()
 }
 
+func (s Service) DestroyDemo() error {
+	return s.repository.DropSchema()
+}
+
 func (s Service) UpdateStatus(t *Task, status Status) error {
 	if t.Status == status {
 		status = Todo

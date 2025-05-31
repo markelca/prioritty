@@ -46,4 +46,8 @@ func init() {
 		config.InitConfig(cfgFile)
 	})
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.cobra.yaml)")
+
+	rootCmd.PersistentFlags().Bool("demo", false, "Populate for demo values for showcase")
+	viper.BindPFlag("demo", rootCmd.PersistentFlags().Lookup("demo"))
+	viper.SetDefault("demo", "false")
 }

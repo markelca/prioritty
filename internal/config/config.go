@@ -9,9 +9,9 @@ import (
 	"github.com/spf13/viper"
 )
 
-const KEY_DATABASE_PATH string = "database_path"
-const KEY_LOG_FILE_PATH string = "log_file_path"
-const KEY_DEFAULT_COMMAND string = "default_command"
+const CONF_DATABASE_PATH string = "database_path"
+const CONF_LOG_FILE_PATH string = "log_file_path"
+const CONF_DEFAULT_COMMAND string = "default_command"
 
 type Config struct {
 	DatabasePath   string `mapstructure:"database_path"`
@@ -82,7 +82,7 @@ func createConfigFile(configDir string) error {
 }
 
 func setDefaults(configDir string) {
-	viper.SetDefault(KEY_DATABASE_PATH, filepath.Join(configDir, "prioritty.db"))
-	viper.SetDefault(KEY_LOG_FILE_PATH, filepath.Join(configDir, "prioritty.log"))
-	viper.SetDefault(KEY_DEFAULT_COMMAND, "ls")
+	viper.SetDefault(CONF_DATABASE_PATH, filepath.Join(configDir, "prioritty.db"))
+	viper.SetDefault(CONF_LOG_FILE_PATH, filepath.Join(configDir, "prioritty.log"))
+	viper.SetDefault(CONF_DEFAULT_COMMAND, "ls")
 }

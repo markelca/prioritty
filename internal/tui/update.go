@@ -15,6 +15,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	)
 
 	task := m.state.GetCurrentTask()
+
 	contentStyle := lipgloss.NewStyle().Width(m.state.taskContent.viewport.Width)
 	// fmt.Println(m.state.cursor)
 
@@ -45,16 +46,16 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.state.cursor > 0 {
 				m.state.cursor--
 			}
-			body := m.state.GetCurrentTask().Body
-			content := contentStyle.Render(body)
+			// body := m.state.GetCurrentTask().Body
+			content := contentStyle.Render(task.Body)
 			m.state.taskContent.viewport.SetContent(content)
 
 		case key.Matches(msg, keys.Down):
 			if m.state.cursor < len(m.state.tasks)-1 {
 				m.state.cursor++
 			}
-			body := m.state.GetCurrentTask().Body
-			content := contentStyle.Render(body)
+			// body := m.state.GetCurrentTask().Body
+			content := contentStyle.Render(task.Body)
 			m.state.taskContent.viewport.SetContent(content)
 
 		case key.Matches(msg, keys.InProgress):
@@ -74,8 +75,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.state.taskContent.ready {
 				m.state.taskContent.ready = false
 			} else {
-				body := m.state.GetCurrentTask().Body
-				content := contentStyle.Render(body)
+				// body := m.state.GetCurrentTask().Body
+				content := contentStyle.Render(task.Body)
 				m.state.taskContent.viewport.SetContent(content)
 				m.state.taskContent.ready = true
 			}

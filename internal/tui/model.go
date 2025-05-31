@@ -3,6 +3,7 @@ package tui
 import (
 	"fmt"
 	"os"
+	"path"
 
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/viewport"
@@ -25,6 +26,9 @@ type State struct {
 }
 
 func (s State) GetCurrentTask() *tasks.Task {
+	if s.cursor+1 > len(s.tasks) {
+		return &tasks.Task{}
+	}
 	return &s.tasks[s.cursor]
 }
 
@@ -41,7 +45,14 @@ type Model struct {
 var Help = help.New()
 
 func InitialModel(withTui bool) Model {
-	dbFilePath := viper.GetString(config.KEY_DATABASE_PATH)
+	isDemo := viper.GetBool("demo")
+	var dbFilePath string
+
+	if isDemo {
+		dbFilePath = path.Join(os.TempDir(), "prioritty_demo.db")
+	} else {
+		dbFilePath = viper.GetString(config.CONF_DATABASE_PATH)
+	}
 
 	repo, err := tasks.NewSQLiteRepository(dbFilePath)
 	if err != nil {
@@ -62,6 +73,14 @@ func InitialModel(withTui bool) Model {
 		state:   State{tasks: tasks, taskContent: taskContent},
 		params:  Params{withTui: withTui},
 		Service: service,
+	}
+}
+
+func (m Model) DestroyDemo() {
+	err := m.Service.DestroyDemo()
+	if err != nil {
+		fmt.Println("Error - Failed destroy the demo data", err)
+		os.Exit(5)
 	}
 }
 

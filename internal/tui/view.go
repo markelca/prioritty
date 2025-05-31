@@ -13,6 +13,17 @@ func (m Model) View() string {
 	view := ""
 	counts := make(map[tasks.Status]int)
 
+	if len(m.state.tasks) == 0 {
+		view += "No tasks found!"
+		if m.params.withTui {
+			view += styles.Default.
+				MarginTop(1).
+				SetString(Help.View(keys)).
+				Render()
+		}
+		return view
+	}
+
 	for i, task := range m.state.tasks {
 		counts[task.Status] += 1
 		cursor := " "
