@@ -11,6 +11,8 @@ type keyMap struct {
 	Right      key.Binding
 	Help       key.Binding
 	Quit       key.Binding
+	HardQuit   key.Binding
+	MenuQuit   key.Binding
 	Check      key.Binding
 	InProgress key.Binding
 	Done       key.Binding
@@ -57,8 +59,14 @@ var keys = keyMap{
 		key.WithHelp("?", "toggle help"),
 	),
 	Quit: key.NewBinding(
-		key.WithKeys("q", "esc", "ctrl+c"),
+		key.WithKeys("q"),
 		key.WithHelp("q", "quit"),
+	),
+	HardQuit: key.NewBinding(
+		key.WithKeys("ctrl+c"),
+	),
+	MenuQuit: key.NewBinding(
+		key.WithKeys("esc"),
 	),
 	Check: key.NewBinding(
 		key.WithKeys("enter"),

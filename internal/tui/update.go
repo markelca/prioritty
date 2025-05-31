@@ -33,6 +33,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, tea.Quit
 			}
 
+		case key.Matches(msg, keys.MenuQuit):
+			if m.state.taskContent.ready {
+				m.state.taskContent.ready = false
+			}
+
+		case key.Matches(msg, keys.HardQuit):
+			return m, tea.Quit
+
 		case key.Matches(msg, keys.Up):
 			if m.state.cursor > 0 {
 				m.state.cursor--
@@ -63,10 +71,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.Service.UpdateStatus(task, tasks.Cancelled)
 
 		case key.Matches(msg, keys.Show):
-			body := m.state.GetCurrentTask().Body
-			content := contentStyle.Render(body)
-			m.state.taskContent.viewport.SetContent(content)
-			m.state.taskContent.ready = true
+			if m.state.taskContent.ready {
+				m.state.taskContent.ready = false
+			} else {
+				body := m.state.GetCurrentTask().Body
+				content := contentStyle.Render(body)
+				m.state.taskContent.viewport.SetContent(content)
+				m.state.taskContent.ready = true
+			}
 
 		}
 	case tea.WindowSizeMsg:
@@ -82,7 +94,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			// here.
 			m.state.taskContent.viewport = viewport.New(msg.Width, msg.Height-verticalMarginHeight)
 			m.state.taskContent.viewport.YPosition = headerHeight
-			// m.state.taskContent.viewport.SetContent(m.state.taskContent.content)
 		} else {
 			m.state.taskContent.viewport.Width = msg.Width
 			m.state.taskContent.viewport.Height = msg.Height - verticalMarginHeight

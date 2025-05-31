@@ -113,5 +113,6 @@ func (m Model) headerView() string {
 func (m Model) footerView() string {
 	info := styles.InfoStyle.Render(fmt.Sprintf("%3.f%%", m.state.taskContent.viewport.ScrollPercent()*100))
 	line := strings.Repeat("─", max(0, m.state.taskContent.viewport.Width-lipgloss.Width(info)))
-	return lipgloss.JoinHorizontal(lipgloss.Center, line, info)
+	footer := lipgloss.JoinHorizontal(lipgloss.Center, line, info, "\n")
+	return footer
 }
