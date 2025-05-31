@@ -46,7 +46,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.state.cursor > 0 {
 				m.state.cursor--
 			}
-			// body := m.state.GetCurrentTask().Body
+			task = m.state.GetCurrentTask()
 			content := contentStyle.Render(task.Body)
 			m.state.taskContent.viewport.SetContent(content)
 
@@ -54,7 +54,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.state.cursor < len(m.state.tasks)-1 {
 				m.state.cursor++
 			}
-			// body := m.state.GetCurrentTask().Body
+			task = m.state.GetCurrentTask()
 			content := contentStyle.Render(task.Body)
 			m.state.taskContent.viewport.SetContent(content)
 

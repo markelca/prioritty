@@ -30,7 +30,6 @@ var tuiCmd = &cobra.Command{
 			os.Exit(2)
 		}
 		isDemo := viper.GetBool("demo")
-		fmt.Println(isDemo)
 		if isDemo {
 			model.DestroyDemo()
 		}

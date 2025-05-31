@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/markelca/prioritty/migrations"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/spf13/viper"
 )
@@ -36,82 +37,21 @@ func NewSQLiteRepository(dbPath string) (*SQLiteRepository, error) {
 	repo := &SQLiteRepository{db: db, filepath: dbPath}
 
 	if !dbExists {
-		if err := repo.initSQLiteDatabase(); err != nil {
+		if _, err := db.Exec(migrations.SchemaSQL); err != nil {
+			log.Printf("Error executing schema: %v", err)
 			db.Close()
 			return nil, err
 		}
 		if viper.GetBool("demo") {
-			if err := repo.insertDefaultData(); err != nil {
+			if _, err := db.Exec(migrations.SeedSQL); err != nil {
 				db.Close()
+				log.Printf("Error executing seed data: %v", err)
 				return nil, err
 			}
 		}
 	}
 
 	return repo, nil
-}
-
-func (r SQLiteRepository) initSQLiteDatabase() error {
-	// Create status table
-	createStatusTable := `
-	CREATE TABLE status (
-		id INTEGER PRIMARY KEY,
-		name TEXT NOT NULL UNIQUE
-	);`
-
-	if _, err := r.db.Exec(createStatusTable); err != nil {
-		log.Printf("Error creating status table: %v", err)
-		return err
-	}
-
-	// Create task table
-	createTaskTable := `
-	CREATE TABLE task (
-		id INTEGER PRIMARY KEY,
-		title TEXT NOT NULL,
-		body TEXT,
-		status_id INTEGER NOT NULL,
-		FOREIGN KEY (status_id) REFERENCES status(id)
-	);`
-
-	if _, err := r.db.Exec(createTaskTable); err != nil {
-		log.Printf("Error creating task table: %v", err)
-		return err
-	}
-
-	// Insert initial status data
-	insertStatuses := `
-	INSERT INTO status (id, name) VALUES
-		(0, 'Pending'),
-		(1, 'In Progress'),
-		(2, 'Completed'),
-		(3, 'Cancelled');`
-
-	if _, err := r.db.Exec(insertStatuses); err != nil {
-		log.Printf("Error inserting status data: %v", err)
-		return err
-	}
-
-	// log.Println("Database initialized successfully")
-	return nil
-}
-
-func (r SQLiteRepository) insertDefaultData() error {
-	// Insert initial task data
-	insertTasks := `
-	INSERT INTO task (title, body, status_id) VALUES 
-		('Complete project documentation', 'Write comprehensive documentation covering all API endpoints, authentication methods, and usage examples. Include code samples in multiple languages and ensure all examples are tested and working. The documentation should be organized into clear sections: Getting Started, Authentication, Core API Reference, Advanced Features, and Troubleshooting. Each endpoint should include request/response examples, parameter descriptions, and common error codes. Add interactive examples where possible and ensure the documentation is accessible to both beginner and advanced developers.', 2),
-		('Review code changes', NULL, 1),
-		('Fix bug in authentication', NULL, 0),
-		('Deploy to production', NULL, 2),
-		('Write unit tests', NULL, 0),
-		('Update dependencies', NULL, 3);`
-
-	if _, err := r.db.Exec(insertTasks); err != nil {
-		log.Printf("Error inserting task data: %v", err)
-		return err
-	}
-	return nil
 }
 
 func (r *SQLiteRepository) DropSchema() error {
