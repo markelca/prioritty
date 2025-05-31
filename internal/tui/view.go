@@ -44,34 +44,31 @@ func (m Model) View() string {
 	return view
 }
 
-func renderTask(t tasks.Task) string {
-	var title string
-	var icon string
-	var contentIcon string
-	var style lipgloss.Style
+var taskIcons = map[tasks.Status]string{
+	tasks.Done:       styles.DoneIcon,
+	tasks.InProgress: styles.InProgressIcon,
+	tasks.Cancelled:  styles.CancelledIcon,
+	tasks.Todo:       styles.TodoIcon,
+}
 
-	switch t.Status {
-	case tasks.Done:
-		icon = styles.DoneIcon
-		style = styles.DoneTitle
-	case tasks.Cancelled:
-		icon = styles.CancelledIcon
-		style = styles.DoneTitle
-	case tasks.InProgress:
-		icon = styles.InProgressIcon
-		style = styles.Default
-	case tasks.Todo:
-		icon = styles.TodoIcon
-		style = styles.Default
-	}
+var taskTitleStyle = map[tasks.Status]lipgloss.Style{
+	tasks.Done:       styles.DoneTitle,
+	tasks.InProgress: styles.Default,
+	tasks.Cancelled:  styles.DoneTitle,
+	tasks.Todo:       styles.Default,
+}
+
+func renderTask(t tasks.Task) string {
+	var contentIcon string
+
+	icon := taskIcons[t.Status]
+	style := taskTitleStyle[t.Status]
 
 	if len(t.Body) > 1 {
 		contentIcon = styles.ContentIcon
 	}
 
-	title += style.
-		// PaddingBottom(1).
-		Render(t.Title)
+	title := style.Render(t.Title)
 
 	return icon + contentIcon + title + "\n"
 }
@@ -107,7 +104,8 @@ func renderSummary(counts map[tasks.Status]int) string {
 
 func (m Model) headerView() string {
 	task := m.state.GetCurrentTask()
-	title := styles.TitleStyle.Render(task.Title)
+	icon := taskIcons[task.Status]
+	title := styles.TitleStyle.Render(icon + task.Title)
 	line := strings.Repeat("─", max(0, m.state.taskContent.viewport.Width-lipgloss.Width(title)))
 	return lipgloss.JoinHorizontal(lipgloss.Center, title, line)
 }
