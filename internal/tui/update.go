@@ -64,8 +64,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, keys.ToDo):
 			m.Service.UpdateStatus(task, tasks.Todo)
 
-		case key.Matches(msg, keys.Done),
-			key.Matches(msg, keys.Check):
+		case key.Matches(msg, keys.Done):
 			m.Service.UpdateStatus(task, tasks.Done)
 
 		case key.Matches(msg, keys.Cancelled):
@@ -80,7 +79,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.state.taskContent.viewport.SetContent(content)
 				m.state.taskContent.ready = true
 			}
-
+		case key.Matches(msg, keys.Edit):
+			m.Service.EditWithEditor(task)
+			// fmt.Print(m.View())
 		}
 	case tea.WindowSizeMsg:
 		headerHeight := lipgloss.Height(m.headerView())

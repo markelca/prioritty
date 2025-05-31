@@ -13,6 +13,7 @@ import (
 type Repository interface {
 	FindAll() ([]Task, error)
 	UpdateStatus(Task, Status) error
+	UpdateTask(Task) error
 	CreateTask(Task) error
 	RemoveTask(int) error
 	DropSchema() error
@@ -102,6 +103,16 @@ func (r *SQLiteRepository) UpdateStatus(t Task, s Status) error {
 	`
 	r.db.Exec(query, s, t.Id)
 	return nil
+}
+
+func (r *SQLiteRepository) UpdateTask(t Task) error {
+	query := `
+		UPDATE task
+		SET title = ?, body = ?, status_id = ?
+		WHERE id = ?
+	`
+	_, err := r.db.Exec(query, t.Title, t.Body, t.Status, t.Id)
+	return err
 }
 
 func (r *SQLiteRepository) CreateTask(t Task) error {
