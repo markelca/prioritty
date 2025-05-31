@@ -24,6 +24,7 @@ default_command: "tui"
 ```
 
 ## Usage
+### CLI
 Run the `help` command to find out the usage:
 ```
 pt help
@@ -52,11 +53,15 @@ Available Commands:
 
 Flags:
       --config string   config file (default is $HOME/.cobra.yaml)
-      --demo            Populate for demo values for showcase
+      --demo            Use a temporal demo database with predefined values
   -h, --help            help for pt
 
 Use "pt [command] --help" for more information about a command.
 ```
+### TUI
+You can also press the `?` key to toggle the full help in TUI mode:
+![image](https://github.com/user-attachments/assets/eec74247-bfff-45be-9d6c-6addb877e65c)
+
 
 ---
 Inspired by [taskbook](https://github.com/klaudiosinani/taskbook)
