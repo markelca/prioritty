@@ -106,7 +106,7 @@ func renderSummary(counts map[tasks.Status]int) string {
 }
 
 func (m Model) headerView() string {
-	task := &m.state.tasks[m.state.cursor]
+	task := m.state.GetCurrentTask()
 	title := styles.TitleStyle.Render(task.Title)
 	line := strings.Repeat("─", max(0, m.state.taskContent.viewport.Width-lipgloss.Width(title)))
 	return lipgloss.JoinHorizontal(lipgloss.Center, title, line)

@@ -24,6 +24,10 @@ type State struct {
 	taskContent TaskContentState
 }
 
+func (s State) GetCurrentTask() *tasks.Task {
+	return &s.tasks[s.cursor]
+}
+
 type Params struct {
 	withTui bool
 }

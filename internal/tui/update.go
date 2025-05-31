@@ -14,8 +14,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		cmds []tea.Cmd
 	)
 
-	task := &m.state.tasks[m.state.cursor]
-	// task := &m.state.tasks[m.state.cursor]
+	task := m.state.GetCurrentTask()
+	contentStyle := lipgloss.NewStyle().Width(m.state.taskContent.viewport.Width)
+	// fmt.Println(m.state.cursor)
+
 	switch msg := msg.(type) {
 
 	case tea.KeyMsg:
@@ -35,11 +37,17 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.state.cursor > 0 {
 				m.state.cursor--
 			}
+			body := m.state.GetCurrentTask().Body
+			content := contentStyle.Render(body)
+			m.state.taskContent.viewport.SetContent(content)
 
 		case key.Matches(msg, keys.Down):
 			if m.state.cursor < len(m.state.tasks)-1 {
 				m.state.cursor++
 			}
+			body := m.state.GetCurrentTask().Body
+			content := contentStyle.Render(body)
+			m.state.taskContent.viewport.SetContent(content)
 
 		case key.Matches(msg, keys.InProgress):
 			m.Service.UpdateStatus(task, tasks.InProgress)
@@ -53,12 +61,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case key.Matches(msg, keys.Cancelled):
 			m.Service.UpdateStatus(task, tasks.Cancelled)
+
 		case key.Matches(msg, keys.Show):
-			width := m.state.taskContent.viewport.Width
-			content := lipgloss.NewStyle().Width(width).Render(task.Body)
-
+			body := m.state.GetCurrentTask().Body
+			content := contentStyle.Render(body)
 			m.state.taskContent.viewport.SetContent(content)
-
 			m.state.taskContent.ready = true
 
 		}
