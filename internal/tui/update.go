@@ -116,12 +116,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	case editor.TaskEditorFinishedMsg:
 		t := m.state.GetCurrentTask()
-		t.Title = msg.Title
-		t.Body = msg.Body
-		if err := m.Service.UpdateTask(*t); err != nil {
-			fmt.Println("Error updating the task - ", err)
-		}
-
+		m.Service.UpdateTaskFromEditorMsg(t, msg)
 		return m, tea.ClearScreen
 	}
 

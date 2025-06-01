@@ -1,6 +1,8 @@
 package tasks
 
 import (
+	"fmt"
+
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/markelca/prioritty/pkg/editor"
 )
@@ -23,6 +25,14 @@ func (s Service) DestroyDemo() error {
 
 func (s Service) UpdateTask(t Task) error {
 	return s.repository.UpdateTask(t)
+}
+
+func (s Service) UpdateTaskFromEditorMsg(t *Task, msg editor.TaskEditorFinishedMsg) {
+	t.Title = msg.Title
+	t.Body = msg.Body
+	if err := s.UpdateTask(*t); err != nil {
+		fmt.Println("Error updating the task - ", err)
+	}
 }
 
 func (s Service) UpdateStatus(t *Task, status Status) error {
