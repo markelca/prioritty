@@ -1,16 +1,9 @@
 package tasks
 
 import (
-	"fmt"
-	"os"
-	"os/exec"
-	"runtime"
-	"strings"
-
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/markelca/prioritty/pkg/editor"
 )
-
-type EditorFinishedMsg struct{ Err error }
 
 type Service struct {
 	repository Repository
@@ -54,132 +47,5 @@ func (s Service) RemoveTask(id int) error {
 }
 
 func (s Service) EditWithEditor(t *Task) (tea.Cmd, error) {
-	// Create temporary file with current task content
-	tempFile, err := os.CreateTemp(os.TempDir(), "task_*.txt")
-	if err != nil {
-		return nil, fmt.Errorf("failed to create temp file: %w", err)
-	}
-
-	// Write current task content to temp file
-	content := t.Title + "\n\n" + t.Body
-	if _, err := tempFile.WriteString(content); err != nil {
-		tempFile.Close()
-		return nil, fmt.Errorf("failed to write to temp file: %w", err)
-	}
-	tempFile.Close()
-
-	// Get the editor command
-	editor := getEditor()
-
-	return tea.Sequence(
-		tea.ExecProcess(exec.Command(editor, tempFile.Name()), func(err error) tea.Msg {
-			defer os.Remove(tempFile.Name())
-			modifiedContent, err := os.ReadFile(tempFile.Name())
-			if err != nil {
-				return EditorFinishedMsg{Err: fmt.Errorf("failed to read modified file: %w", err)}
-			}
-
-			if err := t.parseContent(string(modifiedContent)); err != nil {
-				return EditorFinishedMsg{Err: fmt.Errorf("failed to parse content: %w", err)}
-			}
-
-			if err := s.UpdateTask(*t); err != nil {
-				return EditorFinishedMsg{Err: fmt.Errorf("failed updating task: %w", err)}
-			}
-
-			return EditorFinishedMsg{Err: nil}
-		}),
-	), nil
-}
-
-// parseContent parses the editor content into title and body
-func (t *Task) parseContent(content string) error {
-	lines := strings.Split(strings.TrimSpace(content), "\n")
-
-	if len(lines) == 0 {
-		return fmt.Errorf("content cannot be empty")
-	}
-
-	// First line is the title
-	t.Title = strings.TrimSpace(lines[0])
-	if t.Title == "" {
-		return fmt.Errorf("title cannot be empty")
-	}
-
-	// Rest is the content (skip empty line if present)
-	var contentLines []string
-	startIndex := 1
-
-	// Skip the first empty line if it exists
-	if len(lines) > 1 && strings.TrimSpace(lines[1]) == "" {
-		startIndex = 2
-	}
-
-	if len(lines) > startIndex {
-		contentLines = lines[startIndex:]
-		t.Body = strings.Join(contentLines, "\n")
-	} else {
-		t.Body = ""
-	}
-
-	return nil
-}
-
-// getEditor returns the preferred editor command
-func getEditor() string {
-	// Check environment variables in order of preference
-	editors := []string{"VISUAL", "EDITOR"}
-
-	for _, env := range editors {
-		if editor := os.Getenv(env); editor != "" {
-			return editor
-		}
-	}
-
-	// Fall back to system defaults
-	switch runtime.GOOS {
-	case "windows":
-		return "notepad"
-	default:
-		// Try common editors in order of preference
-		commonEditors := []string{"vim", "vi", "nano", "emacs"}
-		for _, editor := range commonEditors {
-			if _, err := exec.LookPath(editor); err == nil {
-				return editor
-			}
-		}
-		// Ultimate fallback
-		return "vi"
-	}
-}
-
-// parseContentIgnoringComments parses content while ignoring comment lines
-func (t *Task) parseContentIgnoringComments(content string) error {
-	lines := strings.Split(content, "\n")
-	var validLines []string
-
-	// Filter out comment lines and empty lines
-	for _, line := range lines {
-		trimmed := strings.TrimSpace(line)
-		if trimmed != "" && !strings.HasPrefix(trimmed, "#") {
-			validLines = append(validLines, line)
-		}
-	}
-
-	if len(validLines) == 0 {
-		return fmt.Errorf("no valid content found")
-	}
-
-	// First non-comment line is title
-	t.Title = strings.TrimSpace(validLines[0])
-	if t.Title == "" {
-		return fmt.Errorf("title cannot be empty")
-	}
-
-	// Rest is content
-	if len(validLines) > 1 {
-		t.Body = strings.Join(validLines[1:], "\n")
-	}
-
-	return nil
+	return editor.EditTask(t.Id, t.Title, t.Body)
 }

@@ -1,10 +1,13 @@
 package tui
 
 import (
+	"fmt"
+
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/markelca/prioritty/pkg/editor"
 	"github.com/markelca/prioritty/pkg/tasks"
 )
 
@@ -88,7 +91,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.state.taskContent.ready = true
 			}
 		case key.Matches(msg, keys.Edit):
-			msg, _ := m.Service.EditWithEditor(task)
+			msg, err := m.Service.EditWithEditor(task)
+			if err != nil {
+				fmt.Println(err)
+			}
 			return m, msg
 		}
 	case tea.WindowSizeMsg:
@@ -108,8 +114,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.state.taskContent.viewport.Width = msg.Width
 			m.state.taskContent.viewport.Height = msg.Height - verticalMarginHeight
 		}
-	case tasks.EditorFinishedMsg:
-		// Editor finished, refresh the view
+	case editor.TaskEditorFinishedMsg:
+		t := m.state.GetCurrentTask()
+		t.Title = msg.Title
+		t.Body = msg.Body
+		if err := m.Service.UpdateTask(*t); err != nil {
+			fmt.Println("Error updating the task - ", err)
+		}
+
 		return m, tea.ClearScreen
 	}
 

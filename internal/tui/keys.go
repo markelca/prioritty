@@ -19,6 +19,8 @@ type keyMap struct {
 	Cancelled  key.Binding
 	Show       key.Binding
 	Edit       key.Binding
+	Add        key.Binding
+	Remove     key.Binding
 }
 
 // ShortHelp returns keybindings to be shown in the mini help view. It's part
@@ -33,7 +35,7 @@ func (k keyMap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
 		{k.Up, k.Down, k.Left, k.Right}, // first column
 		{k.InProgress, k.ToDo, k.Done, k.Cancelled},
-		{k.Show, k.Edit},
+		{k.Show, k.Edit, k.Add, k.Remove},
 		{k.Help, k.Quit}, // second column
 	}
 }
@@ -92,5 +94,13 @@ var keys = keyMap{
 	Edit: key.NewBinding(
 		key.WithKeys("e"),
 		key.WithHelp("e", "Edit"),
+	),
+	Add: key.NewBinding(
+		key.WithKeys("a"),
+		key.WithHelp("a", "Add"),
+	),
+	Remove: key.NewBinding(
+		key.WithKeys("r"),
+		key.WithHelp("r", "Remove"),
 	),
 }
