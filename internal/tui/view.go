@@ -38,6 +38,14 @@ func (m Model) View() string {
 		view += renderTask(task)
 	}
 
+	for i, note := range m.state.notes {
+		view += styles.Secondary.
+			SetString(fmt.Sprintf(" %d. ", i+1)).
+			Render()
+		title := styles.Default.Render(note.Title)
+		view += "●" + title + "\n"
+	}
+
 	view += renderDonePercentage(m.state.tasks, counts)
 	view += renderSummary(counts)
 

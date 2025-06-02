@@ -26,11 +26,10 @@ var removeCmd = &cobra.Command{
 		}
 
 		m := tui.InitialModel(false)
-		err = m.Service.RemoveTask(id)
+		err = m.Service.Tasks.RemoveTask(id)
 		if err != nil {
 			fmt.Printf("Error removing task: %v\n", err)
 			return
 		}
 	},
 }
-

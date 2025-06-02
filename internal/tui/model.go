@@ -9,6 +9,7 @@ import (
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/markelca/prioritty/internal/config"
+	"github.com/markelca/prioritty/pkg/notes"
 	"github.com/markelca/prioritty/pkg/tasks"
 	"github.com/spf13/viper"
 )
@@ -22,6 +23,7 @@ type TaskContentState struct {
 type State struct {
 	cursor      int
 	tasks       []tasks.Task
+	notes       []notes.Note
 	taskContent TaskContentState
 }
 
@@ -36,10 +38,15 @@ type Params struct {
 	withTui bool
 }
 
+type Service struct {
+	Tasks tasks.Service
+	Notes notes.Service
+}
+
 type Model struct {
 	params  Params
 	state   State
-	Service tasks.Service
+	Service Service
 }
 
 var Help = help.New()
@@ -54,15 +61,29 @@ func InitialModel(withTui bool) Model {
 		dbFilePath = viper.GetString(config.CONF_DATABASE_PATH)
 	}
 
-	repo, err := tasks.NewSQLiteRepository(dbFilePath)
+	tasksRepo, err := tasks.NewSQLiteRepository(dbFilePath)
 	if err != nil {
 		fmt.Println("Error - Failed to create repository:", err)
 		os.Exit(3)
 	}
 
-	service := tasks.NewService(repo)
+	notesRepo, err := notes.NewSQLiteRepository(dbFilePath)
+	if err != nil {
+		fmt.Println("Error - Failed to create repository:", err)
+		os.Exit(3)
+	}
 
-	tasks, err := service.FindAll()
+	taskService := tasks.NewService(tasksRepo)
+
+	tasks, err := taskService.FindAll()
+	if err != nil {
+		fmt.Println("Error - Failed to get the tasks:", err)
+		os.Exit(4)
+	}
+
+	notesService := notes.NewService(notesRepo)
+
+	notes, err := notesService.FindAll()
 	if err != nil {
 		fmt.Println("Error - Failed to get the tasks:", err)
 		os.Exit(4)
@@ -70,14 +91,14 @@ func InitialModel(withTui bool) Model {
 
 	taskContent := TaskContentState{}
 	return Model{
-		state:   State{tasks: tasks, taskContent: taskContent},
+		state:   State{tasks: tasks, notes: notes, taskContent: taskContent},
 		params:  Params{withTui: withTui},
-		Service: service,
+		Service: Service{Tasks: taskService},
 	}
 }
 
 func (m Model) DestroyDemo() {
-	err := m.Service.DestroyDemo()
+	err := m.Service.Tasks.DestroyDemo()
 	if err != nil {
 		fmt.Println("Error - Failed destroy the demo data", err)
 		os.Exit(5)

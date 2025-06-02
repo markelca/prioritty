@@ -10,3 +10,9 @@ CREATE TABLE task (
    status_id INTEGER NOT NULL,
    FOREIGN KEY (status_id) REFERENCES status(id)
 );
+
+CREATE TABLE note (
+   id INTEGER PRIMARY KEY,
+   title TEXT NOT NULL,
+   body TEXT
+);

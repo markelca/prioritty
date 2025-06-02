@@ -20,7 +20,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	task := m.state.GetCurrentTask()
 
 	contentStyle := lipgloss.NewStyle().Width(m.state.taskContent.viewport.Width)
-	// fmt.Println(m.state.cursor)
 
 	switch msg := msg.(type) {
 
@@ -46,7 +45,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 
 		case key.Matches(msg, keys.Up):
-			if m.state.cursor > 0 {
+			if m.state.cursor == 0 {
+				m.state.cursor = len(m.state.tasks) - 1
+			} else {
 				m.state.cursor--
 			}
 			task = m.state.GetCurrentTask()
@@ -54,7 +55,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.state.taskContent.viewport.SetContent(content)
 
 		case key.Matches(msg, keys.Down):
-			if m.state.cursor < len(m.state.tasks)-1 {
+			if m.state.cursor == len(m.state.tasks)-1 {
+				m.state.cursor = 0
+			} else {
 				m.state.cursor++
 			}
 			task = m.state.GetCurrentTask()
@@ -63,22 +66,22 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case key.Matches(msg, keys.InProgress):
 			if !m.state.taskContent.ready {
-				m.Service.UpdateStatus(task, tasks.InProgress)
+				m.Service.Tasks.UpdateStatus(task, tasks.InProgress)
 			}
 
 		case key.Matches(msg, keys.ToDo):
 			if !m.state.taskContent.ready {
-				m.Service.UpdateStatus(task, tasks.Todo)
+				m.Service.Tasks.UpdateStatus(task, tasks.Todo)
 			}
 
 		case key.Matches(msg, keys.Done):
 			if !m.state.taskContent.ready {
-				m.Service.UpdateStatus(task, tasks.Done)
+				m.Service.Tasks.UpdateStatus(task, tasks.Done)
 			}
 
 		case key.Matches(msg, keys.Cancelled):
 			if !m.state.taskContent.ready {
-				m.Service.UpdateStatus(task, tasks.Cancelled)
+				m.Service.Tasks.UpdateStatus(task, tasks.Cancelled)
 			}
 
 		case key.Matches(msg, keys.Show):
@@ -91,7 +94,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.state.taskContent.ready = true
 			}
 		case key.Matches(msg, keys.Edit):
-			msg, err := m.Service.EditWithEditor(task)
+			msg, err := m.Service.Tasks.EditWithEditor(task)
 			if err != nil {
 				fmt.Println(err)
 			}
@@ -116,7 +119,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	case editor.TaskEditorFinishedMsg:
 		t := m.state.GetCurrentTask()
-		m.Service.UpdateTaskFromEditorMsg(t, msg)
+		m.Service.Tasks.UpdateTaskFromEditorMsg(t, msg)
 		return m, tea.ClearScreen
 	}
 

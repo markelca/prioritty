@@ -6,17 +6,17 @@ import (
 )
 
 func init() {
-	rootCmd.AddCommand(addCmd)
+	rootCmd.AddCommand(noteCmd)
 }
 
-var addCmd = &cobra.Command{
-	Use:     "add {title}",
+var taskCmd = &cobra.Command{
+	Use:     "task {title}",
 	Aliases: []string{},
 	Args:    cobra.ExactArgs(1),
 	Short:   "Adds a new task",
 	Long:    `[Long description]`,
 	Run: func(cmd *cobra.Command, args []string) {
 		m := tui.InitialModel(false)
-		m.Service.AddTask(args[0])
+		m.Service.Tasks.AddTask(args[0])
 	},
 }
