@@ -46,7 +46,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 
 		case key.Matches(msg, keys.Up):
-			if m.state.cursor > 0 {
+			if m.state.cursor == 0 {
+				m.state.cursor = len(m.state.tasks) - 1
+			} else {
 				m.state.cursor--
 			}
 			task = m.state.GetCurrentTask()
@@ -54,7 +56,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.state.taskContent.viewport.SetContent(content)
 
 		case key.Matches(msg, keys.Down):
-			if m.state.cursor < len(m.state.tasks)-1 {
+			if m.state.cursor == len(m.state.tasks)-1 {
+				m.state.cursor = 0
+			} else {
 				m.state.cursor++
 			}
 			task = m.state.GetCurrentTask()
