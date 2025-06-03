@@ -31,9 +31,15 @@ func (m Model) View() string {
 			cursor = ">"
 		}
 
+		var padding string
+		if len(m.state.tasks) >= 10 {
+			padding = "2"
+		} else {
+			padding = "1"
+		}
 		view += cursor
 		view += styles.Secondary.
-			SetString(fmt.Sprintf(" %d. ", i+1)).
+			SetString(fmt.Sprintf(" %"+padding+"d. ", i+1)).
 			Render()
 		view += renderTask(task)
 	}
