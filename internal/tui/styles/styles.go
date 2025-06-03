@@ -45,6 +45,10 @@ var (
 			PaddingRight(1).
 			String()
 
+	NoteIcon = InProgress.SetString("i").
+			PaddingRight(1).
+			String()
+
 	RenderTask = func(t tasks.Task) string {
 		var title string
 		var icon string

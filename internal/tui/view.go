@@ -45,11 +45,16 @@ func (m Model) View() string {
 	}
 
 	for i, note := range m.state.notes {
+		cursor := " "
+		if m.params.withTui && m.state.cursor == i {
+			cursor = ">"
+		}
+		view += cursor
 		view += styles.Secondary.
 			SetString(fmt.Sprintf(" %d. ", i+1)).
 			Render()
 		title := styles.Default.Render(note.Title)
-		view += "●" + title + "\n"
+		view += styles.NoteIcon + title + "\n"
 	}
 
 	view += renderDonePercentage(m.state.tasks, counts)
