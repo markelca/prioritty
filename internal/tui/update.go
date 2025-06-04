@@ -8,7 +8,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/markelca/prioritty/pkg/editor"
-	"github.com/markelca/prioritty/pkg/tasks"
+	"github.com/markelca/prioritty/pkg/items"
 )
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -67,22 +67,22 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case key.Matches(msg, keys.InProgress):
 			if !m.state.taskContent.ready {
-				m.Service.UpdateStatus(task, tasks.InProgress)
+				m.Service.UpdateStatus(task, items.InProgress)
 			}
 
 		case key.Matches(msg, keys.ToDo):
 			if !m.state.taskContent.ready {
-				m.Service.UpdateStatus(task, tasks.Todo)
+				m.Service.UpdateStatus(task, items.Todo)
 			}
 
 		case key.Matches(msg, keys.Done):
 			if !m.state.taskContent.ready {
-				m.Service.UpdateStatus(task, tasks.Done)
+				m.Service.UpdateStatus(task, items.Done)
 			}
 
 		case key.Matches(msg, keys.Cancelled):
 			if !m.state.taskContent.ready {
-				m.Service.UpdateStatus(task, tasks.Cancelled)
+				m.Service.UpdateStatus(task, items.Cancelled)
 			}
 
 		case key.Matches(msg, keys.Show):

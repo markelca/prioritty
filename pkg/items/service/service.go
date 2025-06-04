@@ -19,29 +19,25 @@ func NewService(r repository.Repository) Service {
 	}
 }
 
-func (s Service) GetAll() ([]items.Item, error) {
-	var allItems []items.Item
+func (s Service) GetAll() ([]items.Renderable, error) {
+	var allItems []items.Renderable
 
-	// Get all notes
 	notes, err := s.GetNotes()
 	if err != nil {
 		return nil, err
 	}
 
-	// Convert notes to items and append
 	for _, note := range notes {
-		allItems = append(allItems, note.Item)
+		allItems = append(allItems, note)
 	}
 
-	// Get all tasks
 	tasks, err := s.GetTasks()
 	if err != nil {
 		return nil, err
 	}
 
-	// Convert tasks to items and append
 	for _, task := range tasks {
-		allItems = append(allItems, task.Item)
+		allItems = append(allItems, task)
 	}
 
 	return allItems, nil

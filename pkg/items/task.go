@@ -21,3 +21,7 @@ func (t *Task) SetStatus(s Status) {
 		t.Status = s
 	}
 }
+
+func (t Task) Render(r Renderer) string {
+	return r.RenderTask(t)
+}

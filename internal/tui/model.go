@@ -9,7 +9,9 @@ import (
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/markelca/prioritty/internal/config"
-	"github.com/markelca/prioritty/pkg/tasks"
+	"github.com/markelca/prioritty/pkg/items"
+	"github.com/markelca/prioritty/pkg/items/repository"
+	"github.com/markelca/prioritty/pkg/items/service"
 	"github.com/spf13/viper"
 )
 
@@ -21,13 +23,14 @@ type TaskContentState struct {
 
 type State struct {
 	cursor      int
-	tasks       []tasks.Task
+	tasks       []items.Task
+	items       []items.Renderable
 	taskContent TaskContentState
 }
 
-func (s State) GetCurrentTask() *tasks.Task {
+func (s State) GetCurrentTask() *items.Task {
 	if s.cursor+1 > len(s.tasks) {
-		return &tasks.Task{}
+		return &items.Task{}
 	}
 	return &s.tasks[s.cursor]
 }
@@ -37,9 +40,10 @@ type Params struct {
 }
 
 type Model struct {
-	params  Params
-	state   State
-	Service tasks.Service
+	params   Params
+	state    State
+	Service  service.Service
+	renderer items.Renderer
 }
 
 var Help = help.New()
@@ -54,15 +58,21 @@ func InitialModel(withTui bool) Model {
 		dbFilePath = viper.GetString(config.CONF_DATABASE_PATH)
 	}
 
-	repo, err := tasks.NewSQLiteRepository(dbFilePath)
+	repo, err := repository.NewSQLiteRepository(dbFilePath)
 	if err != nil {
 		fmt.Println("Error - Failed to create repository:", err)
 		os.Exit(3)
 	}
 
-	service := tasks.NewService(repo)
+	service := service.NewService(repo)
 
-	tasks, err := service.FindAll()
+	itemList, err := service.GetAll()
+	if err != nil {
+		fmt.Println("Error - Failed to get the tasks:", err)
+		os.Exit(4)
+	}
+
+	tasks, err := service.GetTasks()
 	if err != nil {
 		fmt.Println("Error - Failed to get the tasks:", err)
 		os.Exit(4)
@@ -70,9 +80,10 @@ func InitialModel(withTui bool) Model {
 
 	taskContent := TaskContentState{}
 	return Model{
-		state:   State{tasks: tasks, taskContent: taskContent},
-		params:  Params{withTui: withTui},
-		Service: service,
+		state:    State{tasks: tasks, taskContent: taskContent, items: itemList},
+		params:   Params{withTui: withTui},
+		Service:  service,
+		renderer: items.CliRendererer{},
 	}
 }
 

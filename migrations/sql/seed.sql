@@ -11,3 +11,6 @@ INSERT INTO task (title, body, status_id) VALUES
    ('Deploy to production', NULL, 2),
    ('Write unit tests', NULL, 0),
    ('Update dependencies', NULL, 3);
+
+INSERT INTO note (title) VALUES 
+   ('Some note');

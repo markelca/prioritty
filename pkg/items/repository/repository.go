@@ -2,9 +2,12 @@ package repository
 
 import (
 	"database/sql"
+	"log"
 	"os"
 
+	"github.com/markelca/prioritty/migrations"
 	"github.com/markelca/prioritty/pkg/items"
+	"github.com/spf13/viper"
 )
 
 type TaskRepository interface {
@@ -34,6 +37,11 @@ type SQLiteRepository struct {
 }
 
 func NewSQLiteRepository(dbPath string) (*SQLiteRepository, error) {
+	dbExists := false
+	if _, err := os.Stat(dbPath); err == nil {
+		dbExists = true
+	}
+
 	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
 		return nil, err
@@ -41,6 +49,20 @@ func NewSQLiteRepository(dbPath string) (*SQLiteRepository, error) {
 
 	repo := &SQLiteRepository{db: db, filepath: dbPath}
 
+	if !dbExists {
+		if _, err := db.Exec(migrations.SchemaSQL); err != nil {
+			log.Printf("Error executing schema: %v", err)
+			db.Close()
+			return nil, err
+		}
+		if viper.GetBool("demo") {
+			if _, err := db.Exec(migrations.SeedSQL); err != nil {
+				db.Close()
+				log.Printf("Error executing seed data: %v", err)
+				return nil, err
+			}
+		}
+	}
 	return repo, nil
 }
 
