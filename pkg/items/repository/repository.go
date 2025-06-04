@@ -7,6 +7,7 @@ import (
 
 	"github.com/markelca/prioritty/migrations"
 	"github.com/markelca/prioritty/pkg/items"
+	_ "github.com/mattn/go-sqlite3"
 	"github.com/spf13/viper"
 )
 

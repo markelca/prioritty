@@ -7,7 +7,6 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/markelca/prioritty/internal/tui/styles"
 	"github.com/markelca/prioritty/pkg/items"
-	"github.com/markelca/prioritty/pkg/tasks"
 )
 
 func (m Model) View() string {
@@ -66,10 +65,10 @@ func (m Model) View() string {
 	return view
 }
 
-func renderDonePercentage(taskList []tasks.Task, counts map[tasks.Status]int) string {
+func renderDonePercentage(taskList []items.Task, counts map[items.Status]int) string {
 	var donePercentage float64
 	if len(taskList) > 0 {
-		donePercentage = float64(counts[tasks.Done]+counts[tasks.Cancelled]) / float64(len(taskList)) * 100
+		donePercentage = float64(counts[items.Done]+counts[items.Cancelled]) / float64(len(taskList)) * 100
 	} else {
 		donePercentage = 0
 	}
@@ -82,15 +81,15 @@ func renderDonePercentage(taskList []tasks.Task, counts map[tasks.Status]int) st
 	)
 }
 
-func renderSummary(counts map[tasks.Status]int) string {
+func renderSummary(counts map[items.Status]int) string {
 	return fmt.Sprintf("\n  %s %s %s %s %s %s %s %s\n",
-		styles.Done.Render(fmt.Sprintf("%d", counts[tasks.Done])),
+		styles.Done.Render(fmt.Sprintf("%d", counts[items.Done])),
 		styles.Secondary.Render("done ·"),
-		styles.InProgress.Render(fmt.Sprintf("%d", counts[tasks.InProgress])),
+		styles.InProgress.Render(fmt.Sprintf("%d", counts[items.InProgress])),
 		styles.Secondary.Render("in-progress ·"),
-		styles.Default.Render(fmt.Sprintf("%d", counts[tasks.Done])),
+		styles.Default.Render(fmt.Sprintf("%d", counts[items.Done])),
 		styles.Secondary.Render("pending ·"),
-		styles.Cancelled.Render(fmt.Sprintf("%d", counts[tasks.Cancelled])),
+		styles.Cancelled.Render(fmt.Sprintf("%d", counts[items.Cancelled])),
 		styles.Secondary.Render("cancelled"),
 	)
 }

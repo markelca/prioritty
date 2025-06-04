@@ -2,7 +2,7 @@ package styles
 
 import (
 	"github.com/charmbracelet/lipgloss"
-	"github.com/markelca/prioritty/pkg/tasks"
+	"github.com/markelca/prioritty/pkg/items"
 )
 
 var (
@@ -45,23 +45,23 @@ var (
 			PaddingRight(1).
 			String()
 
-	RenderTask = func(t tasks.Task) string {
+	RenderTask = func(t items.Task) string {
 		var title string
 		var icon string
 		var cIcon string
 		var style lipgloss.Style
 
 		switch t.Status {
-		case tasks.Done:
+		case items.Done:
 			icon = DoneIcon
 			style = DoneTitle
-		case tasks.Cancelled:
+		case items.Cancelled:
 			icon = CancelledIcon
 			style = DoneTitle
-		case tasks.InProgress:
+		case items.InProgress:
 			icon = InProgressIcon
 			style = Default
-		case tasks.Todo:
+		case items.Todo:
 			icon = TodoIcon
 			style = Default
 		}
