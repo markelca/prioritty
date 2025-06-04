@@ -10,6 +10,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/markelca/prioritty/internal/config"
 	"github.com/markelca/prioritty/pkg/items"
+	"github.com/markelca/prioritty/pkg/items/renderer"
 	"github.com/markelca/prioritty/pkg/items/repository"
 	"github.com/markelca/prioritty/pkg/items/service"
 	"github.com/spf13/viper"
@@ -83,7 +84,7 @@ func InitialModel(withTui bool) Model {
 		state:    State{tasks: tasks, taskContent: taskContent, items: itemList},
 		params:   Params{withTui: withTui},
 		Service:  service,
-		renderer: items.CliRendererer{},
+		renderer: renderer.CliRendererer{},
 	}
 }
 
