@@ -1,5 +1,7 @@
 package items
 
+var _ Renderable = (*Note)(nil)
+
 type Note struct {
 	Item
 }

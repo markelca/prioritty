@@ -10,6 +10,8 @@ const (
 	NoteType
 )
 
+var _ Renderable = (*Task)(nil)
+
 type Task struct {
 	Item
 	Status Status
