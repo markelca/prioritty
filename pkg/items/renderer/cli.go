@@ -54,3 +54,35 @@ func (r CliRendererer) renderTask(t items.Task) string {
 func (r CliRendererer) renderNote(t items.Note) string {
 	return styles.NoteIcon + t.Title + "\n"
 }
+
+func RenderTask(t items.Task) string {
+	var title string
+	var icon string
+	var cIcon string
+	var style lipgloss.Style
+
+	switch t.Status {
+	case items.Done:
+		icon = styles.DoneIcon
+		style = styles.DoneTitle
+	case items.Cancelled:
+		icon = styles.CancelledIcon
+		style = styles.DoneTitle
+	case items.InProgress:
+		icon = styles.InProgressIcon
+		style = styles.Default
+	case items.Todo:
+		icon = styles.TodoIcon
+		style = styles.Default
+	}
+
+	if len(t.Body) > 1 {
+		cIcon = styles.ContentIcon
+	}
+
+	title += style.
+		// PaddingBottom(1).
+		Render(t.Title)
+
+	return icon + cIcon + title + "\n"
+}

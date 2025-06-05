@@ -2,7 +2,6 @@ package styles
 
 import (
 	"github.com/charmbracelet/lipgloss"
-	"github.com/markelca/prioritty/pkg/items"
 )
 
 var (
@@ -48,38 +47,6 @@ var (
 	ContentIcon = Default.SetString("🗐").
 			PaddingRight(1).
 			String()
-
-	RenderTask = func(t items.Task) string {
-		var title string
-		var icon string
-		var cIcon string
-		var style lipgloss.Style
-
-		switch t.Status {
-		case items.Done:
-			icon = DoneIcon
-			style = DoneTitle
-		case items.Cancelled:
-			icon = CancelledIcon
-			style = DoneTitle
-		case items.InProgress:
-			icon = InProgressIcon
-			style = Default
-		case items.Todo:
-			icon = TodoIcon
-			style = Default
-		}
-
-		if len(t.Body) > 1 {
-			cIcon = ContentIcon
-		}
-
-		title += style.
-			// PaddingBottom(1).
-			Render(t.Title)
-
-		return icon + cIcon + title + "\n"
-	}
 
 	TitleStyle = func() lipgloss.Style {
 		b := lipgloss.RoundedBorder()
