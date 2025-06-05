@@ -7,6 +7,7 @@ const (
 	InProgress
 	Done
 	Cancelled
+	NoteType
 )
 
 type Task struct {

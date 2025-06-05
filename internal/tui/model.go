@@ -44,7 +44,7 @@ type Model struct {
 	params   Params
 	state    State
 	Service  service.Service
-	renderer items.Renderer
+	renderer renderer.CliRendererer
 }
 
 var Help = help.New()

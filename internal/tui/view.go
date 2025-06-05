@@ -11,7 +11,7 @@ import (
 
 func (m Model) View() string {
 	view := ""
-	// counts := make(map[tasks.Status]int)
+	counts := make(map[items.Status]int)
 
 	if len(m.state.tasks) == 0 {
 		view += "No tasks found!"
@@ -24,9 +24,38 @@ func (m Model) View() string {
 		return view
 	}
 
-	for _, item := range m.state.items {
+	for i, item := range m.state.items {
+		switch item.(type) {
+		case items.Note:
+			counts[items.NoteType] += 1
+		case items.Task:
+			task := item.(items.Task)
+			counts[task.Status] += 1
+		}
+		cursor := " "
+
+		if m.params.withTui && m.state.cursor == i {
+			cursor = ">"
+		}
+
+		if m.params.withTui && m.state.cursor == i {
+			cursor = ">"
+		}
+		var padding string
+		if len(m.state.items) >= 10 {
+			padding = "2"
+		} else {
+			padding = "1"
+		}
+		view += cursor
+		view += styles.Secondary.
+			SetString(fmt.Sprintf(" %"+padding+"d. ", i+1)).
+			Render()
 		view += item.Render(m.renderer)
 	}
+
+	view += renderDonePercentage(m.state.tasks, counts)
+	view += renderSummary(counts)
 
 	// for i, task := range m.state.tasks {
 	// 	counts[task.Status] += 1
@@ -47,9 +76,6 @@ func (m Model) View() string {
 	// 		Render()
 	// 	view += renderTask(task)
 	// }
-
-	// view += renderDonePercentage(m.state.tasks, counts)
-	// view += renderSummary(counts)
 
 	if m.params.withTui {
 		view += styles.Default.
@@ -82,7 +108,7 @@ func renderDonePercentage(taskList []items.Task, counts map[items.Status]int) st
 }
 
 func renderSummary(counts map[items.Status]int) string {
-	return fmt.Sprintf("\n  %s %s %s %s %s %s %s %s\n",
+	return fmt.Sprintf("\n  %s %s %s %s %s %s %s %s %s %s\n",
 		styles.Done.Render(fmt.Sprintf("%d", counts[items.Done])),
 		styles.Secondary.Render("done ·"),
 		styles.InProgress.Render(fmt.Sprintf("%d", counts[items.InProgress])),
@@ -90,7 +116,9 @@ func renderSummary(counts map[items.Status]int) string {
 		styles.Default.Render(fmt.Sprintf("%d", counts[items.Done])),
 		styles.Secondary.Render("pending ·"),
 		styles.Cancelled.Render(fmt.Sprintf("%d", counts[items.Cancelled])),
-		styles.Secondary.Render("cancelled"),
+		styles.Secondary.Render("cancelled ·"),
+		styles.InProgress.Render(fmt.Sprintf("%d", counts[items.NoteType])),
+		styles.Secondary.Render("notes"),
 	)
 }
 

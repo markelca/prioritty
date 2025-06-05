@@ -22,6 +22,10 @@ var (
 	Cancelled = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("#f28aa8"))
 
+	NoteIcon = InProgress.SetString("i").
+			PaddingRight(1).
+			String()
+
 	DoneIcon = Done.SetString("✓").
 			PaddingRight(1).
 			String()

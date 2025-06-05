@@ -39,5 +39,5 @@ func (r CliRendererer) RenderTask(t items.Task) string {
 }
 
 func (r CliRendererer) RenderNote(t items.Note) string {
-	return ""
+	return styles.NoteIcon + t.Title + "\n"
 }
