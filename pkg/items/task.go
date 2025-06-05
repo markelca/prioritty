@@ -24,5 +24,5 @@ func (t *Task) SetStatus(s Status) {
 }
 
 func (t Task) Render(r Renderer) string {
-	return r.RenderTask(t)
+	return r.Render(t)
 }

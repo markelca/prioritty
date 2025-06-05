@@ -1,8 +1,7 @@
 package items
 
 type Renderer interface {
-	RenderTask(Task) string
-	RenderNote(Note) string
+	Render(Renderable) string
 }
 
 type Renderable interface {

@@ -1,6 +1,8 @@
 package renderer
 
 import (
+	"fmt"
+
 	"github.com/charmbracelet/lipgloss"
 	"github.com/markelca/prioritty/internal/tui/styles"
 	"github.com/markelca/prioritty/pkg/items"
@@ -23,7 +25,18 @@ var taskTitleStyle = map[items.Status]lipgloss.Style{
 	items.Todo:       styles.Default,
 }
 
-func (r CliRendererer) RenderTask(t items.Task) string {
+func (r CliRendererer) Render(item items.Renderable) string {
+	switch v := item.(type) {
+	case items.Task:
+		return r.renderTask(v)
+	case items.Note:
+		return r.renderNote(v)
+	default:
+		return fmt.Sprintf("Unknown renderable item type: %T\n", v)
+	}
+}
+
+func (r CliRendererer) renderTask(t items.Task) string {
 	var contentIcon string
 
 	icon := taskIcons[t.Status]
@@ -38,6 +51,6 @@ func (r CliRendererer) RenderTask(t items.Task) string {
 	return icon + contentIcon + title + "\n"
 }
 
-func (r CliRendererer) RenderNote(t items.Note) string {
+func (r CliRendererer) renderNote(t items.Note) string {
 	return styles.NoteIcon + t.Title + "\n"
 }

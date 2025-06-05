@@ -5,5 +5,5 @@ type Note struct {
 }
 
 func (n Note) Render(r Renderer) string {
-	return r.RenderNote(n)
+	return r.Render(n)
 }
