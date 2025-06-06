@@ -24,7 +24,6 @@ type TaskContentState struct {
 
 type State struct {
 	cursor      int
-	tasks       []items.Task
 	items       []items.ItemInterface
 	taskContent TaskContentState
 }
@@ -73,15 +72,9 @@ func InitialModel(withTui bool) Model {
 		os.Exit(4)
 	}
 
-	tasks, err := service.GetTasks()
-	if err != nil {
-		fmt.Println("Error - Failed to get the tasks:", err)
-		os.Exit(4)
-	}
-
 	taskContent := TaskContentState{}
 	return Model{
-		state:    State{tasks: tasks, taskContent: taskContent, items: itemList},
+		state:    State{taskContent: taskContent, items: itemList},
 		params:   Params{withTui: withTui},
 		Service:  service,
 		renderer: renderer.CliRendererer{},

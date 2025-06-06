@@ -13,8 +13,8 @@ func (m Model) View() string {
 	view := ""
 	counts := make(map[items.Status]int)
 
-	if len(m.state.tasks) == 0 {
-		view += "No tasks found!"
+	if len(m.state.items) == 0 {
+		view += "No items found!"
 		if m.params.withTui {
 			view += styles.Default.
 				MarginTop(1).
@@ -25,12 +25,12 @@ func (m Model) View() string {
 	}
 
 	for i, item := range m.state.items {
-		switch item.(type) {
-		case items.Note:
+
+		switch v := item.(type) {
+		case *items.Note:
 			counts[items.NoteType] += 1
-		case items.Task:
-			task := item.(items.Task)
-			counts[task.Status] += 1
+		case *items.Task:
+			counts[v.Status] += 1
 		}
 		cursor := " "
 
@@ -54,28 +54,8 @@ func (m Model) View() string {
 		view += item.Render(m.renderer)
 	}
 
-	view += renderDonePercentage(m.state.tasks, counts)
+	view += renderDonePercentage(m.state.items, counts)
 	view += renderSummary(counts)
-
-	// for i, task := range m.state.tasks {
-	// 	counts[task.Status] += 1
-	// 	cursor := " "
-	// 	if m.params.withTui && m.state.cursor == i {
-	// 		cursor = ">"
-	// 	}
-	//
-	// 	var padding string
-	// 	if len(m.state.tasks) >= 10 {
-	// 		padding = "2"
-	// 	} else {
-	// 		padding = "1"
-	// 	}
-	// 	view += cursor
-	// 	view += styles.Secondary.
-	// 		SetString(fmt.Sprintf(" %"+padding+"d. ", i+1)).
-	// 		Render()
-	// 	view += renderTask(task)
-	// }
 
 	if m.params.withTui {
 		view += styles.Default.
@@ -85,16 +65,22 @@ func (m Model) View() string {
 	}
 
 	if m.state.taskContent.ready {
-		// view = fmt.Sprintf("%s\n%s\n%s", m.headerView(), m.state.taskContent.viewport.View(), m.footerView())
+		view = fmt.Sprintf("%s\n%s\n%s", m.headerView(), m.state.taskContent.viewport.View(), m.footerView())
 	}
 
 	return view
 }
 
-func renderDonePercentage(taskList []items.Task, counts map[items.Status]int) string {
+func renderDonePercentage(taskList []items.ItemInterface, counts map[items.Status]int) string {
+	var taskCount int
+	for _, t := range taskList {
+		if _, ok := t.(*items.Task); ok {
+			taskCount += 1
+		}
+	}
 	var donePercentage float64
-	if len(taskList) > 0 {
-		donePercentage = float64(counts[items.Done]+counts[items.Cancelled]) / float64(len(taskList)) * 100
+	if taskCount > 0 {
+		donePercentage = float64(counts[items.Done]+counts[items.Cancelled]) / float64(taskCount) * 100
 	} else {
 		donePercentage = 0
 	}
@@ -113,7 +99,7 @@ func renderSummary(counts map[items.Status]int) string {
 		styles.Secondary.Render("done ·"),
 		styles.InProgress.Render(fmt.Sprintf("%d", counts[items.InProgress])),
 		styles.Secondary.Render("in-progress ·"),
-		styles.Default.Render(fmt.Sprintf("%d", counts[items.Done])),
+		styles.Default.Render(fmt.Sprintf("%d", counts[items.Todo])),
 		styles.Secondary.Render("pending ·"),
 		styles.Cancelled.Render(fmt.Sprintf("%d", counts[items.Cancelled])),
 		styles.Secondary.Render("cancelled ·"),
@@ -129,16 +115,16 @@ var taskIcons = map[items.Status]string{
 	items.Todo:       styles.TodoIcon,
 }
 
-// func (m Model) headerView() string {
-// 	item := m.state.GetCurrentItem()
-// 	var icon string
-// 	if t, ok := item.(*items.Task); ok {
-// 		icon = taskIcons[t.Status]
-// 	}
-// 	title := styles.TitleStyle.Render(icon + item.Title)
-// 	line := strings.Repeat("─", max(0, m.state.taskContent.viewport.Width-lipgloss.Width(title)))
-// 	return lipgloss.JoinHorizontal(lipgloss.Center, title, line)
-// }
+func (m Model) headerView() string {
+	item := m.state.GetCurrentItem()
+	var icon string
+	if t, ok := item.(*items.Task); ok {
+		icon = taskIcons[t.Status]
+	}
+	title := styles.TitleStyle.Render(icon + item.GetTitle())
+	line := strings.Repeat("─", max(0, m.state.taskContent.viewport.Width-lipgloss.Width(title)))
+	return lipgloss.JoinHorizontal(lipgloss.Center, title, line)
+}
 
 func (m Model) footerView() string {
 	info := styles.InfoStyle.Render(fmt.Sprintf("%3.f%%", m.state.taskContent.viewport.ScrollPercent()*100))
