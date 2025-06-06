@@ -16,16 +16,20 @@ import (
 	"github.com/spf13/viper"
 )
 
-type TaskContentState struct {
+type ItemContent struct {
 	content  string
 	ready    bool
 	viewport viewport.Model
 }
 
+func (c ItemContent) SetReady() {
+
+}
+
 type State struct {
-	cursor      int
-	items       []items.ItemInterface
-	taskContent TaskContentState
+	cursor int
+	items  []items.ItemInterface
+	item   ItemContent
 }
 
 func (s State) GetCurrentItem() items.ItemInterface {
@@ -80,9 +84,9 @@ func InitialModel(withTui bool) Model {
 		os.Exit(4)
 	}
 
-	taskContent := TaskContentState{}
+	taskContent := ItemContent{}
 	return Model{
-		state:    State{taskContent: taskContent, items: itemList},
+		state:    State{item: taskContent, items: itemList},
 		params:   Params{withTui: withTui},
 		Service:  service,
 		renderer: renderer.CliRendererer{},

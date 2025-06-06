@@ -64,8 +64,8 @@ func (m Model) View() string {
 			Render()
 	}
 
-	if m.state.taskContent.ready {
-		view = fmt.Sprintf("%s\n%s\n%s", m.headerView(), m.state.taskContent.viewport.View(), m.footerView())
+	if m.state.item.ready {
+		view = fmt.Sprintf("%s\n%s\n%s", m.headerView(), m.state.item.viewport.View(), m.footerView())
 	}
 
 	return view
@@ -131,13 +131,13 @@ func (m Model) headerView() string {
 		icon = styles.NoteIcon
 	}
 	title := styles.TitleStyle.Render(icon + item.GetTitle())
-	line := strings.Repeat("─", max(0, m.state.taskContent.viewport.Width-lipgloss.Width(title)))
+	line := strings.Repeat("─", max(0, m.state.item.viewport.Width-lipgloss.Width(title)))
 	return lipgloss.JoinHorizontal(lipgloss.Center, title, line)
 }
 
 func (m Model) footerView() string {
-	info := styles.InfoStyle.Render(fmt.Sprintf("%3.f%%", m.state.taskContent.viewport.ScrollPercent()*100))
-	line := strings.Repeat("─", max(0, m.state.taskContent.viewport.Width-lipgloss.Width(info)))
+	info := styles.InfoStyle.Render(fmt.Sprintf("%3.f%%", m.state.item.viewport.ScrollPercent()*100))
+	line := strings.Repeat("─", max(0, m.state.item.viewport.Width-lipgloss.Width(info)))
 	footer := lipgloss.JoinHorizontal(lipgloss.Center, line, info, "\n")
 	return footer
 }
