@@ -25,15 +25,15 @@ type TaskContentState struct {
 type State struct {
 	cursor      int
 	tasks       []items.Task
-	items       []items.Renderable
+	items       []items.ItemInterface
 	taskContent TaskContentState
 }
 
-func (s State) GetCurrentTask() *items.Task {
-	if s.cursor+1 > len(s.tasks) {
-		return &items.Task{}
+func (s State) GetCurrentItem() items.ItemInterface {
+	if s.cursor+1 > len(s.items) {
+		return nil
 	}
-	return &s.tasks[s.cursor]
+	return s.items[s.cursor]
 }
 
 type Params struct {

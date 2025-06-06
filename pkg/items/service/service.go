@@ -19,8 +19,8 @@ func NewService(r repository.Repository) Service {
 	}
 }
 
-func (s Service) GetAll() ([]items.Renderable, error) {
-	var allItems []items.Renderable
+func (s Service) GetAll() ([]items.ItemInterface, error) {
+	var allItems []items.ItemInterface
 
 	notes, err := s.GetNotes()
 	if err != nil {
@@ -28,7 +28,7 @@ func (s Service) GetAll() ([]items.Renderable, error) {
 	}
 
 	for _, note := range notes {
-		allItems = append(allItems, note)
+		allItems = append(allItems, &note)
 	}
 
 	tasks, err := s.GetTasks()
@@ -37,7 +37,7 @@ func (s Service) GetAll() ([]items.Renderable, error) {
 	}
 
 	for _, task := range tasks {
-		allItems = append(allItems, task)
+		allItems = append(allItems, &task)
 	}
 
 	return allItems, nil

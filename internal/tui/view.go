@@ -85,7 +85,7 @@ func (m Model) View() string {
 	}
 
 	if m.state.taskContent.ready {
-		view = fmt.Sprintf("%s\n%s\n%s", m.headerView(), m.state.taskContent.viewport.View(), m.footerView())
+		// view = fmt.Sprintf("%s\n%s\n%s", m.headerView(), m.state.taskContent.viewport.View(), m.footerView())
 	}
 
 	return view
@@ -129,13 +129,16 @@ var taskIcons = map[items.Status]string{
 	items.Todo:       styles.TodoIcon,
 }
 
-func (m Model) headerView() string {
-	task := m.state.GetCurrentTask()
-	icon := taskIcons[task.Status]
-	title := styles.TitleStyle.Render(icon + task.Title)
-	line := strings.Repeat("─", max(0, m.state.taskContent.viewport.Width-lipgloss.Width(title)))
-	return lipgloss.JoinHorizontal(lipgloss.Center, title, line)
-}
+// func (m Model) headerView() string {
+// 	item := m.state.GetCurrentItem()
+// 	var icon string
+// 	if t, ok := item.(*items.Task); ok {
+// 		icon = taskIcons[t.Status]
+// 	}
+// 	title := styles.TitleStyle.Render(icon + item.Title)
+// 	line := strings.Repeat("─", max(0, m.state.taskContent.viewport.Width-lipgloss.Width(title)))
+// 	return lipgloss.JoinHorizontal(lipgloss.Center, title, line)
+// }
 
 func (m Model) footerView() string {
 	info := styles.InfoStyle.Render(fmt.Sprintf("%3.f%%", m.state.taskContent.viewport.ScrollPercent()*100))
