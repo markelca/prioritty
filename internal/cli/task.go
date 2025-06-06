@@ -6,11 +6,11 @@ import (
 )
 
 func init() {
-	rootCmd.AddCommand(addCmd)
+	rootCmd.AddCommand(taskCmd)
 }
 
-var addCmd = &cobra.Command{
-	Use:     "add {title}",
+var taskCmd = &cobra.Command{
+	Use:     "task {title}",
 	Aliases: []string{},
 	Args:    cobra.ExactArgs(1),
 	Short:   "Adds a new task",

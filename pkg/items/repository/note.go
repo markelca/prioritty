@@ -52,7 +52,7 @@ func (r *SQLiteRepository) UpdateNote(n items.Note) error {
 
 func (r *SQLiteRepository) CreateNote(n items.Note) error {
 	query := `
-		INSERT INTO task (title)
+		INSERT INTO note (title)
 		VALUES (?)
 	`
 	_, err := r.db.Exec(query, n.Title)

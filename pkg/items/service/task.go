@@ -51,6 +51,12 @@ func (s TaskService) AddTask(title string) error {
 	return s.repository.CreateTask(t)
 }
 
+func (s TaskService) AddNote(title string) error {
+	t := items.Note{}
+	t.Title = title
+	return s.repository.CreateNote(t)
+}
+
 func (s TaskService) RemoveTask(id int) error {
 	return s.repository.RemoveTask(id)
 }
