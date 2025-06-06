@@ -77,9 +77,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 		case key.Matches(msg, keys.Done):
-			var t *items.Task
-			var ok bool
-			if t, ok = item.(*items.Task); ok {
+			if t, ok := item.(*items.Task); ok {
 				if !m.state.taskContent.ready {
 					m.Service.UpdateStatus(t, items.Done)
 				}

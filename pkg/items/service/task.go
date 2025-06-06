@@ -70,8 +70,23 @@ func (s TaskService) AddNote(title string) error {
 	return s.repository.CreateNote(t)
 }
 
-func (s TaskService) RemoveTask(id int) error {
+func (s TaskService) RemoveItem(item items.ItemInterface) error {
+	switch v := item.(type) {
+	case *items.Note:
+		return s.removeNote(v.GetId())
+	case *items.Task:
+		return s.removeTask(v.GetId())
+	default:
+		return fmt.Errorf("Cannot remove item %v", v)
+	}
+}
+
+func (s TaskService) removeTask(id int) error {
 	return s.repository.RemoveTask(id)
+}
+
+func (s TaskService) removeNote(id int) error {
+	return s.repository.RemoveNote(id)
 }
 
 func (s TaskService) EditWithEditor(t items.ItemInterface) (tea.Cmd, error) {

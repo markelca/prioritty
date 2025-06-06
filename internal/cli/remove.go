@@ -19,18 +19,25 @@ var removeCmd = &cobra.Command{
 	Short:   "Removes a task by ID",
 	Long:    `Removes a task from the list by providing its ID`,
 	Run: func(cmd *cobra.Command, args []string) {
-		id, err := strconv.Atoi(args[0])
+		index, err := strconv.Atoi(args[0])
 		if err != nil {
 			fmt.Printf("Error: Invalid task ID '%s'. Please provide a valid number.\n", args[0])
 			return
 		}
 
 		m := tui.InitialModel(false)
-		err = m.Service.RemoveTask(id)
+
+		item := m.GetItemAt(index - 1)
+
+		if item == nil {
+			fmt.Printf("Task at index %d does not exist", index)
+			return
+		}
+
+		err = m.Service.RemoveItem(item)
 		if err != nil {
 			fmt.Printf("Error removing task: %v\n", err)
 			return
 		}
 	},
 }
-

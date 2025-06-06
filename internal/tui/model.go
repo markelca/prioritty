@@ -46,6 +46,14 @@ type Model struct {
 	renderer renderer.CliRendererer
 }
 
+func (m Model) GetItemAt(index int) items.ItemInterface {
+	if index <= 0 || len(m.state.items)-1 < index {
+		return nil
+	} else {
+		return m.state.items[index]
+	}
+}
+
 var Help = help.New()
 
 func InitialModel(withTui bool) Model {
