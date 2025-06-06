@@ -52,7 +52,13 @@ func (r CliRendererer) renderTask(t items.Task) string {
 }
 
 func (r CliRendererer) renderNote(t items.Note) string {
-	return styles.NoteIcon + t.Title + "\n"
+	var contentIcon string
+
+	if len(t.Body) > 1 {
+		contentIcon = styles.ContentIcon
+	}
+
+	return styles.NoteIcon + contentIcon + t.Title + "\n"
 }
 
 func RenderTask(t items.Task) string {

@@ -1,9 +1,10 @@
 package tui
 
 import (
-	"log"
+	"fmt"
 
 	"github.com/charmbracelet/bubbles/key"
+	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/markelca/prioritty/pkg/editor"
@@ -17,12 +18,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	)
 
 	item := m.state.GetCurrentItem()
-	if item == nil {
-		log.Fatal("nthn")
-	}
 
 	contentStyle := lipgloss.NewStyle().Width(m.state.taskContent.viewport.Width)
-	// fmt.Println(m.state.cursor)
 
 	switch msg := msg.(type) {
 
@@ -105,16 +102,16 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.state.taskContent.ready = true
 			}
 		case key.Matches(msg, keys.Edit):
-			// msg, err := m.Service.EditWithEditor(item)
-			// if err != nil {
-			// fmt.Println(err)
-			// }
-			// return m, msg
+			msg, err := m.Service.EditWithEditor(item)
+			if err != nil {
+				fmt.Println(err)
+			}
+			return m, msg
 		}
 	case tea.WindowSizeMsg:
-		// headerHeight := lipgloss.Height(m.headerView())
-		// footerHeight := lipgloss.Height(m.footerView())
-		// verticalMarginHeight := headerHeight + footerHeight
+		headerHeight := lipgloss.Height(m.headerView())
+		footerHeight := lipgloss.Height(m.footerView())
+		verticalMarginHeight := headerHeight + footerHeight
 
 		if !m.state.taskContent.ready {
 			// Since this program is using the full size of the viewport we
@@ -122,15 +119,15 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			// we can initialize the viewport. The initial dimensions come in
 			// quickly, though asynchronously, which is why we wait for them
 			// here.
-			// m.state.taskContent.viewport = viewport.New(msg.Width, msg.Height-verticalMarginHeight)
-			// m.state.taskContent.viewport.YPosition = headerHeight
+			m.state.taskContent.viewport = viewport.New(msg.Width, msg.Height-verticalMarginHeight)
+			m.state.taskContent.viewport.YPosition = headerHeight
 		} else {
-			// m.state.taskContent.viewport.Width = msg.Width
-			// m.state.taskContent.viewport.Height = msg.Height - verticalMarginHeight
+			m.state.taskContent.viewport.Width = msg.Width
+			m.state.taskContent.viewport.Height = msg.Height - verticalMarginHeight
 		}
 	case editor.TaskEditorFinishedMsg:
-		// t := m.state.GetCurrentItem()
-		// m.Service.UpdateTaskFromEditorMsg(t, msg)
+		t := m.state.GetCurrentItem()
+		m.Service.UpdateItemFromEditorMsg(t, msg)
 		return m, tea.ClearScreen
 	}
 

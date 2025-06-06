@@ -85,8 +85,15 @@ func renderDonePercentage(taskList []items.ItemInterface, counts map[items.Statu
 		donePercentage = 0
 	}
 
+	var doneStyle lipgloss.Style
+	if donePercentage > 0 {
+		doneStyle = styles.Done
+	} else {
+		doneStyle = styles.Secondary
+	}
+
 	return fmt.Sprintf("\n  %s %s",
-		styles.Done.Render(
+		doneStyle.Render(
 			fmt.Sprintf("%.f%%", donePercentage),
 		),
 		styles.Secondary.Render("of all tasks completed."),
@@ -120,6 +127,8 @@ func (m Model) headerView() string {
 	var icon string
 	if t, ok := item.(*items.Task); ok {
 		icon = taskIcons[t.Status]
+	} else if _, ok := item.(*items.Note); ok {
+		icon = styles.NoteIcon
 	}
 	title := styles.TitleStyle.Render(icon + item.GetTitle())
 	line := strings.Repeat("─", max(0, m.state.taskContent.viewport.Width-lipgloss.Width(title)))

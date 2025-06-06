@@ -25,11 +25,24 @@ func (s TaskService) UpdateTask(t items.Task) error {
 	return s.repository.UpdateTask(t)
 }
 
-func (s TaskService) UpdateTaskFromEditorMsg(t *items.Task, msg editor.TaskEditorFinishedMsg) {
-	t.Title = msg.Title
-	t.Body = msg.Body
-	if err := s.UpdateTask(*t); err != nil {
-		fmt.Println("Error updating the task - ", err)
+func (s TaskService) UpdateNote(n items.Note) error {
+	return s.repository.UpdateNote(n)
+}
+
+func (s TaskService) UpdateItemFromEditorMsg(i items.ItemInterface, msg editor.TaskEditorFinishedMsg) {
+	switch v := i.(type) {
+	case *items.Task:
+		v.Title = msg.Title
+		v.Body = msg.Body
+		if err := s.UpdateTask(*v); err != nil {
+			fmt.Println("Error updating the task - ", err)
+		}
+	case *items.Note:
+		v.Title = msg.Title
+		v.Body = msg.Body
+		if err := s.UpdateNote(*v); err != nil {
+			fmt.Println("Error updating the task - ", err)
+		}
 	}
 }
 
@@ -61,6 +74,6 @@ func (s TaskService) RemoveTask(id int) error {
 	return s.repository.RemoveTask(id)
 }
 
-func (s TaskService) EditWithEditor(t *items.Task) (tea.Cmd, error) {
-	return editor.EditTask(t.Id, t.Title, t.Body)
+func (s TaskService) EditWithEditor(t items.ItemInterface) (tea.Cmd, error) {
+	return editor.EditTask(t.GetId(), t.GetTitle(), t.GetBody())
 }
