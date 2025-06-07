@@ -23,23 +23,6 @@ type keyMap struct {
 	Remove     key.Binding
 }
 
-// ShortHelp returns keybindings to be shown in the mini help view. It's part
-// of the key.Map interface.
-func (k keyMap) ShortHelp() []key.Binding {
-	return []key.Binding{k.Help, k.Quit}
-}
-
-// FullHelp returns keybindings for the expanded help view. It's part of the
-// key.Map interface.
-func (k keyMap) FullHelp() [][]key.Binding {
-	return [][]key.Binding{
-		{k.Up, k.Down, k.Left, k.Right}, // first column
-		{k.InProgress, k.ToDo, k.Done, k.Cancelled},
-		{k.Show, k.Edit, k.Add, k.Remove},
-		{k.Help, k.Quit}, // second column
-	}
-}
-
 var keys = keyMap{
 	Up: key.NewBinding(
 		key.WithKeys("up", "k"),
@@ -103,4 +86,21 @@ var keys = keyMap{
 		key.WithKeys("r"),
 		key.WithHelp("r", "Remove"),
 	),
+}
+
+// ShortHelp returns keybindings to be shown in the mini help view. It's part
+// of the key.Map interface.
+func (k keyMap) ShortHelp() []key.Binding {
+	return []key.Binding{k.Help, k.Quit}
+}
+
+// FullHelp returns keybindings for the expanded help view. It's part of the
+// key.Map interface.
+func (k keyMap) FullHelp() [][]key.Binding {
+	return [][]key.Binding{
+		{k.Up, k.Down, k.Left, k.Right}, // first column
+		{k.InProgress, k.ToDo, k.Done, k.Cancelled},
+		{k.Show, k.Edit, k.Add, k.Remove},
+		{k.Help, k.Quit}, // second column
+	}
 }

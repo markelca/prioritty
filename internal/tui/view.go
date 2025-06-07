@@ -9,6 +9,13 @@ import (
 	"github.com/markelca/prioritty/pkg/items"
 )
 
+var taskIcons = map[items.Status]string{
+	items.Done:       styles.DoneIcon,
+	items.InProgress: styles.InProgressIcon,
+	items.Cancelled:  styles.CancelledIcon,
+	items.Todo:       styles.TodoIcon,
+}
+
 func (m Model) View() string {
 	view := ""
 	counts := make(map[items.Status]int)
@@ -113,13 +120,6 @@ func renderSummary(counts map[items.Status]int) string {
 		styles.InProgress.Render(fmt.Sprintf("%d", counts[items.NoteType])),
 		styles.Secondary.Render("notes"),
 	)
-}
-
-var taskIcons = map[items.Status]string{
-	items.Done:       styles.DoneIcon,
-	items.InProgress: styles.InProgressIcon,
-	items.Cancelled:  styles.CancelledIcon,
-	items.Todo:       styles.TodoIcon,
 }
 
 func (m Model) headerView() string {
