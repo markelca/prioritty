@@ -12,11 +12,13 @@ import (
 const CONF_DATABASE_PATH string = "database_path"
 const CONF_LOG_FILE_PATH string = "log_file_path"
 const CONF_DEFAULT_COMMAND string = "default_command"
+const CONF_EDITOR string = "editor"
 
 type Config struct {
 	DatabasePath   string `mapstructure:"database_path"`
 	LogFilePath    string `mapstructure:"log_file_path"`
 	DefaultCommand string `mapstructure:"default_command"`
+	Editor         string `mapstructure:"editor"`
 }
 
 var config *Config
@@ -68,8 +70,6 @@ func InitConfig(cfgFile string) error {
 }
 
 func createConfigFile(configDir string) error {
-	log.Println("Config file not found, creating with defaults...")
-
 	if err := os.MkdirAll(configDir, 0755); err != nil {
 		return fmt.Errorf("failed to create config directory: %w", err)
 	}
@@ -77,12 +77,12 @@ func createConfigFile(configDir string) error {
 	if err := viper.SafeWriteConfig(); err != nil {
 		log.Fatalf("Error creating config file: %v", err)
 	}
-	log.Println("Config file created successfully")
 	return nil
 }
 
 func setDefaults(configDir string) {
 	viper.SetDefault(CONF_DATABASE_PATH, filepath.Join(configDir, "prioritty.db"))
 	viper.SetDefault(CONF_LOG_FILE_PATH, filepath.Join(configDir, "prioritty.log"))
-	viper.SetDefault(CONF_DEFAULT_COMMAND, "ls")
+	viper.SetDefault(CONF_DEFAULT_COMMAND, "tui")
+	viper.SetDefault(CONF_EDITOR, "nano")
 }

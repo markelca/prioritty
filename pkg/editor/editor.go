@@ -2,12 +2,15 @@ package editor
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"runtime"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/markelca/prioritty/internal/config"
+	"github.com/spf13/viper"
 )
 
 type TaskEditorFinishedMsg struct {
@@ -30,7 +33,10 @@ func EditTask(id int, title, body string) (tea.Cmd, error) {
 	}
 	tempFile.Close()
 
-	editor := getEditor()
+	editor, err := getEditor()
+	if err != nil {
+		return nil, err
+	}
 
 	return tea.ExecProcess(exec.Command(editor, tempFile.Name()), func(err error) tea.Msg {
 		defer os.Remove(tempFile.Name())
@@ -78,30 +84,38 @@ func parseTaskContent(content string) TaskEditorFinishedMsg {
 	return TaskEditorFinishedMsg{Title: title, Body: body, Err: nil}
 }
 
-// getEditor returns the preferred editor command
-func getEditor() string {
+func getEditor() (string, error) {
+	if editor := viper.GetString(config.CONF_EDITOR); editor != "" {
+		if _, err := exec.LookPath(editor); err == nil {
+			return editor, nil
+		} else {
+			log.Printf("Warning - Couldn't open the editor from your prioritty.yaml file (%s), make sure is installed and accesible globally", editor)
+		}
+	}
+
 	// Check environment variables in order of preference
 	editors := []string{"VISUAL", "EDITOR"}
 
 	for _, env := range editors {
 		if editor := os.Getenv(env); editor != "" {
-			return editor
+			if _, err := exec.LookPath(editor); err == nil {
+				return editor, nil
+			} else {
+				log.Printf("Warning - Couldn't open the editor from your environment vars (%s), make sure is installed and accesible globally", editor)
+			}
 		}
 	}
 
-	// Fall back to system defaults
 	switch runtime.GOOS {
 	case "windows":
-		return "notepad"
+		return "notepad", nil
 	default:
-		// Try common editors in order of preference
-		commonEditors := []string{"vim", "vi", "nano", "emacs"}
+		commonEditors := []string{"nano", "vim", "vi", "emacs"}
 		for _, editor := range commonEditors {
 			if _, err := exec.LookPath(editor); err == nil {
-				return editor
+				return editor, nil
 			}
 		}
-		// Ultimate fallback
-		return "vi"
 	}
+	return "", fmt.Errorf("Error - No available editor could be found")
 }
