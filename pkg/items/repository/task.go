@@ -9,8 +9,9 @@ import (
 
 func (r *SQLiteRepository) GetTasks() ([]items.Task, error) {
 	query := `
-		SELECT t.id, t.title, t.body, t.status_id, t.created_at
+		SELECT t.id, t.title, t.body, t.status_id, t.created_at, tag.id, tag.name
 		FROM task t
+			JOIN tag on t.tag_id = tag.id
 	`
 
 	rows, err := r.db.Query(query)
@@ -23,12 +24,13 @@ func (r *SQLiteRepository) GetTasks() ([]items.Task, error) {
 	var tasks []items.Task
 
 	for rows.Next() {
+		var tag items.Tag
 		var task items.Task
 		var body *string
 		var statusId int
 		var createdAtStr string
 
-		err := rows.Scan(&task.Id, &task.Title, &body, &statusId, &createdAtStr)
+		err := rows.Scan(&task.Id, &task.Title, &body, &statusId, &createdAtStr, &tag.Id, &tag.Name)
 		if err != nil {
 			log.Printf("Error scanning task: %v", err)
 			continue
@@ -43,6 +45,7 @@ func (r *SQLiteRepository) GetTasks() ([]items.Task, error) {
 			task.Body = *body
 		}
 		task.Status = items.Status(statusId)
+		task.Tag = tag
 		tasks = append(tasks, task)
 	}
 

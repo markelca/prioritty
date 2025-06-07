@@ -3,13 +3,20 @@ CREATE TABLE status (
    name TEXT NOT NULL UNIQUE
 );
 
+CREATE TABLE tag (
+   id INTEGER PRIMARY KEY,
+   name TEXT NOT NULL UNIQUE
+);
+
 CREATE TABLE task (
    id INTEGER PRIMARY KEY,
    title TEXT NOT NULL,
    body TEXT,
    status_id INTEGER NOT NULL,
+   tag_id INTEGER,
    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
    FOREIGN KEY (status_id) REFERENCES status(id)
+   FOREIGN KEY (tag_id) REFERENCES tag(id)
 );
 
 CREATE TABLE note (
@@ -18,3 +25,4 @@ CREATE TABLE note (
    body TEXT,
    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+

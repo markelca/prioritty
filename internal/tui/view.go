@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
+	"github.com/elliotchance/orderedmap/v3"
 	"github.com/markelca/prioritty/internal/tui/styles"
 	"github.com/markelca/prioritty/pkg/items"
 )
@@ -31,34 +32,54 @@ func (m Model) View() string {
 		return view
 	}
 
-	for i, item := range m.state.items {
+	itemsByTag := orderedmap.NewOrderedMap[items.Tag, []items.ItemInterface]()
 
-		switch v := item.(type) {
-		case *items.Note:
-			counts[items.NoteType] += 1
-		case *items.Task:
-			counts[v.Status] += 1
-		}
-		cursor := " "
-
-		if m.params.withTui && m.state.cursor == i {
-			cursor = ">"
-		}
-
-		if m.params.withTui && m.state.cursor == i {
-			cursor = ">"
-		}
-		var padding string
-		if len(m.state.items) >= 10 {
-			padding = "2"
+	for _, item := range m.state.items {
+		tag := item.GetTag()
+		items, _ := itemsByTag.Get(tag)
+		itemsByTag.Set(item.GetTag(), append(items, item))
+	}
+	var index int
+	for tag, itemList := range itemsByTag.AllFromFront() {
+		var tagName string
+		if tag.Name == "" {
+			tagName = "My Board"
 		} else {
-			padding = "1"
+			tagName = "@" + tag.Name
 		}
-		view += cursor
-		view += styles.Secondary.
-			SetString(fmt.Sprintf(" %"+padding+"d. ", i+1)).
-			Render()
-		view += item.Render(m.renderer)
+		view += "\n" + styles.Default.Underline(true).Render(tagName) + "\n"
+
+		for _, item := range itemList {
+			switch v := item.(type) {
+			case *items.Note:
+				counts[items.NoteType] += 1
+			case *items.Task:
+				counts[v.Status] += 1
+			}
+			cursor := " "
+
+			if m.params.withTui && m.state.cursor == index {
+				cursor = ">"
+			}
+
+			if m.params.withTui && m.state.cursor == index {
+				cursor = ">"
+			}
+			var padding string
+			if len(m.state.items) >= 10 {
+				padding = "2"
+			} else {
+				padding = "1"
+			}
+			view += cursor
+			view += styles.Secondary.
+				SetString(fmt.Sprintf(" %"+padding+"d. ", index+1)).
+				Render()
+			view += item.Render(m.renderer)
+
+			index += 1
+		}
+
 	}
 
 	view += renderDonePercentage(m.state.items, counts)

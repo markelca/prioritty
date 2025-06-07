@@ -6,6 +6,7 @@ type Base interface {
 	GetId() int
 	GetTitle() string
 	GetBody() string
+	GetTag() Tag
 	GetCreatedAt() time.Time
 }
 
@@ -14,11 +15,17 @@ type ItemInterface interface {
 	Renderable
 }
 
+type Tag struct {
+	Id   int
+	Name string
+}
+
 type Item struct {
 	Id        int
 	Title     string
 	Body      string
 	CreatedAt time.Time
+	Tag       Tag
 }
 
 func (i Item) GetId() int {
@@ -35,4 +42,8 @@ func (i Item) GetTitle() string {
 
 func (i Item) GetCreatedAt() time.Time {
 	return i.CreatedAt
+}
+
+func (i Item) GetTag() Tag {
+	return i.Tag
 }
