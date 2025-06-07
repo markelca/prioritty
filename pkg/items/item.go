@@ -1,9 +1,12 @@
 package items
 
+import "time"
+
 type Base interface {
 	GetId() int
 	GetTitle() string
 	GetBody() string
+	GetCreatedAt() time.Time
 }
 
 type ItemInterface interface {
@@ -12,9 +15,10 @@ type ItemInterface interface {
 }
 
 type Item struct {
-	Id    int
-	Title string
-	Body  string
+	Id        int
+	Title     string
+	Body      string
+	CreatedAt time.Time
 }
 
 func (i Item) GetId() int {
@@ -27,4 +31,8 @@ func (i Item) GetBody() string {
 
 func (i Item) GetTitle() string {
 	return i.Title
+}
+
+func (i Item) GetCreatedAt() time.Time {
+	return i.CreatedAt
 }

@@ -124,6 +124,9 @@ var taskIcons = map[items.Status]string{
 
 func (m Model) headerView() string {
 	item := m.state.GetCurrentItem()
+	if item == nil {
+		return ""
+	}
 	var icon string
 	if t, ok := item.(*items.Task); ok {
 		icon = taskIcons[t.Status]

@@ -1,6 +1,8 @@
 package service
 
 import (
+	"sort"
+
 	"github.com/markelca/prioritty/pkg/items"
 	"github.com/markelca/prioritty/pkg/items/repository"
 )
@@ -39,6 +41,10 @@ func (s Service) GetAll() ([]items.ItemInterface, error) {
 	for _, task := range tasks {
 		allItems = append(allItems, &task)
 	}
+
+	sort.Slice(allItems, func(i, j int) bool {
+		return allItems[i].GetCreatedAt().After(allItems[j].GetCreatedAt())
+	})
 
 	return allItems, nil
 }

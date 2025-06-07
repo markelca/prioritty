@@ -8,11 +8,13 @@ CREATE TABLE task (
    title TEXT NOT NULL,
    body TEXT,
    status_id INTEGER NOT NULL,
+   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
    FOREIGN KEY (status_id) REFERENCES status(id)
 );
 
 CREATE TABLE note (
    id INTEGER PRIMARY KEY,
    title TEXT NOT NULL,
-   body TEXT
+   body TEXT,
+   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

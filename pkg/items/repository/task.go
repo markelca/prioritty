@@ -2,13 +2,14 @@ package repository
 
 import (
 	"log"
+	"time"
 
 	"github.com/markelca/prioritty/pkg/items"
 )
 
 func (r *SQLiteRepository) GetTasks() ([]items.Task, error) {
 	query := `
-		SELECT t.id, t.title, t.body, t.status_id 
+		SELECT t.id, t.title, t.body, t.status_id, t.created_at
 		FROM task t
 	`
 
@@ -25,10 +26,16 @@ func (r *SQLiteRepository) GetTasks() ([]items.Task, error) {
 		var task items.Task
 		var body *string
 		var statusId int
+		var createdAtStr string
 
-		err := rows.Scan(&task.Id, &task.Title, &body, &statusId)
+		err := rows.Scan(&task.Id, &task.Title, &body, &statusId, &createdAtStr)
 		if err != nil {
 			log.Printf("Error scanning task: %v", err)
+			continue
+		}
+		task.CreatedAt, err = time.Parse("2006-01-02 15:04:05", createdAtStr)
+		if err != nil {
+			log.Printf("Error parsing created_at string: %v", err)
 			continue
 		}
 
