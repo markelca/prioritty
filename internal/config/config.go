@@ -2,11 +2,11 @@ package config
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 
 	"github.com/spf13/viper"
+	"gopkg.in/yaml.v3"
 )
 
 const CONF_DATABASE_PATH string = "database_path"
@@ -15,10 +15,10 @@ const CONF_DEFAULT_COMMAND string = "default_command"
 const CONF_EDITOR string = "editor"
 
 type Config struct {
-	DatabasePath   string `mapstructure:"database_path"`
-	LogFilePath    string `mapstructure:"log_file_path"`
-	DefaultCommand string `mapstructure:"default_command"`
-	Editor         string `mapstructure:"editor"`
+	DatabasePath   string `mapstructure:"database_path" yaml:"database_path"`
+	LogFilePath    string `mapstructure:"log_file_path" yaml:"log_file_path"`
+	DefaultCommand string `mapstructure:"default_command" yaml:"default_command"`
+	Editor         string `mapstructure:"editor" yaml:"editor"`
 }
 
 var config *Config
@@ -73,10 +73,27 @@ func createConfigFile(configDir string) error {
 	if err := os.MkdirAll(configDir, 0755); err != nil {
 		return fmt.Errorf("failed to create config directory: %w", err)
 	}
-	// Create the config file with default values
-	if err := viper.SafeWriteConfig(); err != nil {
-		log.Fatalf("Error creating config file: %v", err)
+
+	cfg := Config{
+		DatabasePath:   viper.GetString(CONF_DATABASE_PATH),
+		LogFilePath:    viper.GetString(CONF_LOG_FILE_PATH),
+		DefaultCommand: viper.GetString(CONF_DEFAULT_COMMAND),
+		Editor:         viper.GetString(CONF_EDITOR),
 	}
+
+	configFile := filepath.Join(configDir, "prioritty.yaml")
+	f, err := os.Create(configFile)
+	if err != nil {
+		return fmt.Errorf("failed to create config file: %w", err)
+	}
+	defer f.Close()
+
+	encoder := yaml.NewEncoder(f)
+	defer encoder.Close()
+	if err := encoder.Encode(cfg); err != nil {
+		return fmt.Errorf("failed to encode config: %w", err)
+	}
+
 	return nil
 }
 
