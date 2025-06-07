@@ -68,7 +68,7 @@ func InitConfig(cfgFile string) error {
 }
 
 func createConfigFile(configDir string) error {
-	fmt.Println("Config file not found, creating with defaults...")
+	log.Println("Config file not found, creating with defaults...")
 
 	if err := os.MkdirAll(configDir, 0755); err != nil {
 		return fmt.Errorf("failed to create config directory: %w", err)
@@ -77,7 +77,7 @@ func createConfigFile(configDir string) error {
 	if err := viper.SafeWriteConfig(); err != nil {
 		log.Fatalf("Error creating config file: %v", err)
 	}
-	fmt.Println("Config file created successfully")
+	log.Println("Config file created successfully")
 	return nil
 }
 

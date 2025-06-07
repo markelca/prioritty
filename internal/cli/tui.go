@@ -1,7 +1,7 @@
 package cli
 
 import (
-	"fmt"
+	"log"
 	"os"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -26,7 +26,7 @@ var tuiCmd = &cobra.Command{
 			tea.WithMouseCellMotion(), // turn on mouse support so we can track the mouse wheel
 		)
 		if _, err := p.Run(); err != nil {
-			fmt.Printf("Alas, there's been an error: %v", err)
+			log.Printf("Alas, there's been an error: %v", err)
 			os.Exit(2)
 		}
 		isDemo := viper.GetBool("demo")

@@ -1,7 +1,7 @@
 package cli
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -16,8 +16,8 @@ var configCmd = &cobra.Command{
 	Short: "Show current configuration",
 	Long:  `Display the current configuration values being used by prioritty.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("Database Path: %s\n", viper.Get("database_path"))
-		fmt.Printf("Log File Path: %s\n", viper.Get("log_file_path"))
-		fmt.Printf("Default Command: %s\n", viper.Get("default_command"))
+		log.Printf("Database Path: %s\n", viper.Get("database_path"))
+		log.Printf("Log File Path: %s\n", viper.Get("log_file_path"))
+		log.Printf("Default Command: %s\n", viper.Get("default_command"))
 	},
 }

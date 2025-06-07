@@ -1,7 +1,7 @@
 package tui
 
 import (
-	"fmt"
+	"log"
 	"os"
 	"path"
 
@@ -72,7 +72,7 @@ func InitialModel(withTui bool) Model {
 
 	repo, err := repository.NewSQLiteRepository(dbFilePath)
 	if err != nil {
-		fmt.Println("Error - Failed to create repository:", err)
+		log.Println("Error - Failed to create repository:", err)
 		os.Exit(3)
 	}
 
@@ -80,7 +80,7 @@ func InitialModel(withTui bool) Model {
 
 	itemList, err := service.GetAll()
 	if err != nil {
-		fmt.Println("Error - Failed to get the tasks:", err)
+		log.Println("Error - Failed to get the tasks:", err)
 		os.Exit(4)
 	}
 
@@ -96,7 +96,7 @@ func InitialModel(withTui bool) Model {
 func (m Model) DestroyDemo() {
 	err := m.Service.DestroyDemo()
 	if err != nil {
-		fmt.Println("Error - Failed destroy the demo data", err)
+		log.Println("Error - Failed destroy the demo data", err)
 		os.Exit(5)
 	}
 }

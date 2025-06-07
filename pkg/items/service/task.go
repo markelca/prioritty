@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"log"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/markelca/prioritty/pkg/editor"
@@ -35,13 +36,13 @@ func (s TaskService) UpdateItemFromEditorMsg(i items.ItemInterface, msg editor.T
 		v.Title = msg.Title
 		v.Body = msg.Body
 		if err := s.UpdateTask(*v); err != nil {
-			fmt.Println("Error updating the task - ", err)
+			log.Println("Error updating the task - ", err)
 		}
 	case *items.Note:
 		v.Title = msg.Title
 		v.Body = msg.Body
 		if err := s.UpdateNote(*v); err != nil {
-			fmt.Println("Error updating the task - ", err)
+			log.Println("Error updating the task - ", err)
 		}
 	}
 }

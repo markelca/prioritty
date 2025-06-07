@@ -4,10 +4,10 @@ Copyright © 2025 NAME HERE <EMAIL ADDRESS>
 package cli
 
 import (
-	"fmt"
-	"os"
+	"log"
 
 	"github.com/markelca/prioritty/internal/config"
+	"github.com/markelca/prioritty/internal/logger"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -29,16 +29,13 @@ var rootCmd = &cobra.Command{
 		if subCmd, _, err := cmd.Find([]string{defaultCommand}); err == nil {
 			subCmd.Run(cmd, args)
 		} else {
-			fmt.Printf("Error - The default configured command doesn't exist (%s)", defaultCommand)
+			log.Printf("Error - The default configured command doesn't exist (%s)", defaultCommand)
 		}
 	},
 }
 
-func Execute() {
-	err := rootCmd.Execute()
-	if err != nil {
-		os.Exit(1)
-	}
+func Execute() error {
+	return rootCmd.Execute()
 }
 
 var cfgFile string
@@ -46,6 +43,9 @@ var cfgFile string
 func init() {
 	cobra.OnInitialize(func() {
 		config.InitConfig(cfgFile)
+		if err := logger.InitLogger(); err != nil {
+			log.Fatalf("Failed to initialize logger: %v", err)
+		}
 	})
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.cobra.yaml)")
 
