@@ -8,6 +8,7 @@ import (
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/markelca/prioritty/internal/config"
 	"github.com/markelca/prioritty/pkg/items"
 	"github.com/markelca/prioritty/pkg/items/renderer"
@@ -22,7 +23,46 @@ type ItemContent struct {
 	viewport viewport.Model
 }
 
-func (c ItemContent) SetReady() {
+type ItemContentDimensions struct {
+	width        int
+	height       int
+	headerHeight int
+	footerHeight int
+}
+
+func (itemContent *ItemContent) init(dimensions ItemContentDimensions) {
+	var (
+		width        = dimensions.width
+		height       = dimensions.height
+		headerHeight = dimensions.headerHeight
+		footerHeight = dimensions.footerHeight
+	)
+	verticalMarginHeight := headerHeight + footerHeight
+	if !itemContent.ready {
+		// Since this program is using the full size of the viewport we
+		// need to wait until we've received the window dimensions before
+		// we can initialize the viewport. The initial dimensions come in
+		// quickly, though asynchronously, which is why we wait for them
+		// here.
+		itemContent.viewport = viewport.New(width, height-verticalMarginHeight)
+		itemContent.viewport.YPosition = headerHeight
+	} else {
+		itemContent.viewport.Width = width
+		itemContent.viewport.Height = height - verticalMarginHeight
+	}
+
+}
+
+func (content *ItemContent) show(item items.ItemInterface) {
+	style := lipgloss.NewStyle().Width(content.viewport.Width)
+	if content.ready {
+		content.ready = false
+	} else {
+		body := item.GetBody()
+		contentStr := style.Render(body)
+		content.viewport.SetContent(contentStr)
+		content.ready = true
+	}
 
 }
 

@@ -5,7 +5,6 @@ import (
 	"log"
 
 	"github.com/charmbracelet/bubbles/key"
-	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/markelca/prioritty/pkg/editor"
@@ -19,8 +18,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	)
 
 	item := m.state.GetCurrentItem()
-
-	contentStyle := lipgloss.NewStyle().Width(m.state.item.viewport.Width)
 
 	switch msg := msg.(type) {
 
@@ -45,7 +42,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case key.Matches(msg, keys.Up),
 			key.Matches(msg, keys.Down):
-			m.move(msg, contentStyle)
+			m.move(msg)
 
 		case key.Matches(msg, keys.InProgress),
 			key.Matches(msg, keys.ToDo),
@@ -54,14 +51,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.updateStatus(msg, item)
 
 		case key.Matches(msg, keys.Show):
-			if m.state.item.ready {
-				m.state.item.ready = false
-			} else {
-				body := (m.state.GetCurrentItem()).GetBody()
-				content := contentStyle.Render(body)
-				m.state.item.viewport.SetContent(content)
-				m.state.item.ready = true
-			}
+			m.state.item.show(item)
 		case key.Matches(msg, keys.Edit):
 			msg, err := m.Service.EditWithEditor(item)
 			if err != nil {
@@ -70,22 +60,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, msg
 		}
 	case tea.WindowSizeMsg:
-		headerHeight := lipgloss.Height(m.headerView())
-		footerHeight := lipgloss.Height(m.footerView())
-		verticalMarginHeight := headerHeight + footerHeight
+		m.state.item.init(ItemContentDimensions{
+			width:        msg.Width,
+			height:       msg.Height,
+			headerHeight: lipgloss.Height(m.headerView()),
+			footerHeight: lipgloss.Height(m.footerView()),
+		})
 
-		if !m.state.item.ready {
-			// Since this program is using the full size of the viewport we
-			// need to wait until we've received the window dimensions before
-			// we can initialize the viewport. The initial dimensions come in
-			// quickly, though asynchronously, which is why we wait for them
-			// here.
-			m.state.item.viewport = viewport.New(msg.Width, msg.Height-verticalMarginHeight)
-			m.state.item.viewport.YPosition = headerHeight
-		} else {
-			m.state.item.viewport.Width = msg.Width
-			m.state.item.viewport.Height = msg.Height - verticalMarginHeight
-		}
 	case editor.TaskEditorFinishedMsg:
 		t := m.state.GetCurrentItem()
 		m.Service.UpdateItemFromEditorMsg(t, msg)
@@ -101,7 +82,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, tea.Batch(cmds...)
 }
 
-func (m *Model) move(msg tea.KeyMsg, contentStyle lipgloss.Style) {
+func (m *Model) move(msg tea.KeyMsg) {
+	style := lipgloss.NewStyle().Width(m.state.item.viewport.Width)
 	switch {
 	case key.Matches(msg, keys.Up):
 		if m.state.cursor == 0 {
@@ -117,7 +99,7 @@ func (m *Model) move(msg tea.KeyMsg, contentStyle lipgloss.Style) {
 		}
 	}
 	item := m.state.GetCurrentItem()
-	content := contentStyle.Render(item.GetBody())
+	content := style.Render(item.GetBody())
 	m.state.item.viewport.SetContent(content)
 }
 
