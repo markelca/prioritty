@@ -12,7 +12,7 @@ func (r *SQLiteRepository) GetNotes() ([]items.Note, error) {
 	query := `
 		SELECT n.id, n.title, n.body, n.created_at, tag.id, tag.name
 		FROM note n
-			JOIN tag on n.tag_id = tag.id
+			LEFT JOIN tag on n.tag_id = tag.id
 	`
 
 	rows, err := r.db.Query(query)
