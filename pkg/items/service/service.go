@@ -43,7 +43,7 @@ func (s Service) GetAll() ([]items.ItemInterface, error) {
 	}
 
 	sort.Slice(allItems, func(i, j int) bool {
-		return allItems[i].GetCreatedAt().After(allItems[j].GetCreatedAt())
+		return allItems[i].After(allItems[j])
 	})
 
 	return allItems, nil
