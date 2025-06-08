@@ -33,7 +33,6 @@ func (m Model) View() string {
 	}
 
 	itemsByTag := orderedmap.NewOrderedMap[items.Tag, []items.ItemInterface]()
-	nullTag := items.Tag{}
 
 	for _, item := range m.state.items {
 		tag := item.GetTag()
@@ -41,25 +40,53 @@ func (m Model) View() string {
 			items, _ := itemsByTag.Get(*tag)
 			itemsByTag.Set(*item.GetTag(), append(items, item))
 		} else {
+			nullTag := items.Tag{}
 			items, _ := itemsByTag.Get(nullTag)
 			itemsByTag.Set(nullTag, append(items, item))
 		}
 	}
 	var index int
-	myBoardItems, ok := itemsByTag.Get(nullTag)
-	if ok {
-		view += "\n  " + styles.Default.Underline(true).Render("My Board") + "\n"
-		view, index = m.renderItemList(myBoardItems, counts, view, index)
-	}
-
 	for tag, itemList := range itemsByTag.AllFromFront() {
-		if tag == nullTag {
-			continue
+		var tagName string
+		if tag.Name == "" {
+			tagName = "My Board"
+		} else {
+			tagName = "@" + tag.Name
 		}
-		tagName := "@" + tag.Name
 		view += "\n  " + styles.Default.Underline(true).Render(tagName) + "\n"
 
-		view, index = m.renderItemList(itemList, counts, view, index)
+		for _, item := range itemList {
+			view += "  "
+			switch v := item.(type) {
+			case *items.Note:
+				counts[items.NoteType] += 1
+			case *items.Task:
+				counts[v.Status] += 1
+			}
+			cursor := " "
+
+			if m.params.withTui && m.state.cursor == index {
+				cursor = ">"
+			}
+
+			if m.params.withTui && m.state.cursor == index {
+				cursor = ">"
+			}
+			var padding string
+			if len(m.state.items) >= 10 {
+				padding = "2"
+			} else {
+				padding = "1"
+			}
+			view += cursor
+			view += styles.Secondary.
+				SetString(fmt.Sprintf(" %"+padding+"d. ", index+1)).
+				Render()
+			view += item.Render(m.renderer)
+
+			index += 1
+		}
+
 	}
 
 	view += renderDonePercentage(m.state.items, counts)
@@ -77,41 +104,6 @@ func (m Model) View() string {
 	}
 
 	return view
-}
-
-func (m Model) renderItemList(list []items.ItemInterface, counts map[items.Status]int, view string, index int) (string, int) {
-	for _, item := range list {
-		view += "  "
-		switch v := item.(type) {
-		case *items.Note:
-			counts[items.NoteType] += 1
-		case *items.Task:
-			counts[v.Status] += 1
-		}
-		cursor := " "
-
-		if m.params.withTui && m.state.cursor == index {
-			cursor = ">"
-		}
-
-		if m.params.withTui && m.state.cursor == index {
-			cursor = ">"
-		}
-		var padding string
-		if len(m.state.items) >= 10 {
-			padding = "2"
-		} else {
-			padding = "1"
-		}
-		view += cursor
-		view += styles.Secondary.
-			SetString(fmt.Sprintf(" %"+padding+"d. ", index+1)).
-			Render()
-		view += item.Render(m.renderer)
-
-		index += 1
-	}
-	return view, index
 }
 
 func renderDonePercentage(taskList []items.ItemInterface, counts map[items.Status]int) string {
