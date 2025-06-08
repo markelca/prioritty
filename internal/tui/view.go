@@ -2,7 +2,6 @@ package tui
 
 import (
 	"fmt"
-	"log"
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
@@ -35,8 +34,7 @@ func (m Model) View() string {
 
 	itemsByTag := orderedmap.NewOrderedMap[items.Tag, []items.ItemInterface]()
 
-	for i, item := range m.state.items {
-		log.Println(i, item.GetTitle())
+	for _, item := range m.state.items {
 		tag := item.GetTag()
 		if tag != nil {
 			items, _ := itemsByTag.Get(*tag)

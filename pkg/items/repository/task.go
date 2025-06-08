@@ -103,3 +103,17 @@ func (r *SQLiteRepository) RemoveTask(id int) error {
 	_, err := r.db.Exec(query, id)
 	return err
 }
+
+func (r *SQLiteRepository) SetTaskTag(t items.Task, tag items.Tag) error {
+	query := `
+		UPDATE task
+		SET tag_id = ?
+		WHERE id = ?
+	`
+	_, err := r.db.Exec(query, tag.Id, t.Id)
+	if err != nil {
+		log.Printf("Error setting tag to task: %v", err)
+		return err
+	}
+	return nil
+}

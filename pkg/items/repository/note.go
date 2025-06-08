@@ -90,3 +90,17 @@ func (r *SQLiteRepository) RemoveNote(id int) error {
 	_, err := r.db.Exec(query, id)
 	return err
 }
+
+func (r *SQLiteRepository) SetNoteTag(n items.Note, tag items.Tag) error {
+	query := `
+		UPDATE note
+		SET tag_id = ?
+		WHERE id = ?
+	`
+	_, err := r.db.Exec(query, tag.Id, n.Id)
+	if err != nil {
+		log.Printf("Error setting tag to note: %v", err)
+		return err
+	}
+	return nil
+}

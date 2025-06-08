@@ -17,6 +17,7 @@ type TaskRepository interface {
 	CreateTask(items.Task) error
 	RemoveTask(int) error
 	UpdateTaskStatus(items.Task, items.Status) error
+	SetTaskTag(items.Task, items.Tag) error
 }
 
 type NoteRepository interface {
@@ -24,11 +25,14 @@ type NoteRepository interface {
 	UpdateNote(items.Note) error
 	CreateNote(items.Note) error
 	RemoveNote(int) error
+	SetNoteTag(items.Note, items.Tag) error
 }
 
 type Repository interface {
 	TaskRepository
 	NoteRepository
+	GetTag(string) (*items.Tag, error)
+	CreateTag(string) (*items.Tag, error)
 	DropSchema() error
 }
 
@@ -69,4 +73,47 @@ func NewSQLiteRepository(dbPath string) (*SQLiteRepository, error) {
 
 func (r *SQLiteRepository) DropSchema() error {
 	return os.Remove(r.filepath)
+}
+
+func (r *SQLiteRepository) GetTag(name string) (*items.Tag, error) {
+	var tag items.Tag
+	query := `
+		SELECT id, name
+		FROM tag
+		WHERE name = ?
+	`
+	row := r.db.QueryRow(query, name)
+
+	err := row.Scan(&tag.Id, &tag.Name)
+	if err != nil {
+		log.Printf("Error scanning task: %v", err)
+		return nil, err
+	}
+
+	return &tag, nil
+}
+
+func (r *SQLiteRepository) CreateTag(name string) (*items.Tag, error) {
+	query := `
+		INSERT INTO tag (name)
+		VALUES (?)
+	`
+	result, err := r.db.Exec(query, name)
+	if err != nil {
+		log.Printf("Error inserting task: %v", err)
+		return nil, err
+	}
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		log.Println("Error getting last inserted tag id: %v", err)
+		return nil, err
+	}
+
+	tag := items.Tag{
+		Id:   int(id),
+		Name: name,
+	}
+
+	return &tag, nil
 }

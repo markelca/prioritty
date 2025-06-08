@@ -67,7 +67,7 @@ func (m Model) Init() tea.Cmd {
 }
 
 func (m Model) GetItemAt(index int) items.ItemInterface {
-	if index <= 0 || len(m.state.items)-1 < index {
+	if index < 0 || len(m.state.items)-1 < index {
 		return nil
 	} else {
 		return m.state.items[index]

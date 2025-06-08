@@ -1,8 +1,12 @@
 package service
 
 import (
+	"database/sql"
+	"fmt"
+	"log"
 	"sort"
 
+	"github.com/markelca/prioritty/pkg/editor"
 	"github.com/markelca/prioritty/pkg/items"
 	"github.com/markelca/prioritty/pkg/items/repository"
 )
@@ -47,4 +51,51 @@ func (s Service) GetAll() ([]items.ItemInterface, error) {
 	})
 
 	return allItems, nil
+}
+
+func (s Service) UpdateItemFromEditorMsg(i items.ItemInterface, msg editor.TaskEditorFinishedMsg) error {
+	switch v := i.(type) {
+	case *items.Task:
+		v.Title = msg.Title
+		v.Body = msg.Body
+		if err := s.UpdateTask(*v); err != nil {
+			log.Println("Error updating the task - ", err)
+		}
+	case *items.Note:
+		v.Title = msg.Title
+		v.Body = msg.Body
+		if err := s.UpdateNote(*v); err != nil {
+			log.Println("Error updating the task - ", err)
+		}
+	default:
+		return fmt.Errorf("Can't update the item, no implementation: %v", v)
+	}
+	return nil
+}
+
+func (s Service) SetTag(i items.ItemInterface, name string) error {
+	var tag *items.Tag
+	var err error
+	tag, err = s.repository.GetTag(name)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			tag, err = s.repository.CreateTag(name)
+			if err != nil {
+				log.Printf("Error creating tag: %v", err)
+				return err
+			}
+		} else {
+			log.Printf("Error geting tag: %v", err)
+			return err
+		}
+	}
+	switch v := i.(type) {
+	case *items.Task:
+		return s.repository.SetTaskTag(*v, *tag)
+	case *items.Note:
+		return s.repository.SetNoteTag(*v, *tag)
+	default:
+		return fmt.Errorf("Can't update the item, no implementation: %v", v)
+	}
+
 }

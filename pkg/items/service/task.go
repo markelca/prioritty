@@ -2,7 +2,6 @@ package service
 
 import (
 	"fmt"
-	"log"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/markelca/prioritty/pkg/editor"
@@ -30,23 +29,6 @@ func (s TaskService) UpdateNote(n items.Note) error {
 	return s.repository.UpdateNote(n)
 }
 
-func (s TaskService) UpdateItemFromEditorMsg(i items.ItemInterface, msg editor.TaskEditorFinishedMsg) {
-	switch v := i.(type) {
-	case *items.Task:
-		v.Title = msg.Title
-		v.Body = msg.Body
-		if err := s.UpdateTask(*v); err != nil {
-			log.Println("Error updating the task - ", err)
-		}
-	case *items.Note:
-		v.Title = msg.Title
-		v.Body = msg.Body
-		if err := s.UpdateNote(*v); err != nil {
-			log.Println("Error updating the task - ", err)
-		}
-	}
-}
-
 func (s TaskService) UpdateStatus(t *items.Task, status items.Status) error {
 	if t.Status == status {
 		status = items.Todo
@@ -60,6 +42,10 @@ func (s TaskService) UpdateStatus(t *items.Task, status items.Status) error {
 }
 
 func (s TaskService) SetTag(title string) error {
+	return nil
+}
+
+func (s TaskService) TagItem(items items.ItemInterface, tag string) error {
 	return nil
 }
 

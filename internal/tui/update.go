@@ -69,7 +69,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case editor.TaskEditorFinishedMsg:
 		t := m.state.GetCurrentItem()
-		m.Service.UpdateItemFromEditorMsg(t, msg)
+		err := m.Service.UpdateItemFromEditorMsg(t, msg)
+		if err != nil {
+			log.Println("Error - ", err)
+		}
 		return m, tea.ClearScreen
 	}
 
