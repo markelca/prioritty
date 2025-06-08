@@ -6,7 +6,7 @@ type Base interface {
 	GetId() int
 	GetTitle() string
 	GetBody() string
-	GetTag() Tag
+	GetTag() *Tag
 	GetCreatedAt() time.Time
 }
 
@@ -25,7 +25,7 @@ type Item struct {
 	Title     string
 	Body      string
 	CreatedAt time.Time
-	Tag       Tag
+	Tag       *Tag
 }
 
 func (i Item) GetId() int {
@@ -44,6 +44,6 @@ func (i Item) GetCreatedAt() time.Time {
 	return i.CreatedAt
 }
 
-func (i Item) GetTag() Tag {
+func (i Item) GetTag() *Tag {
 	return i.Tag
 }

@@ -9,11 +9,11 @@ func init() {
 	rootCmd.AddCommand(tagCmd)
 }
 
-var taskCmd = &cobra.Command{
-	Use:     "task {title}",
+var tagCmd = &cobra.Command{
+	Use:     "tag {id}",
 	Aliases: []string{},
 	Args:    cobra.ExactArgs(1),
-	Short:   "Adds a new task",
+	Short:   "Sets the tag for a task",
 	Run: func(cmd *cobra.Command, args []string) {
 		m := tui.InitialModel(false)
 		m.Service.AddTask(args[0])

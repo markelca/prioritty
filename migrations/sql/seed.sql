@@ -16,6 +16,7 @@ INSERT INTO task (title, body, status_id, tag_id) VALUES
    ('Write unit tests', NULL, 0, 1),
    ('Update dependencies', NULL, 3, 1);
 
-INSERT INTO note (title) VALUES 
-   ('Some note');
+INSERT INTO note (title, tag_id) VALUES 
+   ('Some note', NULL),
+   ('Docs should be written in markdown', 2);
 

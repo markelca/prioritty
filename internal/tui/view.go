@@ -36,8 +36,14 @@ func (m Model) View() string {
 
 	for _, item := range m.state.items {
 		tag := item.GetTag()
-		items, _ := itemsByTag.Get(tag)
-		itemsByTag.Set(item.GetTag(), append(items, item))
+		if tag != nil {
+			items, _ := itemsByTag.Get(*tag)
+			itemsByTag.Set(*item.GetTag(), append(items, item))
+		} else {
+			nullTag := items.Tag{}
+			items, _ := itemsByTag.Get(nullTag)
+			itemsByTag.Set(nullTag, append(items, item))
+		}
 	}
 	var index int
 	for tag, itemList := range itemsByTag.AllFromFront() {
@@ -47,9 +53,10 @@ func (m Model) View() string {
 		} else {
 			tagName = "@" + tag.Name
 		}
-		view += "\n" + styles.Default.Underline(true).Render(tagName) + "\n"
+		view += "\n  " + styles.Default.Underline(true).Render(tagName) + "\n"
 
 		for _, item := range itemList {
+			view += "  "
 			switch v := item.(type) {
 			case *items.Note:
 				counts[items.NoteType] += 1

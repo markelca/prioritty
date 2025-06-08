@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"database/sql"
 	"log"
 	"time"
 
@@ -11,7 +12,7 @@ func (r *SQLiteRepository) GetTasks() ([]items.Task, error) {
 	query := `
 		SELECT t.id, t.title, t.body, t.status_id, t.created_at, tag.id, tag.name
 		FROM task t
-			JOIN tag on t.tag_id = tag.id
+			LEFT JOIN tag on t.tag_id = tag.id
 	`
 
 	rows, err := r.db.Query(query)
@@ -24,17 +25,19 @@ func (r *SQLiteRepository) GetTasks() ([]items.Task, error) {
 	var tasks []items.Task
 
 	for rows.Next() {
-		var tag items.Tag
 		var task items.Task
 		var body *string
 		var statusId int
+		var tagId sql.NullInt64
+		var tagName sql.NullString
 		var createdAtStr string
 
-		err := rows.Scan(&task.Id, &task.Title, &body, &statusId, &createdAtStr, &tag.Id, &tag.Name)
+		err := rows.Scan(&task.Id, &task.Title, &body, &statusId, &createdAtStr, &tagId, &tagName)
 		if err != nil {
 			log.Printf("Error scanning task: %v", err)
 			continue
 		}
+
 		task.CreatedAt, err = time.Parse("2006-01-02 15:04:05", createdAtStr)
 		if err != nil {
 			log.Printf("Error parsing created_at string: %v", err)
@@ -44,8 +47,19 @@ func (r *SQLiteRepository) GetTasks() ([]items.Task, error) {
 		if body != nil {
 			task.Body = *body
 		}
+
+		if tagId.Valid {
+			tag := items.Tag{
+				Id:   int(tagId.Int64),
+				Name: tagName.String,
+			}
+			task.Tag = &tag // assuming Task.Tag is *Tag
+		} else {
+			task.Tag = nil
+		}
+
 		task.Status = items.Status(statusId)
-		task.Tag = tag
+
 		tasks = append(tasks, task)
 	}
 

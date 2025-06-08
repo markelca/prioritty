@@ -59,6 +59,10 @@ func (s TaskService) UpdateStatus(t *items.Task, status items.Status) error {
 	return nil
 }
 
+func (s TaskService) SetTag(title string) error {
+	return nil
+}
+
 func (s TaskService) AddTask(title string) error {
 	t := items.Task{}
 	t.Title = title

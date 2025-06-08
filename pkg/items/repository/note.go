@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"database/sql"
 	"log"
 	"time"
 
@@ -9,8 +10,9 @@ import (
 
 func (r *SQLiteRepository) GetNotes() ([]items.Note, error) {
 	query := `
-		SELECT n.id, n.title, n.body, n.created_at
+		SELECT n.id, n.title, n.body, n.created_at, tag.id, tag.name
 		FROM note n
+			JOIN tag on n.tag_id = tag.id
 	`
 
 	rows, err := r.db.Query(query)
@@ -25,21 +27,36 @@ func (r *SQLiteRepository) GetNotes() ([]items.Note, error) {
 	for rows.Next() {
 		var note items.Note
 		var body *string
+		var tagId sql.NullInt64
+		var tagName sql.NullString
 		var createdAtStr string
 
-		err := rows.Scan(&note.Id, &note.Title, &body, &createdAtStr)
+		err := rows.Scan(&note.Id, &note.Title, &body, &createdAtStr, &tagId, &tagName)
 		if err != nil {
 			log.Printf("Error scanning task: %v", err)
 			continue
 		}
+
 		note.CreatedAt, err = time.Parse("2006-01-02 15:04:05", createdAtStr)
 		if err != nil {
 			log.Printf("Error parsing created_at string: %v", err)
 			continue
 		}
+
 		if body != nil {
 			note.Body = *body
 		}
+
+		if tagId.Valid {
+			tag := items.Tag{
+				Id:   int(tagId.Int64),
+				Name: tagName.String,
+			}
+			note.Tag = &tag // assuming Task.Tag is *Tag
+		} else {
+			note.Tag = nil
+		}
+
 		notes = append(notes, note)
 	}
 
