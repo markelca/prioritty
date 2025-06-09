@@ -7,9 +7,7 @@ A Terminal User Interface (TUI) and CLI application for managing your tasks. Foc
 - Autocompletion support
 
 **🚧 Disclaimer: This project is still under development.**
-Home screen             |  Task content
-:-------------------------:|:-------------------------:
-![image](https://github.com/user-attachments/assets/d9a74cb8-e64e-4d16-8b4f-43833a9d5067) | ![image](https://github.com/user-attachments/assets/8096063f-b35a-4c7e-88e3-881d7a1bd9e3)
+![Peek 2025-06-09 18-58](https://github.com/user-attachments/assets/24c2bd12-a714-4d69-bc01-ba28c34b8f32)
 
 
 ---
@@ -21,13 +19,13 @@ You can configure the tool with the `config` command, or by modifying the config
 database_path: "./data/prioritty.db"
 log_file_path: "./logs/prioritty.log"
 default_command: "tui"
+editor: vim
 ```
 
 ## Usage
 ### CLI
 Run the `help` command to find out the usage:
 ```
-pt help
 A Terminal User Interface (TUI) and CLI application for managing your tasks. Focused on:
         - Good looks
         - Performance
@@ -42,12 +40,14 @@ Usage:
   pt [command]
 
 Available Commands:
-  add         Adds a new task
   completion  Generate the autocompletion script for the specified shell
   config      Show current configuration
   help        Help about any command
   list        Shows all the tasks
+  note        Adds a new note
   remove      Removes a task by ID
+  tag         Sets the tag for a task
+  task        Adds a new task
   tui         Launch the interactive TUI
   version     Print the version number of Hugo
 
