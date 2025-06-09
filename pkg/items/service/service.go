@@ -99,3 +99,14 @@ func (s Service) SetTag(i items.ItemInterface, name string) error {
 	}
 
 }
+
+func (s Service) UnsetTag(i items.ItemInterface) error {
+	switch v := i.(type) {
+	case *items.Task:
+		return s.repository.UnsetTaskTag(*v)
+	case *items.Note:
+		return s.repository.UnsetNoteTag(*v)
+	default:
+		return fmt.Errorf("Can't unset tag for item, no implementation: %v", v)
+	}
+}

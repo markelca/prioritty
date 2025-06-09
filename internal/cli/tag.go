@@ -11,6 +11,7 @@ import (
 
 func init() {
 	rootCmd.AddCommand(tagCmd)
+	tagCmd.AddCommand(tagUnsetCmd)
 }
 
 var tagCmd = &cobra.Command{
@@ -32,6 +33,28 @@ var tagCmd = &cobra.Command{
 		err = m.Service.SetTag(item, args[1])
 		if err != nil {
 			log.Printf("Error setting the task: %v", err)
+		}
+	},
+}
+
+var tagUnsetCmd = &cobra.Command{
+	Use:   "unset {id}",
+	Args:  cobra.ExactArgs(1),
+	Short: "Unsets the tag for a task or note",
+	Run: func(cmd *cobra.Command, args []string) {
+		m := tui.InitialModel(false)
+		i, err := strconv.Atoi(args[0])
+		if err != nil {
+			fmt.Println("Error converting string index to int")
+		}
+
+		item := m.GetItemAt(i - 1)
+		if item == nil {
+			fmt.Printf("Error - No item found with index %d", i)
+		}
+		err = m.Service.UnsetTag(item)
+		if err != nil {
+			log.Printf("Error unsetting the tag: %v", err)
 		}
 	},
 }

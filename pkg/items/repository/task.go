@@ -117,3 +117,17 @@ func (r *SQLiteRepository) SetTaskTag(t items.Task, tag items.Tag) error {
 	}
 	return nil
 }
+
+func (r *SQLiteRepository) UnsetTaskTag(t items.Task) error {
+	query := `
+		UPDATE task
+		SET tag_id = NULL
+		WHERE id = ?
+	`
+	_, err := r.db.Exec(query, t.Id)
+	if err != nil {
+		log.Printf("Error unsetting tag from task: %v", err)
+		return err
+	}
+	return nil
+}

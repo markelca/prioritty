@@ -18,6 +18,7 @@ type TaskRepository interface {
 	RemoveTask(int) error
 	UpdateTaskStatus(items.Task, items.Status) error
 	SetTaskTag(items.Task, items.Tag) error
+	UnsetTaskTag(items.Task) error
 }
 
 type NoteRepository interface {
@@ -26,6 +27,7 @@ type NoteRepository interface {
 	CreateNote(items.Note) error
 	RemoveNote(int) error
 	SetNoteTag(items.Note, items.Tag) error
+	UnsetNoteTag(items.Note) error
 }
 
 type Repository interface {
