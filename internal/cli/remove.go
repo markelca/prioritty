@@ -13,31 +13,33 @@ func init() {
 }
 
 var removeCmd = &cobra.Command{
-	Use:     "remove {id}",
+	Use:     "remove {id...}",
 	Aliases: []string{"rm", "delete"},
-	Args:    cobra.ExactArgs(1),
-	Short:   "Removes a task by ID",
-	Long:    `Removes a task from the list by providing its ID`,
+	Args:    cobra.MinimumNArgs(1),
+	Short:   "Removes one or more tasks by ID",
+	Long:    `Removes one or more tasks from the list by providing their IDs`,
 	Run: func(cmd *cobra.Command, args []string) {
-		index, err := strconv.Atoi(args[0])
-		if err != nil {
-			log.Printf("Error: Invalid task ID '%s'. Please provide a valid number.\n", args[0])
-			return
-		}
-
 		m := tui.InitialModel(false)
 
-		item := m.GetItemAt(index - 1)
+		for _, arg := range args {
+			index, err := strconv.Atoi(arg)
+			if err != nil {
+				log.Printf("Error: Invalid task ID '%s'. Please provide a valid number.\n", arg)
+				continue
+			}
 
-		if item == nil {
-			log.Printf("Task at index %d does not exist", index)
-			return
-		}
+			item := m.GetItemAt(index - 1)
 
-		err = m.Service.RemoveItem(item)
-		if err != nil {
-			log.Printf("Error removing task: %v\n", err)
-			return
+			if item == nil {
+				log.Printf("Task at index %d does not exist", index)
+				continue
+			}
+
+			err = m.Service.RemoveItem(item)
+			if err != nil {
+				log.Printf("Error removing task: %v\n", err)
+				continue
+			}
 		}
 	},
 }
