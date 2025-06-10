@@ -110,3 +110,24 @@ func (s Service) UnsetTag(i items.ItemInterface) error {
 		return fmt.Errorf("Can't unset tag for item, no implementation: %v", v)
 	}
 }
+
+func (s Service) GetTags() ([]items.Tag, error) {
+	return s.repository.GetTags()
+}
+
+func (s Service) RemoveTag(name string) error {
+	itemsWithTag, err := s.repository.GetItemsWithTag(name)
+	if err != nil {
+		return fmt.Errorf("error checking items with tag: %v", err)
+	}
+
+	if len(itemsWithTag) > 0 {
+		return fmt.Errorf("cannot remove tag '%s' because it is assigned to %d item(s)", name, len(itemsWithTag))
+	}
+
+	return s.repository.RemoveTag(name)
+}
+
+func (s Service) GetItemsWithTag(name string) ([]items.ItemInterface, error) {
+	return s.repository.GetItemsWithTag(name)
+}

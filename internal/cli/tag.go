@@ -1,6 +1,8 @@
 package cli
 
 import (
+	"database/sql"
+	"fmt"
 	"log"
 	"strconv"
 
@@ -10,7 +12,10 @@ import (
 
 func init() {
 	rootCmd.AddCommand(tagCmd)
+	rootCmd.AddCommand(tagsCmd)
 	tagCmd.AddCommand(tagUnsetCmd)
+	tagCmd.AddCommand(tagListCmd)
+	tagCmd.AddCommand(tagRmCmd)
 }
 
 var tagCmd = &cobra.Command{
@@ -72,5 +77,64 @@ var tagUnsetCmd = &cobra.Command{
 				continue
 			}
 		}
+	},
+}
+
+func listTags(cmd *cobra.Command, args []string) {
+	m := tui.InitialModel(false)
+
+	tags, err := m.Service.GetTags()
+	if err != nil {
+		log.Printf("Error getting tags: %v\n", err)
+		return
+	}
+
+	if len(tags) == 0 {
+		fmt.Println("No tags found")
+		return
+	}
+
+	for _, tag := range tags {
+		fmt.Println(tag.Name)
+	}
+}
+
+var tagListCmd = &cobra.Command{
+	Use:     "list",
+	Aliases: []string{"ls"},
+	Args:    cobra.NoArgs,
+	Short:   "Lists all available tags",
+	Long:    `Lists all available tags in the system`,
+	Run:     listTags,
+}
+
+var tagsCmd = &cobra.Command{
+	Use:   "tags",
+	Args:  cobra.NoArgs,
+	Short: "Lists all available tags",
+	Long:  `Lists all available tags in the system`,
+	Run:   listTags,
+}
+
+var tagRmCmd = &cobra.Command{
+	Use:   "rm {tag}",
+	Args:  cobra.ExactArgs(1),
+	Short: "Removes a tag from the database",
+	Long:  `Removes a tag from the database if it's not assigned to any tasks or notes`,
+	Run: func(cmd *cobra.Command, args []string) {
+		m := tui.InitialModel(false)
+		tagName := args[0]
+
+		err := m.Service.RemoveTag(tagName)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				fmt.Printf("Tag '%s' not found\n", tagName)
+				return
+			}
+			fmt.Printf("Error removing tag: %v\n", err)
+			return
+		}
+
+		fmt.Printf("Tag '%s' removed successfully\n", tagName)
 	},
 }
