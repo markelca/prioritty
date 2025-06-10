@@ -73,8 +73,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.params.CreateMode != "" {
 				// Creation mode - just quit without creating
 				return m, tea.Quit
+			} else if m.params.EditMode {
+				// Standalone edit mode - quit without updating
+				return m, tea.Quit
 			} else {
-				// Edit mode - return to list without updating
+				// Interactive TUI mode - return to list without updating
 				return m, tea.ClearScreen
 			}
 		}
@@ -98,7 +101,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if err != nil {
 				log.Println("Error - ", err)
 			}
-			return m, tea.ClearScreen
+			if m.params.EditMode {
+				// Standalone edit mode - quit after editing
+				return m, tea.Quit
+			} else {
+				// Interactive TUI mode - return to list
+				return m, tea.ClearScreen
+			}
 		}
 	}
 

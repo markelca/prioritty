@@ -20,6 +20,7 @@ var Help = help.New()
 type Params struct {
 	withTui    bool
 	CreateMode string // "task" or "note" for creation mode
+	EditMode   bool   // true when editing an existing item
 }
 
 type Model struct {
@@ -72,6 +73,16 @@ func (m Model) Init() tea.Cmd {
 		}
 		return cmd
 	}
+	// If in edit mode, immediately open the editor with current item
+	if m.params.EditMode {
+		item := m.state.GetCurrentItem()
+		cmd, err := m.Service.EditWithEditor(item)
+		if err != nil {
+			log.Println("Error opening editor:", err)
+			return tea.Quit
+		}
+		return cmd
+	}
 	// Just return `nil`, which means "no I/O right now, please."
 	return nil
 }
@@ -94,4 +105,13 @@ func (m Model) DestroyDemo() {
 
 func (m *Model) SetCreateMode(mode string) {
 	m.params.CreateMode = mode
+}
+
+func EditModel(item items.ItemInterface) Model {
+	// Create a minimal model for editing
+	m := InitialModel(false)
+	m.state.items = []items.ItemInterface{item}
+	m.state.cursor = 0
+	m.params.EditMode = true
+	return m
 }
