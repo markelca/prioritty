@@ -75,10 +75,10 @@ func (r *SQLiteRepository) UpdateNote(n items.Note) error {
 
 func (r *SQLiteRepository) CreateNote(n items.Note) error {
 	query := `
-		INSERT INTO note (title)
-		VALUES (?)
+		INSERT INTO note (title, body)
+		VALUES (?, ?)
 	`
-	_, err := r.db.Exec(query, n.Title)
+	_, err := r.db.Exec(query, n.Title, n.Body)
 	return err
 }
 

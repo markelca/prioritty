@@ -18,7 +18,8 @@ import (
 var Help = help.New()
 
 type Params struct {
-	withTui bool
+	withTui    bool
+	CreateMode string // "task" or "note" for creation mode
 }
 
 type Model struct {
@@ -62,6 +63,15 @@ func InitialModel(withTui bool) Model {
 }
 
 func (m Model) Init() tea.Cmd {
+	// If in creation mode, immediately open the editor
+	if m.params.CreateMode != "" {
+		cmd, err := m.Service.CreateWithEditor(m.params.CreateMode)
+		if err != nil {
+			log.Println("Error opening editor:", err)
+			return tea.Quit
+		}
+		return cmd
+	}
 	// Just return `nil`, which means "no I/O right now, please."
 	return nil
 }
@@ -80,4 +90,8 @@ func (m Model) DestroyDemo() {
 		log.Println("Error - Failed destroy the demo data", err)
 		os.Exit(5)
 	}
+}
+
+func (m *Model) SetCreateMode(mode string) {
+	m.params.CreateMode = mode
 }

@@ -88,10 +88,10 @@ func (r *SQLiteRepository) UpdateTaskStatus(t items.Task, s items.Status) error 
 
 func (r *SQLiteRepository) CreateTask(t items.Task) error {
 	query := `
-		INSERT INTO task (title, status_id)
-		VALUES (?, ?)
+		INSERT INTO task (title, body, status_id)
+		VALUES (?, ?, ?)
 	`
-	_, err := r.db.Exec(query, t.Title, t.Status)
+	_, err := r.db.Exec(query, t.Title, t.Body, t.Status)
 	return err
 }
 

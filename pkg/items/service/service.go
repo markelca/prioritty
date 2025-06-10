@@ -73,6 +73,26 @@ func (s Service) UpdateItemFromEditorMsg(i items.ItemInterface, msg editor.TaskE
 	return nil
 }
 
+func (s Service) CreateTaskFromEditorMsg(msg editor.TaskEditorFinishedMsg) error {
+	task := items.Task{
+		Item: items.Item{
+			Title: msg.Title,
+			Body:  msg.Body,
+		},
+	}
+	return s.repository.CreateTask(task)
+}
+
+func (s Service) CreateNoteFromEditorMsg(msg editor.TaskEditorFinishedMsg) error {
+	note := items.Note{
+		Item: items.Item{
+			Title: msg.Title,
+			Body:  msg.Body,
+		},
+	}
+	return s.repository.CreateNote(note)
+}
+
 func (s Service) SetTag(i items.ItemInterface, name string) error {
 	var tag *items.Tag
 	var err error

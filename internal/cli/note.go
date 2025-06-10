@@ -1,6 +1,7 @@
 package cli
 
 import (
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/markelca/prioritty/internal/tui"
 	"github.com/spf13/cobra"
 )
@@ -10,12 +11,19 @@ func init() {
 }
 
 var noteCmd = &cobra.Command{
-	Use:     "note {title}",
+	Use:     "note [title]",
 	Aliases: []string{},
-	Args:    cobra.ExactArgs(1),
+	Args:    cobra.MaximumNArgs(1),
 	Short:   "Adds a new note",
 	Run: func(cmd *cobra.Command, args []string) {
 		m := tui.InitialModel(false)
-		m.Service.AddNote(args[0])
+		if len(args) == 0 {
+			// Create with editor
+			m.SetCreateMode("note")
+			tea.NewProgram(m).Run()
+		} else {
+			// Create with title only
+			m.Service.AddNote(args[0])
+		}
 	},
 }

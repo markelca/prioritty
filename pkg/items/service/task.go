@@ -83,3 +83,7 @@ func (s TaskService) removeNote(id int) error {
 func (s TaskService) EditWithEditor(t items.ItemInterface) (tea.Cmd, error) {
 	return editor.EditTask(t.GetId(), t.GetTitle(), t.GetBody())
 }
+
+func (s TaskService) CreateWithEditor(itemType string) (tea.Cmd, error) {
+	return editor.EditTask(0, "", "")
+}

@@ -53,16 +53,22 @@ func EditTask(id int, title, body string) (tea.Cmd, error) {
 }
 
 func parseTaskContent(content string) TaskEditorFinishedMsg {
-	lines := strings.Split(strings.TrimSpace(content), "\n")
+	// Check if content is completely empty or only whitespace
+	trimmedContent := strings.TrimSpace(content)
+	if trimmedContent == "" {
+		return TaskEditorFinishedMsg{Err: fmt.Errorf("operation cancelled - no content provided")}
+	}
+
+	lines := strings.Split(trimmedContent, "\n")
 	var body, title string
 
 	if len(lines) == 0 {
-		return TaskEditorFinishedMsg{Err: fmt.Errorf("content cannot be empty")}
+		return TaskEditorFinishedMsg{Err: fmt.Errorf("operation cancelled - no content provided")}
 	}
 
 	title = strings.TrimSpace(lines[0])
 	if title == "" {
-		return TaskEditorFinishedMsg{Err: fmt.Errorf("title cannot be empty")}
+		return TaskEditorFinishedMsg{Err: fmt.Errorf("operation cancelled - no content provided")}
 	}
 
 	// Rest is the content (skip empty line if present)

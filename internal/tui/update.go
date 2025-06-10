@@ -68,12 +68,38 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		})
 
 	case editor.TaskEditorFinishedMsg:
-		t := m.state.GetCurrentItem()
-		err := m.Service.UpdateItemFromEditorMsg(t, msg)
-		if err != nil {
-			log.Println("Error - ", err)
+		// Check if the editor operation was cancelled (no content)
+		if msg.Err != nil {
+			if m.params.CreateMode != "" {
+				// Creation mode - just quit without creating
+				return m, tea.Quit
+			} else {
+				// Edit mode - return to list without updating
+				return m, tea.ClearScreen
+			}
 		}
-		return m, tea.ClearScreen
+
+		if m.params.CreateMode != "" {
+			// Creation mode
+			var err error
+			if m.params.CreateMode == "task" {
+				err = m.Service.CreateTaskFromEditorMsg(msg)
+			} else if m.params.CreateMode == "note" {
+				err = m.Service.CreateNoteFromEditorMsg(msg)
+			}
+			if err != nil {
+				log.Println("Error creating item:", err)
+			}
+			return m, tea.Quit
+		} else {
+			// Edit mode
+			t := m.state.GetCurrentItem()
+			err := m.Service.UpdateItemFromEditorMsg(t, msg)
+			if err != nil {
+				log.Println("Error - ", err)
+			}
+			return m, tea.ClearScreen
+		}
 	}
 
 	// Return the updated model to the Bubble Tea runtime for processing.
