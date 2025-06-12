@@ -53,7 +53,25 @@ func (m Model) View() string {
 		} else {
 			tagName = "@" + tag.Name
 		}
-		view += "\n  " + styles.Default.Underline(true).Render(tagName) + "\n"
+
+		// Count completed and total tasks for this tag
+		var completedTasks, totalTasks int
+		for _, item := range itemList {
+			if task, ok := item.(*items.Task); ok {
+				totalTasks++
+				if task.Status == items.Done || task.Status == items.Cancelled {
+					completedTasks++
+				}
+			}
+		}
+
+		view += "\n  " + styles.Default.Underline(true).Render(tagName)
+
+		if totalTasks > 0 {
+			view += styles.Secondary.Render(fmt.Sprintf(" [%d/%d]", completedTasks, totalTasks))
+		}
+
+		view += "\n"
 
 		for _, item := range itemList {
 			view += "  "
