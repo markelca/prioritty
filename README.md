@@ -62,6 +62,9 @@ Flags:
 
 Use "pt [command] --help" for more information about a command.
 ```
+### TUI
+You can also press the `?` key to toggle the full help in TUI mode:
+![image](https://github.com/user-attachments/assets/bcc53f9c-8250-45e8-bb2d-edaaeebdbf95)
 
 ### Autocompletion
 
@@ -90,10 +93,6 @@ source (pt completion fish | psub)
 # Add to your PowerShell profile
 Invoke-Expression (pt completion powershell | Out-String)
 ```
-
-### TUI
-You can also press the `?` key to toggle the full help in TUI mode:
-![image](https://github.com/user-attachments/assets/bcc53f9c-8250-45e8-bb2d-edaaeebdbf95)
 
 
 ---
