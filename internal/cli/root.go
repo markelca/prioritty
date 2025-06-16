@@ -22,8 +22,7 @@ var rootCmd = &cobra.Command{
 	- Nice defaults
 	- Customization
 	- Autocompletion support
-
-🚧 Disclaimer: This project is still under development.`,
+`,
 	Run: func(cmd *cobra.Command, args []string) {
 		defaultCommand := viper.GetString("default_command")
 		if subCmd, _, err := cmd.Find([]string{defaultCommand}); err == nil {
