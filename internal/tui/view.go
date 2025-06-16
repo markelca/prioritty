@@ -168,17 +168,22 @@ func renderSummary(counts map[items.Status]int) string {
 	)
 }
 
-func (m Model) headerView() string {
-	item := m.state.GetCurrentItem()
-	if item == nil {
-		return ""
-	}
+func GetItemIcon(item items.ItemInterface) string {
 	var icon string
 	if t, ok := item.(*items.Task); ok {
 		icon = taskIcons[t.Status]
 	} else if _, ok := item.(*items.Note); ok {
 		icon = styles.NoteIcon
 	}
+	return icon
+}
+
+func (m Model) headerView() string {
+	item := m.state.GetCurrentItem()
+	if item == nil {
+		return ""
+	}
+	icon := GetItemIcon(item)
 	title := styles.TitleStyle.Render(icon + item.GetTitle())
 	line := strings.Repeat("─", max(0, m.state.item.viewport.Width-lipgloss.Width(title)))
 	return lipgloss.JoinHorizontal(lipgloss.Center, title, line)

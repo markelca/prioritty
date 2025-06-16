@@ -36,11 +36,11 @@ var showCmd = &cobra.Command{
 			return
 		}
 
-		fmt.Printf("Title: %s\n", item.GetTitle())
+		icon := tui.GetItemIcon(item)
+		fmt.Println(icon + item.GetTitle())
 		if item.GetBody() != "" {
-			fmt.Printf("Content:\n%s\n", item.GetBody())
-		} else {
-			fmt.Printf("Content: (empty)\n")
+			fmt.Printf("\n" + item.GetBody())
 		}
 	},
 }
+
