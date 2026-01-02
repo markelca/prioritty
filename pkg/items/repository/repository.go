@@ -13,7 +13,6 @@ import (
 
 var ErrNotFound = errors.New("not found")
 
-// Repository types
 const (
 	RepoTypeObsidian = "obsidian"
 	RepoTypeSQLite   = "sqlite"
@@ -64,7 +63,7 @@ func GetDatabasePath(repoType string, isDemo bool) (dbPath string, err error) {
 			dbPath = viper.GetString(config.CONF_DATABASE_PATH)
 		}
 	default:
-		return "", fmt.Errorf("database type not supported (%s)", repoType)
+		return "", fmt.Errorf("repository type not supported (%s)", repoType)
 	}
 	return dbPath, nil
 }

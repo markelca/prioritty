@@ -39,7 +39,7 @@ func InitialModel(withTui bool) Model {
 	dbPath, err := repository.GetDatabasePath(repoType, isDemo)
 	if err != nil {
 		log.Printf("Error - %s:", err)
-		os.Exit(ExitCodeDatabasePath)
+		os.Exit(ExitCodeRepositoryNotSupported)
 	}
 
 	switch repoType {
@@ -48,8 +48,8 @@ func InitialModel(withTui bool) Model {
 	case repository.RepoTypeSQLite:
 		repo, err = sqliteMigrations.NewSQLiteRepository(dbPath)
 	default:
-		log.Println("Error - Failed to create repository:", err)
-		os.Exit(ExitCodeRepositoryCreate)
+		log.Println("Error - Repository type not supported: ", repoType)
+		os.Exit(ExitCodeRepositoryNotSupported)
 	}
 
 	if err != nil {
