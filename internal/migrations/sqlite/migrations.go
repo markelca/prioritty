@@ -6,7 +6,9 @@ import (
 	"log"
 	"os"
 
-	"github.com/markelca/prioritty/pkg/items/repository"
+	_ "github.com/mattn/go-sqlite3"
+
+	"github.com/markelca/prioritty/pkg/items/repository/sqlite"
 	"github.com/spf13/viper"
 )
 
@@ -16,7 +18,7 @@ var SchemaSQL string
 //go:embed sql/seed.sql
 var SeedSQL string
 
-func NewSQLiteRepository(dbPath string) (*repository.SQLiteRepository, error) {
+func NewSQLiteRepository(dbPath string) (*sqlite.SQLiteRepository, error) {
 	dbExists := false
 	if _, err := os.Stat(dbPath); err == nil {
 		dbExists = true
@@ -27,7 +29,7 @@ func NewSQLiteRepository(dbPath string) (*repository.SQLiteRepository, error) {
 		return nil, err
 	}
 
-	repo := repository.NewSQLiteRepository(db, dbPath)
+	repo := sqlite.NewSQLiteRepository(db, dbPath)
 
 	if !dbExists {
 		if _, err := db.Exec(SchemaSQL); err != nil {
