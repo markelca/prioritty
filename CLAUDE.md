@@ -66,7 +66,7 @@ Environment variables use `PRIORITTY_` prefix.
 - **Repository Pattern**: `SQLiteRepository` implements `TaskRepository` and `NoteRepository` interfaces
 - **Service Composition**: `Service` struct composes `TaskService` and `NoteService`
 - **Embedded SQL**: Migration files use `//go:embed` directive
-- **Editor Integration**: `pkg/editor/` creates temp files for external editor editing
+- **Editor Integration**: `internal/editor/` creates temp files for external editor editing
 - **Item Sorting**: Items with tags appear first, then sorted by creation date (newest first)
 
 ## TUI Keybindings
