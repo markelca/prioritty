@@ -1,6 +1,7 @@
 package obsidian
 
 import (
+	_ "embed"
 	"encoding/json"
 	"os"
 	"path/filepath"
@@ -9,6 +10,9 @@ import (
 	"github.com/markelca/prioritty/pkg/items/repository/obsidian"
 	"github.com/spf13/viper"
 )
+
+//go:embed all_items.base.yaml
+var allItemsBaseContent string
 
 // TypesJSON represents the Obsidian types.json structure
 type TypesJSON struct {
@@ -47,6 +51,12 @@ func NewObsidianRepository(vaultPath string) (*obsidian.ObsidianRepository, erro
 		return nil, err
 	}
 
+	// Initialize All Items.base file
+	basePath := filepath.Join(vaultPath, "All Items.base")
+	if err := initBaseFile(basePath); err != nil {
+		return nil, err
+	}
+
 	repo := obsidian.NewObsidianRepository(vaultPath)
 
 	// Seed demo data if demo mode
@@ -57,6 +67,15 @@ func NewObsidianRepository(vaultPath string) (*obsidian.ObsidianRepository, erro
 	}
 
 	return repo, nil
+}
+
+// initBaseFile creates the All Items.base file if it doesn't exist.
+func initBaseFile(basePath string) error {
+	// Only create if file doesn't exist
+	if _, err := os.Stat(basePath); err == nil {
+		return nil
+	}
+	return os.WriteFile(basePath, []byte(allItemsBaseContent), 0644)
 }
 
 // initTypesJSON creates or updates the types.json file with Prioritty's property types.
