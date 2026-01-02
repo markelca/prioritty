@@ -8,8 +8,7 @@ import (
 	"github.com/markelca/prioritty/pkg/items"
 )
 
-type CliRendererer struct {
-}
+type CLI struct{}
 
 var taskIcons = map[items.Status]string{
 	items.Done:       styles.DoneIcon,
@@ -25,7 +24,7 @@ var taskTitleStyle = map[items.Status]lipgloss.Style{
 	items.Todo:       styles.Default,
 }
 
-func (r CliRendererer) Render(item items.Renderable) string {
+func (r CLI) Render(item items.Renderable) string {
 	switch v := item.(type) {
 	case items.Task:
 		return r.renderTask(v)
@@ -36,7 +35,7 @@ func (r CliRendererer) Render(item items.Renderable) string {
 	}
 }
 
-func (r CliRendererer) renderTask(t items.Task) string {
+func (r CLI) renderTask(t items.Task) string {
 	var contentIcon string
 
 	icon := taskIcons[t.Status]
@@ -51,7 +50,7 @@ func (r CliRendererer) renderTask(t items.Task) string {
 	return icon + contentIcon + title + "\n"
 }
 
-func (r CliRendererer) renderNote(t items.Note) string {
+func (r CLI) renderNote(t items.Note) string {
 	var contentIcon string
 
 	if len(t.Body) > 1 {
@@ -61,34 +60,3 @@ func (r CliRendererer) renderNote(t items.Note) string {
 	return styles.NoteIcon + contentIcon + t.Title + "\n"
 }
 
-func RenderTask(t items.Task) string {
-	var title string
-	var icon string
-	var cIcon string
-	var style lipgloss.Style
-
-	switch t.Status {
-	case items.Done:
-		icon = styles.DoneIcon
-		style = styles.DoneTitle
-	case items.Cancelled:
-		icon = styles.CancelledIcon
-		style = styles.DoneTitle
-	case items.InProgress:
-		icon = styles.InProgressIcon
-		style = styles.Default
-	case items.Todo:
-		icon = styles.TodoIcon
-		style = styles.Default
-	}
-
-	if len(t.Body) > 1 {
-		cIcon = styles.ContentIcon
-	}
-
-	title += style.
-		// PaddingBottom(1).
-		Render(t.Title)
-
-	return icon + cIcon + title + "\n"
-}

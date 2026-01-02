@@ -27,7 +27,7 @@ type Model struct {
 	params   Params
 	state    State
 	Service  service.Service
-	renderer renderer.CliRendererer
+	renderer renderer.CLI
 }
 
 func InitialModel(withTui bool) Model {
@@ -59,7 +59,7 @@ func InitialModel(withTui bool) Model {
 		state:    State{item: taskContent, items: itemList},
 		params:   Params{withTui: withTui},
 		Service:  service,
-		renderer: renderer.CliRendererer{},
+		renderer: renderer.CLI{},
 	}
 }
 
