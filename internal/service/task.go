@@ -81,8 +81,5 @@ func (s TaskService) CreateWithEditor(itemType items.ItemType) (tea.Cmd, error) 
 	input := editor.EditorInput{
 		ItemType: itemType,
 	}
-	if itemType == items.ItemTypeTask {
-		input.Status = "todo"
-	}
 	return editor.EditItem(input)
 }

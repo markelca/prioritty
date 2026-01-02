@@ -13,13 +13,30 @@ import (
 	"github.com/markelca/prioritty/pkg/frontmatter"
 	"github.com/markelca/prioritty/pkg/items"
 	"github.com/spf13/viper"
+	"gopkg.in/yaml.v3"
 )
 
-// EditorFrontmatter represents the YAML frontmatter in the editor temp file.
-type EditorFrontmatter struct {
-	Title  string `yaml:"title,omitempty"`
-	Status string `yaml:"status,omitempty"`
-	Tag    string `yaml:"tag,omitempty"`
+// unquotedString is a string type that marshals to YAML without quotes.
+type unquotedString string
+
+func (s unquotedString) MarshalYAML() (interface{}, error) {
+	return &yaml.Node{
+		Kind:  yaml.ScalarNode,
+		Value: string(s),
+	}, nil
+}
+
+// TaskEditorFrontmatter represents the YAML frontmatter for tasks in the editor.
+type TaskEditorFrontmatter struct {
+	Title  unquotedString `yaml:"title"`
+	Status unquotedString `yaml:"status"`
+	Tag    unquotedString `yaml:"tag"`
+}
+
+// NoteEditorFrontmatter represents the YAML frontmatter for notes in the editor.
+type NoteEditorFrontmatter struct {
+	Title unquotedString `yaml:"title"`
+	Tag   unquotedString `yaml:"tag"`
 }
 
 // EditorInput contains the data to populate the editor temp file.
@@ -84,20 +101,36 @@ func EditItem(input EditorInput) (tea.Cmd, error) {
 
 // serializeEditorContent creates the content for the editor temp file with frontmatter.
 func serializeEditorContent(input EditorInput) (string, error) {
-	fm := EditorFrontmatter{
-		Title: input.Title,
-		Tag:   input.Tag,
-	}
+	var content []byte
+	var err error
+
 	if input.ItemType == items.ItemTypeTask {
-		fm.Status = input.Status
+		fm := TaskEditorFrontmatter{
+			Title:  unquotedString(input.Title),
+			Status: unquotedString(input.Status),
+			Tag:    unquotedString(input.Tag),
+		}
+		content, err = frontmatter.Serialize(fm, input.Body)
+	} else {
+		fm := NoteEditorFrontmatter{
+			Title: unquotedString(input.Title),
+			Tag:   unquotedString(input.Tag),
+		}
+		content, err = frontmatter.Serialize(fm, input.Body)
 	}
 
-	content, err := frontmatter.Serialize(fm, input.Body)
 	if err != nil {
 		return "", err
 	}
 
 	return string(content), nil
+}
+
+// parsedFrontmatter is used for parsing (uses regular strings)
+type parsedFrontmatter struct {
+	Title  string `yaml:"title"`
+	Status string `yaml:"status"`
+	Tag    string `yaml:"tag"`
 }
 
 // parseEditorContent parses the editor content including frontmatter.
@@ -109,7 +142,7 @@ func parseEditorContent(content string, itemType items.ItemType) EditorFinishedM
 	}
 
 	// Parse frontmatter
-	var fm EditorFrontmatter
+	var fm parsedFrontmatter
 	body, err := frontmatter.Parse(content, &fm)
 	if err != nil {
 		log.Printf("Error parsing frontmatter: %v", err)
