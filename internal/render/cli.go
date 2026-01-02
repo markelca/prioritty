@@ -1,4 +1,4 @@
-package renderer
+package render
 
 import (
 	"fmt"
@@ -9,6 +9,8 @@ import (
 )
 
 type CLI struct{}
+
+var _ items.Renderer = (*CLI)(nil)
 
 var taskIcons = map[items.Status]string{
 	items.Done:       styles.DoneIcon,
@@ -59,4 +61,3 @@ func (r CLI) renderNote(t items.Note) string {
 
 	return styles.NoteIcon + contentIcon + t.Title + "\n"
 }
-

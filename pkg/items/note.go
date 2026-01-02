@@ -1,6 +1,6 @@
 package items
 
-var _ ItemInterface = (*Task)(nil)
+var _ ItemInterface = (*Note)(nil)
 
 type Note struct {
 	Item

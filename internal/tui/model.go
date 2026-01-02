@@ -8,8 +8,8 @@ import (
 	"github.com/charmbracelet/bubbles/help"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/markelca/prioritty/internal/config"
+	"github.com/markelca/prioritty/internal/render"
 	"github.com/markelca/prioritty/pkg/items"
-	"github.com/markelca/prioritty/pkg/items/renderer"
 	"github.com/markelca/prioritty/pkg/items/repository"
 	"github.com/markelca/prioritty/pkg/items/service"
 	"github.com/spf13/viper"
@@ -27,7 +27,7 @@ type Model struct {
 	params   Params
 	state    State
 	Service  service.Service
-	renderer renderer.CLI
+	renderer render.CLI
 }
 
 func InitialModel(withTui bool) Model {
@@ -59,7 +59,7 @@ func InitialModel(withTui bool) Model {
 		state:    State{item: taskContent, items: itemList},
 		params:   Params{withTui: withTui},
 		Service:  service,
-		renderer: renderer.CLI{},
+		renderer: render.CLI{},
 	}
 }
 
