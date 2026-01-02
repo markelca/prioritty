@@ -53,6 +53,17 @@ func (s Service) GetAll() ([]items.ItemInterface, error) {
 	return allItems, nil
 }
 
+func (s Service) RemoveItem(item items.ItemInterface) error {
+	switch v := item.(type) {
+	case *items.Note:
+		return s.removeNote(v.GetId())
+	case *items.Task:
+		return s.removeTask(v.GetId())
+	default:
+		return fmt.Errorf("Cannot remove item %v", v)
+	}
+}
+
 func (s Service) UpdateItemFromEditorMsg(i items.ItemInterface, msg editor.TaskEditorFinishedMsg) error {
 	switch v := i.(type) {
 	case *items.Task:
