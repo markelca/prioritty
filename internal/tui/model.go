@@ -3,7 +3,6 @@ package tui
 import (
 	"log"
 	"os"
-	"path"
 
 	"github.com/charmbracelet/bubbles/help"
 	tea "github.com/charmbracelet/bubbletea"
@@ -37,30 +36,25 @@ func InitialModel(withTui bool) Model {
 	repoType := viper.GetString(config.CONF_REPOSITORY_TYPE)
 
 	var repo repository.Repository
-	var err error
+	dbPath, err := repository.GetDatabasePath(repoType, isDemo)
+	if err != nil {
+		log.Printf("Error - %s:", err)
+		os.Exit(ExitCodeDatabasePath)
+	}
 
 	switch repoType {
-	case "obsidian":
-		var vaultPath string
-		if isDemo {
-			vaultPath = path.Join(os.TempDir(), "prioritty_demo_vault")
-		} else {
-			vaultPath = viper.GetString(config.CONF_DATABASE_PATH)
-		}
-		repo, err = obsidianMigrations.NewObsidianRepository(vaultPath)
-	default: // "sqlite" or any other value defaults to sqlite
-		var dbFilePath string
-		if isDemo {
-			dbFilePath = path.Join(os.TempDir(), "prioritty_demo.db")
-		} else {
-			dbFilePath = viper.GetString(config.CONF_DATABASE_PATH)
-		}
-		repo, err = sqliteMigrations.NewSQLiteRepository(dbFilePath)
+	case repository.RepoTypeObsidian:
+		repo, err = obsidianMigrations.NewObsidianRepository(dbPath)
+	case repository.RepoTypeSQLite:
+		repo, err = sqliteMigrations.NewSQLiteRepository(dbPath)
+	default:
+		log.Println("Error - Failed to create repository:", err)
+		os.Exit(ExitCodeRepositoryCreate)
 	}
 
 	if err != nil {
 		log.Println("Error - Failed to create repository:", err)
-		os.Exit(3)
+		os.Exit(ExitCodeRepositoryCreate)
 	}
 
 	service := service.NewService(repo)
@@ -68,7 +62,7 @@ func InitialModel(withTui bool) Model {
 	itemList, err := service.GetAll()
 	if err != nil {
 		log.Println("Error - Failed to get the tasks:", err)
-		os.Exit(4)
+		os.Exit(ExitCodeGetItems)
 	}
 
 	taskContent := ItemContent{}
@@ -116,7 +110,7 @@ func (m Model) DestroyDemo() {
 	err := m.Service.DestroyDemo()
 	if err != nil {
 		log.Println("Error - Failed destroy the demo data", err)
-		os.Exit(5)
+		os.Exit(ExitCodeDestroyDemo)
 	}
 }
 

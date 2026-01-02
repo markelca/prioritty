@@ -2,11 +2,22 @@ package repository
 
 import (
 	"errors"
+	"fmt"
+	"os"
+	"path"
 
+	"github.com/markelca/prioritty/internal/config"
 	"github.com/markelca/prioritty/pkg/items"
+	"github.com/spf13/viper"
 )
 
 var ErrNotFound = errors.New("not found")
+
+// Repository types
+const (
+	RepoTypeObsidian = "obsidian"
+	RepoTypeSQLite   = "sqlite"
+)
 
 type TaskRepository interface {
 	GetTasks() ([]items.Task, error)
@@ -36,4 +47,24 @@ type Repository interface {
 	RemoveTag(string) error
 	GetItemsWithTag(string) ([]items.ItemInterface, error)
 	Reset() error
+}
+
+func GetDatabasePath(repoType string, isDemo bool) (dbPath string, err error) {
+	switch repoType {
+	case RepoTypeObsidian:
+		if isDemo {
+			dbPath = path.Join(os.TempDir(), "prioritty_demo_vault")
+		} else {
+			dbPath = viper.GetString(config.CONF_DATABASE_PATH)
+		}
+	case RepoTypeSQLite:
+		if isDemo {
+			dbPath = path.Join(os.TempDir(), "prioritty_demo.db")
+		} else {
+			dbPath = viper.GetString(config.CONF_DATABASE_PATH)
+		}
+	default:
+		return "", fmt.Errorf("database type not supported (%s)", repoType)
+	}
+	return dbPath, nil
 }
