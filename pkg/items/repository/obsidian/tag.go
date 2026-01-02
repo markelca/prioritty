@@ -134,10 +134,10 @@ func (r *ObsidianRepository) GetItemsWithTag(tagName string) ([]items.ItemInterf
 		id := relativeID(r.vaultPath, filePath)
 
 		switch fm.Type {
-		case typeTask:
+		case string(items.ItemTypeTask):
 			task := taskFromFrontmatter(fm, body, id)
 			result = append(result, &task)
-		case typeNote:
+		case string(items.ItemTypeNote):
 			note := noteFromFrontmatter(fm, body, id)
 			result = append(result, &note)
 		}

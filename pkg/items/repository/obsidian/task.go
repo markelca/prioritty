@@ -29,7 +29,7 @@ func (r *ObsidianRepository) GetTasks() ([]items.Task, error) {
 			continue
 		}
 
-		if fm.Type != typeTask {
+		if fm.Type != string(items.ItemTypeTask) {
 			continue
 		}
 
@@ -136,7 +136,7 @@ func (r *ObsidianRepository) UpdateTaskStatus(t items.Task, status items.Status)
 	}
 
 	// Update status
-	fm.Status = statusToString(status)
+	fm.Status = items.StatusToString(status)
 
 	// Serialize and write back
 	newContent, err := serializeFrontmatter(fm, body)

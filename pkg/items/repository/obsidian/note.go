@@ -29,7 +29,7 @@ func (r *ObsidianRepository) GetNotes() ([]items.Note, error) {
 			continue
 		}
 
-		if fm.Type != typeNote {
+		if fm.Type != string(items.ItemTypeNote) {
 			continue
 		}
 

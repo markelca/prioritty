@@ -69,19 +69,53 @@ func (s Service) UpdateItemFromEditorMsg(i items.ItemInterface, msg editor.TaskE
 	case *items.Task:
 		v.Title = msg.Title
 		v.Body = msg.Body
+		// Update status if provided
+		if msg.Status != "" {
+			v.Status = items.StringToStatus(msg.Status)
+		}
 		if err := s.UpdateTask(*v); err != nil {
 			log.Println("Error updating the task - ", err)
+		}
+		// Update tag if changed
+		if err := s.updateTagFromEditor(v, msg.Tag); err != nil {
+			log.Println("Error updating tag - ", err)
 		}
 	case *items.Note:
 		v.Title = msg.Title
 		v.Body = msg.Body
 		if err := s.UpdateNote(*v); err != nil {
-			log.Println("Error updating the task - ", err)
+			log.Println("Error updating the note - ", err)
+		}
+		// Update tag if changed
+		if err := s.updateTagFromEditor(v, msg.Tag); err != nil {
+			log.Println("Error updating tag - ", err)
 		}
 	default:
 		return fmt.Errorf("Can't update the item, no implementation: %v", v)
 	}
 	return nil
+}
+
+// updateTagFromEditor updates an item's tag based on the editor message.
+func (s Service) updateTagFromEditor(i items.ItemInterface, tagName string) error {
+	currentTag := i.GetTag()
+	currentTagName := ""
+	if currentTag != nil {
+		currentTagName = currentTag.Name
+	}
+
+	// No change needed
+	if currentTagName == tagName {
+		return nil
+	}
+
+	// Remove tag if empty
+	if tagName == "" {
+		return s.UnsetTag(i)
+	}
+
+	// Set new tag
+	return s.SetTag(i, tagName)
 }
 
 func (s Service) CreateTaskFromEditorMsg(msg editor.TaskEditorFinishedMsg) error {
@@ -90,8 +124,18 @@ func (s Service) CreateTaskFromEditorMsg(msg editor.TaskEditorFinishedMsg) error
 			Title: msg.Title,
 			Body:  msg.Body,
 		},
+		Status: items.StringToStatus(msg.Status),
 	}
-	return s.repository.CreateTask(task)
+	if err := s.repository.CreateTask(task); err != nil {
+		return err
+	}
+	// Set tag if provided
+	if msg.Tag != "" {
+		// Need to get the created task to set the tag
+		// For now, we'll set it directly since the task ID will be the title
+		return s.SetTag(&task, msg.Tag)
+	}
+	return nil
 }
 
 func (s Service) CreateNoteFromEditorMsg(msg editor.TaskEditorFinishedMsg) error {
@@ -101,7 +145,14 @@ func (s Service) CreateNoteFromEditorMsg(msg editor.TaskEditorFinishedMsg) error
 			Body:  msg.Body,
 		},
 	}
-	return s.repository.CreateNote(note)
+	if err := s.repository.CreateNote(note); err != nil {
+		return err
+	}
+	// Set tag if provided
+	if msg.Tag != "" {
+		return s.SetTag(&note, msg.Tag)
+	}
+	return nil
 }
 
 func (s Service) SetTag(i items.ItemInterface, name string) error {

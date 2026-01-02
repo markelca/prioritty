@@ -20,8 +20,8 @@ var Help = help.New()
 
 type Params struct {
 	withTui    bool
-	CreateMode string // "task" or "note" for creation mode
-	EditMode   bool   // true when editing an existing item
+	CreateMode items.ItemType // items.ItemTypeTask or items.ItemTypeNote for creation mode
+	EditMode   bool           // true when editing an existing item
 }
 
 type Model struct {
@@ -114,7 +114,7 @@ func (m Model) DestroyDemo() {
 	}
 }
 
-func (m *Model) SetCreateMode(mode string) {
+func (m *Model) SetCreateMode(mode items.ItemType) {
 	m.params.CreateMode = mode
 }
 

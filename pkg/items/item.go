@@ -2,6 +2,14 @@ package items
 
 import "time"
 
+// ItemType represents the type of an item (task or note)
+type ItemType string
+
+const (
+	ItemTypeTask ItemType = "task"
+	ItemTypeNote ItemType = "note"
+)
+
 type Base interface {
 	GetId() string
 	GetTitle() string

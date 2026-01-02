@@ -85,9 +85,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if m.params.CreateMode != "" {
 			// Creation mode
 			var err error
-			if m.params.CreateMode == "task" {
+			if m.params.CreateMode == items.ItemTypeTask {
 				err = m.Service.CreateTaskFromEditorMsg(msg)
-			} else if m.params.CreateMode == "note" {
+			} else if m.params.CreateMode == items.ItemTypeNote {
 				err = m.Service.CreateNoteFromEditorMsg(msg)
 			}
 			if err != nil {
