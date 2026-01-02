@@ -18,7 +18,7 @@ func (s TaskService) GetTasks() ([]items.Task, error) {
 }
 
 func (s TaskService) DestroyDemo() error {
-	return s.repository.DropSchema()
+	return s.repository.Reset()
 }
 
 func (s TaskService) UpdateTask(t items.Task) error {
@@ -72,11 +72,11 @@ func (s TaskService) RemoveItem(item items.ItemInterface) error {
 	}
 }
 
-func (s TaskService) removeTask(id int) error {
+func (s TaskService) removeTask(id string) error {
 	return s.repository.RemoveTask(id)
 }
 
-func (s TaskService) removeNote(id int) error {
+func (s TaskService) removeNote(id string) error {
 	return s.repository.RemoveNote(id)
 }
 
@@ -85,5 +85,5 @@ func (s TaskService) EditWithEditor(t items.ItemInterface) (tea.Cmd, error) {
 }
 
 func (s TaskService) CreateWithEditor(itemType string) (tea.Cmd, error) {
-	return editor.EditTask(0, "", "")
+	return editor.EditTask("", "", "")
 }

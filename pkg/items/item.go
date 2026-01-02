@@ -3,7 +3,7 @@ package items
 import "time"
 
 type Base interface {
-	GetId() int
+	GetId() string
 	GetTitle() string
 	GetBody() string
 	GetTag() *Tag
@@ -17,19 +17,19 @@ type ItemInterface interface {
 }
 
 type Tag struct {
-	Id   int
+	Id   string
 	Name string
 }
 
 type Item struct {
-	Id        int
+	Id        string
 	Title     string
 	Body      string
 	CreatedAt time.Time
 	Tag       *Tag
 }
 
-func (i Item) GetId() int {
+func (i Item) GetId() string {
 	return i.Id
 }
 

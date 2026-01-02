@@ -3,6 +3,7 @@ package sqlite
 import (
 	"database/sql"
 	"log"
+	"strconv"
 	"time"
 
 	"github.com/markelca/prioritty/pkg/items"
@@ -27,16 +28,18 @@ func (r *SQLiteRepository) GetTasks() ([]items.Task, error) {
 	for rows.Next() {
 		var task items.Task
 		var body *string
+		var taskId int
 		var statusId int
 		var tagId sql.NullInt64
 		var tagName sql.NullString
 		var createdAtStr string
 
-		err := rows.Scan(&task.Id, &task.Title, &body, &statusId, &createdAtStr, &tagId, &tagName)
+		err := rows.Scan(&taskId, &task.Title, &body, &statusId, &createdAtStr, &tagId, &tagName)
 		if err != nil {
 			log.Printf("Error scanning task: %v", err)
 			continue
 		}
+		task.Id = strconv.Itoa(taskId)
 
 		task.CreatedAt, err = time.Parse("2006-01-02 15:04:05", createdAtStr)
 		if err != nil {
@@ -50,10 +53,10 @@ func (r *SQLiteRepository) GetTasks() ([]items.Task, error) {
 
 		if tagId.Valid {
 			tag := items.Tag{
-				Id:   int(tagId.Int64),
+				Id:   strconv.FormatInt(tagId.Int64, 10),
 				Name: tagName.String,
 			}
-			task.Tag = &tag // assuming Task.Tag is *Tag
+			task.Tag = &tag
 		} else {
 			task.Tag = nil
 		}
@@ -95,7 +98,7 @@ func (r *SQLiteRepository) CreateTask(t items.Task) error {
 	return err
 }
 
-func (r *SQLiteRepository) RemoveTask(id int) error {
+func (r *SQLiteRepository) RemoveTask(id string) error {
 	query := `
 		DELETE FROM task
 		WHERE id = ?

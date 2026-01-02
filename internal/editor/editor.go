@@ -14,13 +14,13 @@ import (
 )
 
 type TaskEditorFinishedMsg struct {
-	Id    int
+	Id    string
 	Title string
 	Body  string
 	Err   error
 }
 
-func EditTask(id int, title, body string) (tea.Cmd, error) {
+func EditTask(id string, title, body string) (tea.Cmd, error) {
 	tempFile, err := os.CreateTemp(os.TempDir(), "task_*.txt")
 	if err != nil {
 		return nil, fmt.Errorf("failed to create temp file: %w", err)

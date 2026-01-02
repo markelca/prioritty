@@ -2,11 +2,14 @@ package sqlite
 
 import (
 	"database/sql"
+	"errors"
 	"log"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/markelca/prioritty/pkg/items"
+	"github.com/markelca/prioritty/pkg/items/repository"
 )
 
 type SQLiteRepository struct {
@@ -18,12 +21,13 @@ func NewSQLiteRepository(db *sql.DB, filepath string) *SQLiteRepository {
 	return &SQLiteRepository{db: db, filepath: filepath}
 }
 
-func (r *SQLiteRepository) DropSchema() error {
+func (r *SQLiteRepository) Reset() error {
 	return os.Remove(r.filepath)
 }
 
 func (r *SQLiteRepository) GetTag(name string) (*items.Tag, error) {
 	var tag items.Tag
+	var id int
 	query := `
 		SELECT id, name
 		FROM tag
@@ -31,11 +35,15 @@ func (r *SQLiteRepository) GetTag(name string) (*items.Tag, error) {
 	`
 	row := r.db.QueryRow(query, name)
 
-	err := row.Scan(&tag.Id, &tag.Name)
+	err := row.Scan(&id, &tag.Name)
 	if err != nil {
-		log.Printf("Error scanning task: %v", err)
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, repository.ErrNotFound
+		}
+		log.Printf("Error scanning tag: %v", err)
 		return nil, err
 	}
+	tag.Id = strconv.Itoa(id)
 
 	return &tag, nil
 }
@@ -56,11 +64,13 @@ func (r *SQLiteRepository) GetTags() ([]items.Tag, error) {
 
 	for rows.Next() {
 		var tag items.Tag
-		err := rows.Scan(&tag.Id, &tag.Name)
+		var id int
+		err := rows.Scan(&id, &tag.Name)
 		if err != nil {
 			log.Printf("Error scanning tag: %v", err)
 			return nil, err
 		}
+		tag.Id = strconv.Itoa(id)
 		tags = append(tags, tag)
 	}
 
@@ -79,7 +89,7 @@ func (r *SQLiteRepository) CreateTag(name string) (*items.Tag, error) {
 	`
 	result, err := r.db.Exec(query, name)
 	if err != nil {
-		log.Printf("Error inserting task: %v", err)
+		log.Printf("Error inserting tag: %v", err)
 		return nil, err
 	}
 
@@ -90,7 +100,7 @@ func (r *SQLiteRepository) CreateTag(name string) (*items.Tag, error) {
 	}
 
 	tag := items.Tag{
-		Id:   int(id),
+		Id:   strconv.FormatInt(id, 10),
 		Name: name,
 	}
 
@@ -112,7 +122,7 @@ func (r *SQLiteRepository) RemoveTag(name string) error {
 	}
 
 	if rowsAffected == 0 {
-		return sql.ErrNoRows
+		return repository.ErrNotFound
 	}
 
 	return nil
@@ -139,14 +149,16 @@ func (r *SQLiteRepository) GetItemsWithTag(tagName string) ([]items.ItemInterfac
 		var body *string
 		var statusId int
 		var createdAtStr string
+		var taskId int
 		var tagId int
 		var tagName string
 
-		err := rows.Scan(&task.Id, &task.Title, &body, &statusId, &createdAtStr, &tagId, &tagName)
+		err := rows.Scan(&taskId, &task.Title, &body, &statusId, &createdAtStr, &tagId, &tagName)
 		if err != nil {
 			log.Printf("Error scanning task: %v", err)
 			return nil, err
 		}
+		task.Id = strconv.Itoa(taskId)
 
 		task.CreatedAt, err = time.Parse("2006-01-02 15:04:05", createdAtStr)
 		if err != nil {
@@ -159,7 +171,7 @@ func (r *SQLiteRepository) GetItemsWithTag(tagName string) ([]items.ItemInterfac
 		}
 
 		tag := items.Tag{
-			Id:   tagId,
+			Id:   strconv.Itoa(tagId),
 			Name: tagName,
 		}
 		task.Tag = &tag
@@ -185,14 +197,16 @@ func (r *SQLiteRepository) GetItemsWithTag(tagName string) ([]items.ItemInterfac
 		var note items.Note
 		var body *string
 		var createdAtStr string
+		var noteId int
 		var tagId int
 		var tagName string
 
-		err := rows.Scan(&note.Id, &note.Title, &body, &createdAtStr, &tagId, &tagName)
+		err := rows.Scan(&noteId, &note.Title, &body, &createdAtStr, &tagId, &tagName)
 		if err != nil {
 			log.Printf("Error scanning note: %v", err)
 			return nil, err
 		}
+		note.Id = strconv.Itoa(noteId)
 
 		note.CreatedAt, err = time.Parse("2006-01-02 15:04:05", createdAtStr)
 		if err != nil {
@@ -205,7 +219,7 @@ func (r *SQLiteRepository) GetItemsWithTag(tagName string) ([]items.ItemInterfac
 		}
 
 		tag := items.Tag{
-			Id:   tagId,
+			Id:   strconv.Itoa(tagId),
 			Name: tagName,
 		}
 		note.Tag = &tag

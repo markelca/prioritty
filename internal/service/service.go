@@ -1,7 +1,7 @@
 package service
 
 import (
-	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"sort"
@@ -98,14 +98,14 @@ func (s Service) SetTag(i items.ItemInterface, name string) error {
 	var err error
 	tag, err = s.repository.GetTag(name)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, repository.ErrNotFound) {
 			tag, err = s.repository.CreateTag(name)
 			if err != nil {
 				log.Printf("Error creating tag: %v", err)
 				return err
 			}
 		} else {
-			log.Printf("Error geting tag: %v", err)
+			log.Printf("Error getting tag: %v", err)
 			return err
 		}
 	}

@@ -3,6 +3,7 @@ package sqlite
 import (
 	"database/sql"
 	"log"
+	"strconv"
 	"time"
 
 	"github.com/markelca/prioritty/pkg/items"
@@ -17,7 +18,7 @@ func (r *SQLiteRepository) GetNotes() ([]items.Note, error) {
 
 	rows, err := r.db.Query(query)
 	if err != nil {
-		log.Printf("Error querying tasks: %v", err)
+		log.Printf("Error querying notes: %v", err)
 		return []items.Note{}, err
 	}
 	defer rows.Close()
@@ -27,15 +28,17 @@ func (r *SQLiteRepository) GetNotes() ([]items.Note, error) {
 	for rows.Next() {
 		var note items.Note
 		var body *string
+		var noteId int
 		var tagId sql.NullInt64
 		var tagName sql.NullString
 		var createdAtStr string
 
-		err := rows.Scan(&note.Id, &note.Title, &body, &createdAtStr, &tagId, &tagName)
+		err := rows.Scan(&noteId, &note.Title, &body, &createdAtStr, &tagId, &tagName)
 		if err != nil {
-			log.Printf("Error scanning task: %v", err)
+			log.Printf("Error scanning note: %v", err)
 			continue
 		}
+		note.Id = strconv.Itoa(noteId)
 
 		note.CreatedAt, err = time.Parse("2006-01-02 15:04:05", createdAtStr)
 		if err != nil {
@@ -49,10 +52,10 @@ func (r *SQLiteRepository) GetNotes() ([]items.Note, error) {
 
 		if tagId.Valid {
 			tag := items.Tag{
-				Id:   int(tagId.Int64),
+				Id:   strconv.FormatInt(tagId.Int64, 10),
 				Name: tagName.String,
 			}
-			note.Tag = &tag // assuming Task.Tag is *Tag
+			note.Tag = &tag
 		} else {
 			note.Tag = nil
 		}
@@ -82,7 +85,7 @@ func (r *SQLiteRepository) CreateNote(n items.Note) error {
 	return err
 }
 
-func (r *SQLiteRepository) RemoveNote(id int) error {
+func (r *SQLiteRepository) RemoveNote(id string) error {
 	query := `
 		DELETE FROM note
 		WHERE id = ?
