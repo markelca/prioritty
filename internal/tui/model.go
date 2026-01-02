@@ -10,8 +10,8 @@ import (
 	"github.com/markelca/prioritty/internal/config"
 	"github.com/markelca/prioritty/internal/migrations/sqlite"
 	"github.com/markelca/prioritty/internal/render"
+	"github.com/markelca/prioritty/internal/service"
 	"github.com/markelca/prioritty/pkg/items"
-	"github.com/markelca/prioritty/pkg/items/service"
 	"github.com/spf13/viper"
 )
 
