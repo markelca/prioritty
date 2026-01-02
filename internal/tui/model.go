@@ -8,9 +8,9 @@ import (
 	"github.com/charmbracelet/bubbles/help"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/markelca/prioritty/internal/config"
+	"github.com/markelca/prioritty/internal/migrations/sqlite"
 	"github.com/markelca/prioritty/internal/render"
 	"github.com/markelca/prioritty/pkg/items"
-	"github.com/markelca/prioritty/pkg/items/repository"
 	"github.com/markelca/prioritty/pkg/items/service"
 	"github.com/spf13/viper"
 )
@@ -40,7 +40,7 @@ func InitialModel(withTui bool) Model {
 		dbFilePath = viper.GetString(config.CONF_DATABASE_PATH)
 	}
 
-	repo, err := repository.NewSQLiteRepository(dbFilePath)
+	repo, err := sqlite.NewSQLiteRepository(dbFilePath)
 	if err != nil {
 		log.Println("Error - Failed to create repository:", err)
 		os.Exit(3)

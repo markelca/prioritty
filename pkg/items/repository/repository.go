@@ -6,10 +6,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/markelca/prioritty/internal/migrations"
 	"github.com/markelca/prioritty/pkg/items"
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/spf13/viper"
 )
 
 type TaskRepository interface {
@@ -47,34 +45,8 @@ type SQLiteRepository struct {
 	filepath string
 }
 
-func NewSQLiteRepository(dbPath string) (*SQLiteRepository, error) {
-	dbExists := false
-	if _, err := os.Stat(dbPath); err == nil {
-		dbExists = true
-	}
-
-	db, err := sql.Open("sqlite3", dbPath)
-	if err != nil {
-		return nil, err
-	}
-
-	repo := &SQLiteRepository{db: db, filepath: dbPath}
-
-	if !dbExists {
-		if _, err := db.Exec(migrations.SchemaSQL); err != nil {
-			log.Printf("Error executing schema: %v", err)
-			db.Close()
-			return nil, err
-		}
-		if viper.GetBool("demo") {
-			if _, err := db.Exec(migrations.SeedSQL); err != nil {
-				db.Close()
-				log.Printf("Error executing seed data: %v", err)
-				return nil, err
-			}
-		}
-	}
-	return repo, nil
+func NewSQLiteRepository(db *sql.DB, filepath string) *SQLiteRepository {
+	return &SQLiteRepository{db: db, filepath: filepath}
 }
 
 func (r *SQLiteRepository) DropSchema() error {
