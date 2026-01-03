@@ -7,6 +7,7 @@ import (
 
 	"github.com/markelca/prioritty/pkg/items"
 	"github.com/markelca/prioritty/pkg/items/repository"
+	"github.com/markelca/prioritty/pkg/markdown"
 )
 
 // GetTag returns a tag by name if it's used by any item.
@@ -23,8 +24,8 @@ func (r *ObsidianRepository) GetTag(name string) (*items.Tag, error) {
 			continue
 		}
 
-		fm, _, err := parseFrontmatter(content)
-		if err != nil {
+		var fm markdown.Frontmatter
+		if _, err := markdown.Parse(string(content), &fm); err != nil {
 			continue
 		}
 
@@ -55,8 +56,8 @@ func (r *ObsidianRepository) GetTags() ([]items.Tag, error) {
 			continue
 		}
 
-		fm, _, err := parseFrontmatter(content)
-		if err != nil {
+		var fm markdown.Frontmatter
+		if _, err := markdown.Parse(string(content), &fm); err != nil {
 			log.Printf("Warning: failed to parse frontmatter in %s: %v", filePath, err)
 			continue
 		}
@@ -121,7 +122,8 @@ func (r *ObsidianRepository) GetItemsWithTag(tagName string) ([]items.ItemInterf
 			continue
 		}
 
-		fm, body, err := parseFrontmatter(content)
+		var fm markdown.Frontmatter
+		body, err := markdown.Parse(string(content), &fm)
 		if err != nil {
 			log.Printf("Warning: failed to parse frontmatter in %s: %v", filePath, err)
 			continue

@@ -9,27 +9,6 @@ import (
 
 const timeFormat = time.RFC3339
 
-// Frontmatter represents the YAML frontmatter in a markdown file.
-type Frontmatter struct {
-	Title     string `yaml:"title"`
-	Type      string `yaml:"type"`
-	Status    string `yaml:"status,omitempty"`
-	Tag       string `yaml:"tag,omitempty"`
-	CreatedAt string `yaml:"created_at,omitempty"`
-}
-
-// parseFrontmatter extracts frontmatter and body from markdown content.
-func parseFrontmatter(content []byte) (Frontmatter, string, error) {
-	var fm Frontmatter
-	body, err := markdown.Parse(string(content), &fm)
-	return fm, body, err
-}
-
-// serializeFrontmatter creates markdown content from frontmatter and body.
-func serializeFrontmatter(fm Frontmatter, body string) ([]byte, error) {
-	return markdown.SerializeFrontmatter(fm, body)
-}
-
 // parseCreatedAt parses the created_at string to time.Time.
 func parseCreatedAt(s string) time.Time {
 	if s == "" {
@@ -51,7 +30,7 @@ func formatCreatedAt(t time.Time) string {
 }
 
 // taskFromFrontmatter creates a Task from frontmatter data.
-func taskFromFrontmatter(fm Frontmatter, body, id string) items.Task {
+func taskFromFrontmatter(fm markdown.Frontmatter, body, id string) items.Task {
 	var tag *items.Tag
 	if fm.Tag != "" {
 		tag = &items.Tag{
@@ -73,7 +52,7 @@ func taskFromFrontmatter(fm Frontmatter, body, id string) items.Task {
 }
 
 // noteFromFrontmatter creates a Note from frontmatter data.
-func noteFromFrontmatter(fm Frontmatter, body, id string) items.Note {
+func noteFromFrontmatter(fm markdown.Frontmatter, body, id string) items.Note {
 	var tag *items.Tag
 	if fm.Tag != "" {
 		tag = &items.Tag{
@@ -93,29 +72,31 @@ func noteFromFrontmatter(fm Frontmatter, body, id string) items.Note {
 	}
 }
 
-// frontmatterFromTask creates frontmatter from a Task.
-func frontmatterFromTask(t items.Task) Frontmatter {
-	fm := Frontmatter{
+// itemInputFromTask creates an ItemInput from a Task.
+func itemInputFromTask(t items.Task) markdown.ItemInput {
+	input := markdown.ItemInput{
+		ItemType:  items.ItemTypeTask,
 		Title:     t.Title,
-		Type:      string(items.ItemTypeTask),
+		Body:      t.Body,
 		Status:    string(t.Status),
 		CreatedAt: formatCreatedAt(t.CreatedAt),
 	}
 	if t.Tag != nil {
-		fm.Tag = t.Tag.Name
+		input.Tag = t.Tag.Name
 	}
-	return fm
+	return input
 }
 
-// frontmatterFromNote creates frontmatter from a Note.
-func frontmatterFromNote(n items.Note) Frontmatter {
-	fm := Frontmatter{
+// itemInputFromNote creates an ItemInput from a Note.
+func itemInputFromNote(n items.Note) markdown.ItemInput {
+	input := markdown.ItemInput{
+		ItemType:  items.ItemTypeNote,
 		Title:     n.Title,
-		Type:      string(items.ItemTypeNote),
+		Body:      n.Body,
 		CreatedAt: formatCreatedAt(n.CreatedAt),
 	}
 	if n.Tag != nil {
-		fm.Tag = n.Tag.Name
+		input.Tag = n.Tag.Name
 	}
-	return fm
+	return input
 }
