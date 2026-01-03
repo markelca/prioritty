@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/markelca/prioritty/pkg/frontmatter"
 	"github.com/markelca/prioritty/pkg/items/repository/obsidian"
 	"github.com/spf13/viper"
 )
@@ -14,9 +15,31 @@ import (
 //go:embed all_items.base.yaml
 var allItemsBaseContent string
 
+//go:embed demo_data.json
+var demoDataJSON []byte
+
 // TypesJSON represents the Obsidian types.json structure
 type TypesJSON struct {
 	Types map[string]string `json:"types"`
+}
+
+// DemoData represents the structure of demo_data.json
+type DemoData struct {
+	Tasks []DemoTask `json:"tasks"`
+	Notes []DemoNote `json:"notes"`
+}
+
+type DemoTask struct {
+	Title  string `json:"title"`
+	Body   string `json:"body"`
+	Status string `json:"status"`
+	Tag    string `json:"tag"`
+}
+
+type DemoNote struct {
+	Title string `json:"title"`
+	Body  string `json:"body"`
+	Tag   string `json:"tag"`
 }
 
 // defaultTypes returns the default property types for Prioritty
@@ -124,66 +147,53 @@ func seedDemoData(repo *obsidian.ObsidianRepository) error {
 		}
 	}
 
-	// Create demo tasks
-	demoTasks := []struct {
-		title  string
-		body   string
-		status string
-		tag    string
-	}{
-		{
-			title:  "Welcome to Prioritty",
-			body:   "This is a demo task. Press 'e' to edit, 'd' to mark as done.",
-			status: "todo",
-			tag:    "demo",
-		},
-		{
-			title:  "Learn the keybindings",
-			body:   "Use ? to see all available keybindings.\n\nNavigation: j/k or arrows\nStatus: t (todo), p (in progress), d (done), c (cancelled)",
-			status: "in-progress",
-			tag:    "demo",
-		},
-		{
-			title:  "Try the CLI commands",
-			body:   "Run 'pt --help' to see available commands.\n\nExamples:\n- pt list\n- pt task add \"New task\"\n- pt note add \"New note\"",
-			status: "todo",
-			tag:    "docs",
-		},
+	// Load demo data from embedded JSON
+	var demoData DemoData
+	if err := json.Unmarshal(demoDataJSON, &demoData); err != nil {
+		return err
 	}
 
 	now := time.Now().Format(time.RFC3339)
-	for _, t := range demoTasks {
-		content := "---\n"
-		content += "title: " + t.title + "\n"
-		content += "type: task\n"
-		content += "status: " + t.status + "\n"
-		if t.tag != "" {
-			content += "tag: " + t.tag + "\n"
-		}
-		content += "created_at: " + now + "\n"
-		content += "---\n"
-		content += t.body + "\n"
 
-		filename := obsidian.FilenameFromTitle(t.title)
+	// Create demo tasks
+	for _, t := range demoData.Tasks {
+		fm := obsidian.Frontmatter{
+			Title:     t.Title,
+			Type:      "task",
+			Status:    t.Status,
+			Tag:       t.Tag,
+			CreatedAt: now,
+		}
+		content, err := frontmatter.Serialize(fm, t.Body)
+		if err != nil {
+			return err
+		}
+
+		filename := obsidian.FilenameFromTitle(t.Title)
 		filePath := filepath.Join(repo.VaultPath(), filename)
-		if err := os.WriteFile(filePath, []byte(content), 0644); err != nil {
+		if err := os.WriteFile(filePath, content, 0644); err != nil {
 			return err
 		}
 	}
 
-	// Create a demo note
-	noteContent := "---\n"
-	noteContent += "title: Demo Note\n"
-	noteContent += "type: note\n"
-	noteContent += "tag: demo\n"
-	noteContent += "created_at: " + now + "\n"
-	noteContent += "---\n"
-	noteContent += "This is a demo note. Notes don't have status like tasks.\n"
-	noteContent += "\nYou can use notes for general information or documentation.\n"
+	// Create demo notes
+	for _, n := range demoData.Notes {
+		fm := obsidian.Frontmatter{
+			Title:     n.Title,
+			Type:      "note",
+			Tag:       n.Tag,
+			CreatedAt: now,
+		}
+		content, err := frontmatter.Serialize(fm, n.Body)
+		if err != nil {
+			return err
+		}
 
-	notePath := filepath.Join(repo.VaultPath(), "demo-note.md")
-	if err := os.WriteFile(notePath, []byte(noteContent), 0644); err != nil {
-		return err
+		filename := obsidian.FilenameFromTitle(n.Title)
+		filePath := filepath.Join(repo.VaultPath(), filename)
+		if err := os.WriteFile(filePath, content, 0644); err != nil {
+			return err
+		}
 	}
 
 	return nil

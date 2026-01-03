@@ -67,7 +67,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			footerHeight: lipgloss.Height(m.footerView()),
 		})
 
-	case editor.TaskEditorFinishedMsg:
+	case editor.EditorFinishedMsg:
 		// Check if the editor operation was cancelled (no content)
 		if msg.Err != nil {
 			if m.params.CreateMode != "" {
@@ -85,9 +85,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if m.params.CreateMode != "" {
 			// Creation mode
 			var err error
-			if m.params.CreateMode == "task" {
+			if m.params.CreateMode == items.ItemTypeTask {
 				err = m.Service.CreateTaskFromEditorMsg(msg)
-			} else if m.params.CreateMode == "note" {
+			} else if m.params.CreateMode == items.ItemTypeNote {
 				err = m.Service.CreateNoteFromEditorMsg(msg)
 			}
 			if err != nil {

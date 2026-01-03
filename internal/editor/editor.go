@@ -10,23 +10,67 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/markelca/prioritty/internal/config"
+	"github.com/markelca/prioritty/pkg/frontmatter"
+	"github.com/markelca/prioritty/pkg/items"
 	"github.com/spf13/viper"
+	"gopkg.in/yaml.v3"
 )
 
-type TaskEditorFinishedMsg struct {
-	Id    string
-	Title string
-	Body  string
-	Err   error
+// unquotedString is a string type that marshals to YAML without quotes.
+type unquotedString string
+
+func (s unquotedString) MarshalYAML() (interface{}, error) {
+	return &yaml.Node{
+		Kind:  yaml.ScalarNode,
+		Value: string(s),
+	}, nil
 }
 
-func EditTask(id string, title, body string) (tea.Cmd, error) {
-	tempFile, err := os.CreateTemp(os.TempDir(), "task_*.txt")
+// TaskEditorFrontmatter represents the YAML frontmatter for tasks in the editor.
+type TaskEditorFrontmatter struct {
+	Title  unquotedString `yaml:"title"`
+	Status unquotedString `yaml:"status"`
+	Tag    unquotedString `yaml:"tag"`
+}
+
+// NoteEditorFrontmatter represents the YAML frontmatter for notes in the editor.
+type NoteEditorFrontmatter struct {
+	Title unquotedString `yaml:"title"`
+	Tag   unquotedString `yaml:"tag"`
+}
+
+// EditorInput contains the data to populate the editor temp file.
+type EditorInput struct {
+	Id       string
+	ItemType items.ItemType
+	Title    string
+	Body     string
+	Status   string
+	Tag      string
+}
+
+// EditorFinishedMsg contains the parsed result from the editor.
+type EditorFinishedMsg struct {
+	Id     string
+	Title  string
+	Body   string
+	Status string
+	Tag    string
+	Err    error
+}
+
+func EditItem(input EditorInput) (tea.Cmd, error) {
+	tempFile, err := os.CreateTemp(os.TempDir(), "item_*.md")
 	if err != nil {
 		return nil, fmt.Errorf("failed to create temp file: %w", err)
 	}
 
-	content := title + "\n\n" + body
+	content, err := serializeEditorContent(input)
+	if err != nil {
+		tempFile.Close()
+		return nil, fmt.Errorf("failed to serialize content: %w", err)
+	}
+
 	if _, err := tempFile.WriteString(content); err != nil {
 		tempFile.Close()
 		return nil, fmt.Errorf("failed to write to temp file: %w", err)
@@ -42,52 +86,78 @@ func EditTask(id string, title, body string) (tea.Cmd, error) {
 		defer os.Remove(tempFile.Name())
 		modifiedContent, err := os.ReadFile(tempFile.Name())
 		if err != nil {
-			return TaskEditorFinishedMsg{Err: fmt.Errorf("failed to read modified file: %w", err)}
+			return EditorFinishedMsg{Err: fmt.Errorf("failed to read modified file: %w", err)}
 		}
 
-		msg := parseTaskContent(string(modifiedContent))
-		msg.Id = id
+		msg := parseEditorContent(string(modifiedContent), input.ItemType)
+		msg.Id = input.Id
 
 		return msg
 	}), nil
 }
 
-func parseTaskContent(content string) TaskEditorFinishedMsg {
+// serializeEditorContent creates the content for the editor temp file with frontmatter.
+func serializeEditorContent(input EditorInput) (string, error) {
+	var content []byte
+	var err error
+
+	if input.ItemType == items.ItemTypeTask {
+		fm := TaskEditorFrontmatter{
+			Title:  unquotedString(input.Title),
+			Status: unquotedString(input.Status),
+			Tag:    unquotedString(input.Tag),
+		}
+		content, err = frontmatter.Serialize(fm, input.Body)
+	} else {
+		fm := NoteEditorFrontmatter{
+			Title: unquotedString(input.Title),
+			Tag:   unquotedString(input.Tag),
+		}
+		content, err = frontmatter.Serialize(fm, input.Body)
+	}
+
+	if err != nil {
+		return "", err
+	}
+
+	return string(content), nil
+}
+
+// parsedFrontmatter is used for parsing (uses regular strings)
+type parsedFrontmatter struct {
+	Title  string `yaml:"title"`
+	Status string `yaml:"status"`
+	Tag    string `yaml:"tag"`
+}
+
+// parseEditorContent parses the editor content including frontmatter.
+func parseEditorContent(content string, itemType items.ItemType) EditorFinishedMsg {
 	// Check if content is completely empty or only whitespace
 	trimmedContent := strings.TrimSpace(content)
 	if trimmedContent == "" {
-		return TaskEditorFinishedMsg{Err: fmt.Errorf("operation cancelled - no content provided")}
+		return EditorFinishedMsg{Err: fmt.Errorf("operation cancelled - no content provided")}
 	}
 
-	lines := strings.Split(trimmedContent, "\n")
-	var body, title string
-
-	if len(lines) == 0 {
-		return TaskEditorFinishedMsg{Err: fmt.Errorf("operation cancelled - no content provided")}
+	// Parse frontmatter
+	var fm parsedFrontmatter
+	body, err := frontmatter.Parse(content, &fm)
+	if err != nil {
+		log.Printf("Error parsing frontmatter: %v", err)
+		return EditorFinishedMsg{Err: fmt.Errorf("invalid frontmatter: %w", err)}
 	}
 
-	title = strings.TrimSpace(lines[0])
+	// Title is required
+	title := strings.TrimSpace(fm.Title)
 	if title == "" {
-		return TaskEditorFinishedMsg{Err: fmt.Errorf("operation cancelled - no content provided")}
+		return EditorFinishedMsg{Err: fmt.Errorf("operation cancelled - no title provided")}
 	}
 
-	// Rest is the content (skip empty line if present)
-	var contentLines []string
-	startIndex := 1
-
-	// Skip the first empty line if it exists
-	if len(lines) > 1 && strings.TrimSpace(lines[1]) == "" {
-		startIndex = 2
+	return EditorFinishedMsg{
+		Title:  title,
+		Body:   strings.TrimSpace(body),
+		Status: fm.Status,
+		Tag:    fm.Tag,
 	}
-
-	if len(lines) > startIndex {
-		contentLines = lines[startIndex:]
-		body = strings.Join(contentLines, "\n")
-	} else {
-		body = ""
-	}
-
-	return TaskEditorFinishedMsg{Title: title, Body: body, Err: nil}
 }
 
 func getEditor() (string, error) {

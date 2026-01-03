@@ -3,6 +3,7 @@ package cli
 import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/markelca/prioritty/internal/tui"
+	"github.com/markelca/prioritty/pkg/items"
 	"github.com/spf13/cobra"
 )
 
@@ -19,7 +20,7 @@ var noteCmd = &cobra.Command{
 		m := tui.InitialModel(false)
 		if len(args) == 0 {
 			// Create with editor
-			m.SetCreateMode("note")
+			m.SetCreateMode(items.ItemTypeNote)
 			tea.NewProgram(m).Run()
 		} else {
 			// Create with title only

@@ -54,9 +54,32 @@ func (s TaskService) removeTask(id string) error {
 }
 
 func (s TaskService) EditWithEditor(t items.ItemInterface) (tea.Cmd, error) {
-	return editor.EditTask(t.GetId(), t.GetTitle(), t.GetBody())
+	input := editor.EditorInput{
+		Id:    t.GetId(),
+		Title: t.GetTitle(),
+		Body:  t.GetBody(),
+	}
+
+	// Set item type and status based on the concrete type
+	switch task := t.(type) {
+	case *items.Task:
+		input.ItemType = items.ItemTypeTask
+		input.Status = items.StatusToString(task.Status)
+	case *items.Note:
+		input.ItemType = items.ItemTypeNote
+	}
+
+	// Set tag if present
+	if tag := t.GetTag(); tag != nil {
+		input.Tag = tag.Name
+	}
+
+	return editor.EditItem(input)
 }
 
-func (s TaskService) CreateWithEditor(itemType string) (tea.Cmd, error) {
-	return editor.EditTask("", "", "")
+func (s TaskService) CreateWithEditor(itemType items.ItemType) (tea.Cmd, error) {
+	input := editor.EditorInput{
+		ItemType: itemType,
+	}
+	return editor.EditItem(input)
 }

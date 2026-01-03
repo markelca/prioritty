@@ -1,0 +1,29 @@
+{
+  "tasks": [
+    {
+      "title": "Welcome to Prioritty",
+      "body": "This is a demo task. Press 'e' to edit, 'd' to mark as done.",
+      "status": "todo",
+      "tag": "demo"
+    },
+    {
+      "title": "Learn the keybindings",
+      "body": "Use ? to see all available keybindings.\n\nNavigation: j/k or arrows\nStatus: t (todo), p (in progress), d (done), c (cancelled)",
+      "status": "in-progress",
+      "tag": "demo"
+    },
+    {
+      "title": "Try the CLI commands",
+      "body": "Run 'pt --help' to see available commands.\n\nExamples:\n- pt list\n- pt task add \"New task\"\n- pt note add \"New note\"",
+      "status": "todo",
+      "tag": "docs"
+    }
+  ],
+  "notes": [
+    {
+      "title": "Demo Note",
+      "body": "This is a demo note. Notes don't have status like tasks.\n\nYou can use notes for general information or documentation.",
+      "tag": "demo"
+    }
+  ]
+}
