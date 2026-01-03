@@ -10,34 +10,10 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/markelca/prioritty/internal/config"
-	"github.com/markelca/prioritty/pkg/frontmatter"
 	"github.com/markelca/prioritty/pkg/items"
+	"github.com/markelca/prioritty/pkg/markdown"
 	"github.com/spf13/viper"
-	"gopkg.in/yaml.v3"
 )
-
-// unquotedString is a string type that marshals to YAML without quotes.
-type unquotedString string
-
-func (s unquotedString) MarshalYAML() (interface{}, error) {
-	return &yaml.Node{
-		Kind:  yaml.ScalarNode,
-		Value: string(s),
-	}, nil
-}
-
-// TaskEditorFrontmatter represents the YAML frontmatter for tasks in the editor.
-type TaskEditorFrontmatter struct {
-	Title  unquotedString `yaml:"title"`
-	Status unquotedString `yaml:"status"`
-	Tag    unquotedString `yaml:"tag"`
-}
-
-// NoteEditorFrontmatter represents the YAML frontmatter for notes in the editor.
-type NoteEditorFrontmatter struct {
-	Title unquotedString `yaml:"title"`
-	Tag   unquotedString `yaml:"tag"`
-}
 
 // EditorInput contains the data to populate the editor temp file.
 type EditorInput struct {
@@ -65,7 +41,13 @@ func EditItem(input EditorInput) (tea.Cmd, error) {
 		return nil, fmt.Errorf("failed to create temp file: %w", err)
 	}
 
-	content, err := serializeEditorContent(input)
+	content, err := markdown.Serialize(markdown.ItemInput{
+		ItemType: input.ItemType,
+		Title:    input.Title,
+		Body:     input.Body,
+		Status:   input.Status,
+		Tag:      input.Tag,
+	})
 	if err != nil {
 		tempFile.Close()
 		return nil, fmt.Errorf("failed to serialize content: %w", err)
@@ -96,33 +78,6 @@ func EditItem(input EditorInput) (tea.Cmd, error) {
 	}), nil
 }
 
-// serializeEditorContent creates the content for the editor temp file with frontmatter.
-func serializeEditorContent(input EditorInput) (string, error) {
-	var content []byte
-	var err error
-
-	if input.ItemType == items.ItemTypeTask {
-		fm := TaskEditorFrontmatter{
-			Title:  unquotedString(input.Title),
-			Status: unquotedString(input.Status),
-			Tag:    unquotedString(input.Tag),
-		}
-		content, err = frontmatter.Serialize(fm, input.Body)
-	} else {
-		fm := NoteEditorFrontmatter{
-			Title: unquotedString(input.Title),
-			Tag:   unquotedString(input.Tag),
-		}
-		content, err = frontmatter.Serialize(fm, input.Body)
-	}
-
-	if err != nil {
-		return "", err
-	}
-
-	return string(content), nil
-}
-
 // parsedFrontmatter is used for parsing (uses regular strings)
 type parsedFrontmatter struct {
 	Title  string `yaml:"title"`
@@ -140,7 +95,7 @@ func parseEditorContent(content string, itemType items.ItemType) EditorFinishedM
 
 	// Parse frontmatter
 	var fm parsedFrontmatter
-	body, err := frontmatter.Parse(content, &fm)
+	body, err := markdown.Parse(content, &fm)
 	if err != nil {
 		log.Printf("Error parsing frontmatter: %v", err)
 		return EditorFinishedMsg{Err: fmt.Errorf("invalid frontmatter: %w", err)}

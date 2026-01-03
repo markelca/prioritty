@@ -3,8 +3,8 @@ package obsidian
 import (
 	"time"
 
-	"github.com/markelca/prioritty/pkg/frontmatter"
 	"github.com/markelca/prioritty/pkg/items"
+	"github.com/markelca/prioritty/pkg/markdown"
 )
 
 const timeFormat = time.RFC3339
@@ -21,13 +21,13 @@ type Frontmatter struct {
 // parseFrontmatter extracts frontmatter and body from markdown content.
 func parseFrontmatter(content []byte) (Frontmatter, string, error) {
 	var fm Frontmatter
-	body, err := frontmatter.Parse(string(content), &fm)
+	body, err := markdown.Parse(string(content), &fm)
 	return fm, body, err
 }
 
 // serializeFrontmatter creates markdown content from frontmatter and body.
 func serializeFrontmatter(fm Frontmatter, body string) ([]byte, error) {
-	return frontmatter.Serialize(fm, body)
+	return markdown.SerializeFrontmatter(fm, body)
 }
 
 // parseCreatedAt parses the created_at string to time.Time.

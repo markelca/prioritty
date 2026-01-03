@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/markelca/prioritty/pkg/frontmatter"
 	"github.com/markelca/prioritty/pkg/items/repository/obsidian"
+	"github.com/markelca/prioritty/pkg/markdown"
 	"github.com/spf13/viper"
 )
 
@@ -164,7 +164,7 @@ func seedDemoData(repo *obsidian.ObsidianRepository) error {
 			Tag:       t.Tag,
 			CreatedAt: now,
 		}
-		content, err := frontmatter.Serialize(fm, t.Body)
+		content, err := markdown.SerializeFrontmatter(fm, t.Body)
 		if err != nil {
 			return err
 		}
@@ -184,7 +184,7 @@ func seedDemoData(repo *obsidian.ObsidianRepository) error {
 			Tag:       n.Tag,
 			CreatedAt: now,
 		}
-		content, err := frontmatter.Serialize(fm, n.Body)
+		content, err := markdown.SerializeFrontmatter(fm, n.Body)
 		if err != nil {
 			return err
 		}
