@@ -51,11 +51,8 @@ func (r *ObsidianRepository) CreateNote(n items.Note) error {
 	// Generate unique filename
 	filePath := uniqueFilename(r.vaultPath, n.Title)
 
-	// Create frontmatter
-	fm := frontmatterFromNote(n)
-
 	// Serialize to markdown
-	content, err := serializeFrontmatter(fm, n.Body)
+	content, err := serializeItem(itemInputFromNote(n))
 	if err != nil {
 		return err
 	}
@@ -84,11 +81,8 @@ func (r *ObsidianRepository) UpdateNote(n items.Note) error {
 		n.CreatedAt = parseCreatedAt(existingFm.CreatedAt)
 	}
 
-	// Create frontmatter
-	fm := frontmatterFromNote(n)
-
 	// Serialize to markdown
-	content, err := serializeFrontmatter(fm, n.Body)
+	content, err := serializeItem(itemInputFromNote(n))
 	if err != nil {
 		return err
 	}
@@ -139,7 +133,7 @@ func (r *ObsidianRepository) SetNoteTag(n items.Note, tag items.Tag) error {
 	fm.Tag = tag.Name
 
 	// Serialize and write back
-	newContent, err := serializeFrontmatter(fm, body)
+	newContent, err := fm.Serialize(body)
 	if err != nil {
 		return err
 	}
@@ -166,7 +160,7 @@ func (r *ObsidianRepository) UnsetNoteTag(n items.Note) error {
 	fm.Tag = ""
 
 	// Serialize and write back
-	newContent, err := serializeFrontmatter(fm, body)
+	newContent, err := fm.Serialize(body)
 	if err != nil {
 		return err
 	}

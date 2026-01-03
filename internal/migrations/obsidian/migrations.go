@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/markelca/prioritty/pkg/items"
 	"github.com/markelca/prioritty/pkg/items/repository/obsidian"
 	"github.com/markelca/prioritty/pkg/markdown"
 	"github.com/spf13/viper"
@@ -157,41 +158,41 @@ func seedDemoData(repo *obsidian.ObsidianRepository) error {
 
 	// Create demo tasks
 	for _, t := range demoData.Tasks {
-		fm := obsidian.Frontmatter{
+		content, err := markdown.Serialize(markdown.ItemInput{
+			ItemType:  items.ItemTypeTask,
 			Title:     t.Title,
-			Type:      "task",
+			Body:      t.Body,
 			Status:    t.Status,
 			Tag:       t.Tag,
 			CreatedAt: now,
-		}
-		content, err := markdown.SerializeFrontmatter(fm, t.Body)
+		})
 		if err != nil {
 			return err
 		}
 
 		filename := obsidian.FilenameFromTitle(t.Title)
 		filePath := filepath.Join(repo.VaultPath(), filename)
-		if err := os.WriteFile(filePath, content, 0644); err != nil {
+		if err := os.WriteFile(filePath, []byte(content), 0644); err != nil {
 			return err
 		}
 	}
 
 	// Create demo notes
 	for _, n := range demoData.Notes {
-		fm := obsidian.Frontmatter{
+		content, err := markdown.Serialize(markdown.ItemInput{
+			ItemType:  items.ItemTypeNote,
 			Title:     n.Title,
-			Type:      "note",
+			Body:      n.Body,
 			Tag:       n.Tag,
 			CreatedAt: now,
-		}
-		content, err := markdown.SerializeFrontmatter(fm, n.Body)
+		})
 		if err != nil {
 			return err
 		}
 
 		filename := obsidian.FilenameFromTitle(n.Title)
 		filePath := filepath.Join(repo.VaultPath(), filename)
-		if err := os.WriteFile(filePath, content, 0644); err != nil {
+		if err := os.WriteFile(filePath, []byte(content), 0644); err != nil {
 			return err
 		}
 	}
