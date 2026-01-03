@@ -2,14 +2,14 @@ package items
 
 import "strings"
 
-type Status int
+type Status string
 
 const (
-	Todo Status = iota
-	InProgress
-	Done
-	Cancelled
-	NoteType
+	Todo       Status = "todo"
+	InProgress Status = "in-progress"
+	Done       Status = "done"
+	Cancelled  Status = "cancelled"
+	NoteType   Status = "note" // Used for counting notes in UI
 )
 
 var _ ItemInterface = (*Task)(nil)
@@ -31,24 +31,8 @@ func (t Task) Render(r Renderer) string {
 	return r.Render(t)
 }
 
-// StatusToString converts a Status enum to its string value.
-func StatusToString(s Status) string {
-	switch s {
-	case Todo:
-		return "todo"
-	case InProgress:
-		return "in-progress"
-	case Done:
-		return "done"
-	case Cancelled:
-		return "cancelled"
-	default:
-		return "todo"
-	}
-}
-
-// StringToStatus converts a string to Status enum.
-func StringToStatus(s string) Status {
+// ParseStatus converts a string to Status, handling alternate spellings.
+func ParseStatus(s string) Status {
 	switch strings.ToLower(s) {
 	case "todo":
 		return Todo

@@ -136,7 +136,7 @@ func (r *ObsidianRepository) UpdateTaskStatus(t items.Task, status items.Status)
 	}
 
 	// Update status
-	fm.Status = items.StatusToString(status)
+	fm.Status = string(status)
 
 	// Serialize and write back
 	newContent, err := serializeFrontmatter(fm, body)

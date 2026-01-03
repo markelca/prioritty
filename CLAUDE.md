@@ -5,6 +5,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Guidelines
 
 - Do not run build or package manager commands (e.g., `make build`, `go build`, `go mod tidy`). Ask the user to run them and confirm when done.
+- This repository uses Graphite (`gt`) instead of git for branch and PR management. Use `gt` commands instead of `git`:
+  - `gt create -m "message"` instead of `git commit`
+  - `gt modify` instead of `git commit --amend`
+  - `gt submit` instead of `git push` / `gh pr create`
+  - `gt sync` instead of `git pull`
 
 ## Project Overview
 

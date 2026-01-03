@@ -71,7 +71,7 @@ func (s Service) UpdateItemFromEditorMsg(i items.ItemInterface, msg editor.Edito
 		v.Body = msg.Body
 		// Update status if provided
 		if msg.Status != "" {
-			v.Status = items.StringToStatus(msg.Status)
+			v.Status = items.ParseStatus(msg.Status)
 		}
 		if err := s.UpdateTask(*v); err != nil {
 			log.Println("Error updating the task - ", err)
@@ -124,7 +124,7 @@ func (s Service) CreateTaskFromEditorMsg(msg editor.EditorFinishedMsg) error {
 			Title: msg.Title,
 			Body:  msg.Body,
 		},
-		Status: items.StringToStatus(msg.Status),
+		Status: items.ParseStatus(msg.Status),
 	}
 	if err := s.repository.CreateTask(task); err != nil {
 		return err

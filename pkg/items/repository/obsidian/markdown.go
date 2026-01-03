@@ -68,7 +68,7 @@ func taskFromFrontmatter(fm Frontmatter, body, id string) items.Task {
 			CreatedAt: parseCreatedAt(fm.CreatedAt),
 			Tag:       tag,
 		},
-		Status: items.StringToStatus(fm.Status),
+		Status: items.ParseStatus(fm.Status),
 	}
 }
 
@@ -98,7 +98,7 @@ func frontmatterFromTask(t items.Task) Frontmatter {
 	fm := Frontmatter{
 		Title:     t.Title,
 		Type:      string(items.ItemTypeTask),
-		Status:    items.StatusToString(t.Status),
+		Status:    string(t.Status),
 		CreatedAt: formatCreatedAt(t.CreatedAt),
 	}
 	if t.Tag != nil {

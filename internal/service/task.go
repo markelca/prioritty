@@ -64,7 +64,7 @@ func (s TaskService) EditWithEditor(t items.ItemInterface) (tea.Cmd, error) {
 	switch task := t.(type) {
 	case *items.Task:
 		input.ItemType = items.ItemTypeTask
-		input.Status = items.StatusToString(task.Status)
+		input.Status = string(task.Status)
 	case *items.Note:
 		input.ItemType = items.ItemTypeNote
 	}
