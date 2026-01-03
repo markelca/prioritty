@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/markelca/prioritty/pkg/frontmatter"
 	"github.com/markelca/prioritty/pkg/items/repository/obsidian"
 	"github.com/spf13/viper"
 )
@@ -153,36 +154,40 @@ func seedDemoData(repo *obsidian.ObsidianRepository) error {
 
 	now := time.Now().Format(time.RFC3339)
 	for _, t := range demoTasks {
-		content := "---\n"
-		content += "title: " + t.title + "\n"
-		content += "type: task\n"
-		content += "status: " + t.status + "\n"
-		if t.tag != "" {
-			content += "tag: " + t.tag + "\n"
+		fm := obsidian.Frontmatter{
+			Title:     t.title,
+			Type:      "task",
+			Status:    t.status,
+			Tag:       t.tag,
+			CreatedAt: now,
 		}
-		content += "created_at: " + now + "\n"
-		content += "---\n"
-		content += t.body + "\n"
+		content, err := frontmatter.Serialize(fm, t.body)
+		if err != nil {
+			return err
+		}
 
 		filename := obsidian.FilenameFromTitle(t.title)
 		filePath := filepath.Join(repo.VaultPath(), filename)
-		if err := os.WriteFile(filePath, []byte(content), 0644); err != nil {
+		if err := os.WriteFile(filePath, content, 0644); err != nil {
 			return err
 		}
 	}
 
 	// Create a demo note
-	noteContent := "---\n"
-	noteContent += "title: Demo Note\n"
-	noteContent += "type: note\n"
-	noteContent += "tag: demo\n"
-	noteContent += "created_at: " + now + "\n"
-	noteContent += "---\n"
-	noteContent += "This is a demo note. Notes don't have status like tasks.\n"
-	noteContent += "\nYou can use notes for general information or documentation.\n"
+	noteFm := obsidian.Frontmatter{
+		Title:     "Demo Note",
+		Type:      "note",
+		Tag:       "demo",
+		CreatedAt: now,
+	}
+	noteBody := "This is a demo note. Notes don't have status like tasks.\n\nYou can use notes for general information or documentation."
+	noteContent, err := frontmatter.Serialize(noteFm, noteBody)
+	if err != nil {
+		return err
+	}
 
 	notePath := filepath.Join(repo.VaultPath(), "demo-note.md")
-	if err := os.WriteFile(notePath, []byte(noteContent), 0644); err != nil {
+	if err := os.WriteFile(notePath, noteContent, 0644); err != nil {
 		return err
 	}
 
