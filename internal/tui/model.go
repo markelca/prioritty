@@ -8,10 +8,12 @@ import (
 	"github.com/charmbracelet/bubbles/help"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/markelca/prioritty/internal/config"
-	"github.com/markelca/prioritty/internal/migrations/sqlite"
+	obsidianMigrations "github.com/markelca/prioritty/internal/migrations/obsidian"
+	sqliteMigrations "github.com/markelca/prioritty/internal/migrations/sqlite"
 	"github.com/markelca/prioritty/internal/render"
 	"github.com/markelca/prioritty/internal/service"
 	"github.com/markelca/prioritty/pkg/items"
+	"github.com/markelca/prioritty/pkg/items/repository"
 	"github.com/spf13/viper"
 )
 
@@ -32,15 +34,30 @@ type Model struct {
 
 func InitialModel(withTui bool) Model {
 	isDemo := viper.GetBool("demo")
-	var dbFilePath string
+	repoType := viper.GetString(config.CONF_REPOSITORY_TYPE)
 
-	if isDemo {
-		dbFilePath = path.Join(os.TempDir(), "prioritty_demo.db")
-	} else {
-		dbFilePath = viper.GetString(config.CONF_DATABASE_PATH)
+	var repo repository.Repository
+	var err error
+
+	switch repoType {
+	case "obsidian":
+		var vaultPath string
+		if isDemo {
+			vaultPath = path.Join(os.TempDir(), "prioritty_demo_vault")
+		} else {
+			vaultPath = viper.GetString(config.CONF_DATABASE_PATH)
+		}
+		repo, err = obsidianMigrations.NewObsidianRepository(vaultPath)
+	default: // "sqlite" or any other value defaults to sqlite
+		var dbFilePath string
+		if isDemo {
+			dbFilePath = path.Join(os.TempDir(), "prioritty_demo.db")
+		} else {
+			dbFilePath = viper.GetString(config.CONF_DATABASE_PATH)
+		}
+		repo, err = sqliteMigrations.NewSQLiteRepository(dbFilePath)
 	}
 
-	repo, err := sqlite.NewSQLiteRepository(dbFilePath)
 	if err != nil {
 		log.Println("Error - Failed to create repository:", err)
 		os.Exit(3)

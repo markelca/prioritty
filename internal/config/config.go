@@ -13,12 +13,14 @@ const CONF_DATABASE_PATH string = "database_path"
 const CONF_LOG_FILE_PATH string = "log_file_path"
 const CONF_DEFAULT_COMMAND string = "default_command"
 const CONF_EDITOR string = "editor"
+const CONF_REPOSITORY_TYPE string = "repository_type"
 
 type Config struct {
 	DatabasePath   string `mapstructure:"database_path" yaml:"database_path"`
 	LogFilePath    string `mapstructure:"log_file_path" yaml:"log_file_path"`
 	DefaultCommand string `mapstructure:"default_command" yaml:"default_command"`
 	Editor         string `mapstructure:"editor" yaml:"editor"`
+	RepositoryType string `mapstructure:"repository_type" yaml:"repository_type"`
 }
 
 var config *Config
@@ -79,6 +81,7 @@ func createConfigFile(configDir string) error {
 		LogFilePath:    viper.GetString(CONF_LOG_FILE_PATH),
 		DefaultCommand: viper.GetString(CONF_DEFAULT_COMMAND),
 		Editor:         viper.GetString(CONF_EDITOR),
+		RepositoryType: viper.GetString(CONF_REPOSITORY_TYPE),
 	}
 
 	configFile := filepath.Join(configDir, "prioritty.yaml")
@@ -102,4 +105,5 @@ func setDefaults(configDir string) {
 	viper.SetDefault(CONF_LOG_FILE_PATH, filepath.Join(configDir, "prioritty.log"))
 	viper.SetDefault(CONF_DEFAULT_COMMAND, "tui")
 	viper.SetDefault(CONF_EDITOR, "nano")
+	viper.SetDefault(CONF_REPOSITORY_TYPE, "sqlite")
 }
