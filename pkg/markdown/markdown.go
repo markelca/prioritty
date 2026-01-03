@@ -21,26 +21,48 @@ func (s unquotedString) MarshalYAML() (interface{}, error) {
 	}, nil
 }
 
-// TaskFrontmatter represents the YAML frontmatter for tasks.
-type TaskFrontmatter struct {
-	Title  unquotedString `yaml:"title"`
-	Status unquotedString `yaml:"status"`
-	Tag    unquotedString `yaml:"tag"`
+// Frontmatter represents the YAML frontmatter for items.
+type Frontmatter struct {
+	Title     string `yaml:"title"`
+	Type      string `yaml:"type,omitempty"`
+	Status    string `yaml:"status,omitempty"`
+	Tag       string `yaml:"tag,omitempty"`
+	CreatedAt string `yaml:"created_at,omitempty"`
 }
 
-// NoteFrontmatter represents the YAML frontmatter for notes.
-type NoteFrontmatter struct {
-	Title unquotedString `yaml:"title"`
-	Tag   unquotedString `yaml:"tag"`
+// unquotedFrontmatter is used internally for serialization to produce clean YAML without quotes.
+type unquotedFrontmatter struct {
+	Title     unquotedString `yaml:"title"`
+	Type      unquotedString `yaml:"type,omitempty"`
+	Status    unquotedString `yaml:"status,omitempty"`
+	Tag       unquotedString `yaml:"tag,omitempty"`
+	CreatedAt unquotedString `yaml:"created_at,omitempty"`
+}
+
+// toUnquoted converts a Frontmatter to unquotedFrontmatter for serialization.
+func (fm Frontmatter) toUnquoted() unquotedFrontmatter {
+	return unquotedFrontmatter{
+		Title:     unquotedString(fm.Title),
+		Type:      unquotedString(fm.Type),
+		Status:    unquotedString(fm.Status),
+		Tag:       unquotedString(fm.Tag),
+		CreatedAt: unquotedString(fm.CreatedAt),
+	}
+}
+
+// Serialize converts a Frontmatter to markdown content with body.
+func (fm Frontmatter) Serialize(body string) ([]byte, error) {
+	return SerializeFrontmatter(fm.toUnquoted(), body)
 }
 
 // ItemInput contains the data to serialize an item to markdown.
 type ItemInput struct {
-	ItemType items.ItemType
-	Title    string
-	Body     string
-	Status   string
-	Tag      string
+	ItemType  items.ItemType
+	Title     string
+	Body      string
+	Status    string
+	Tag       string
+	CreatedAt string // Only populated when serializing for storage/display, not for editor
 }
 
 // Parse extracts frontmatter and body from markdown content.
@@ -108,24 +130,19 @@ func SerializeFrontmatter[T any](fm T, body string) ([]byte, error) {
 
 // Serialize creates markdown content with frontmatter from an ItemInput.
 func Serialize(input ItemInput) (string, error) {
-	var content []byte
-	var err error
-
-	if input.ItemType == items.ItemTypeTask {
-		fm := TaskFrontmatter{
-			Title:  unquotedString(input.Title),
-			Status: unquotedString(input.Status),
-			Tag:    unquotedString(input.Tag),
-		}
-		content, err = SerializeFrontmatter(fm, input.Body)
-	} else {
-		fm := NoteFrontmatter{
-			Title: unquotedString(input.Title),
-			Tag:   unquotedString(input.Tag),
-		}
-		content, err = SerializeFrontmatter(fm, input.Body)
+	fm := Frontmatter{
+		Title:     input.Title,
+		Type:      string(input.ItemType),
+		Tag:       input.Tag,
+		CreatedAt: input.CreatedAt,
 	}
 
+	// Only include status for tasks
+	if input.ItemType == items.ItemTypeTask {
+		fm.Status = input.Status
+	}
+
+	content, err := SerializeFrontmatter(fm.toUnquoted(), input.Body)
 	if err != nil {
 		return "", err
 	}

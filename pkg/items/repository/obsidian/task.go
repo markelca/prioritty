@@ -51,11 +51,8 @@ func (r *ObsidianRepository) CreateTask(t items.Task) error {
 	// Generate unique filename
 	filePath := uniqueFilename(r.vaultPath, t.Title)
 
-	// Create frontmatter
-	fm := frontmatterFromTask(t)
-
 	// Serialize to markdown
-	content, err := serializeFrontmatter(fm, t.Body)
+	content, err := serializeItem(itemInputFromTask(t))
 	if err != nil {
 		return err
 	}
@@ -84,11 +81,8 @@ func (r *ObsidianRepository) UpdateTask(t items.Task) error {
 		t.CreatedAt = parseCreatedAt(existingFm.CreatedAt)
 	}
 
-	// Create frontmatter
-	fm := frontmatterFromTask(t)
-
 	// Serialize to markdown
-	content, err := serializeFrontmatter(fm, t.Body)
+	content, err := serializeItem(itemInputFromTask(t))
 	if err != nil {
 		return err
 	}
@@ -139,7 +133,7 @@ func (r *ObsidianRepository) UpdateTaskStatus(t items.Task, status items.Status)
 	fm.Status = string(status)
 
 	// Serialize and write back
-	newContent, err := serializeFrontmatter(fm, body)
+	newContent, err := fm.Serialize(body)
 	if err != nil {
 		return err
 	}
@@ -166,7 +160,7 @@ func (r *ObsidianRepository) SetTaskTag(t items.Task, tag items.Tag) error {
 	fm.Tag = tag.Name
 
 	// Serialize and write back
-	newContent, err := serializeFrontmatter(fm, body)
+	newContent, err := fm.Serialize(body)
 	if err != nil {
 		return err
 	}
@@ -193,7 +187,7 @@ func (r *ObsidianRepository) UnsetTaskTag(t items.Task) error {
 	fm.Tag = ""
 
 	// Serialize and write back
-	newContent, err := serializeFrontmatter(fm, body)
+	newContent, err := fm.Serialize(body)
 	if err != nil {
 		return err
 	}
