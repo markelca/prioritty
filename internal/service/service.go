@@ -64,7 +64,7 @@ func (s Service) RemoveItem(item items.ItemInterface) error {
 	}
 }
 
-func (s Service) UpdateItemFromEditorMsg(i items.ItemInterface, msg editor.TaskEditorFinishedMsg) error {
+func (s Service) UpdateItemFromEditorMsg(i items.ItemInterface, msg editor.EditorFinishedMsg) error {
 	switch v := i.(type) {
 	case *items.Task:
 		v.Title = msg.Title
@@ -118,7 +118,7 @@ func (s Service) updateTagFromEditor(i items.ItemInterface, tagName string) erro
 	return s.SetTag(i, tagName)
 }
 
-func (s Service) CreateTaskFromEditorMsg(msg editor.TaskEditorFinishedMsg) error {
+func (s Service) CreateTaskFromEditorMsg(msg editor.EditorFinishedMsg) error {
 	task := items.Task{
 		Item: items.Item{
 			Title: msg.Title,
@@ -138,7 +138,7 @@ func (s Service) CreateTaskFromEditorMsg(msg editor.TaskEditorFinishedMsg) error
 	return nil
 }
 
-func (s Service) CreateNoteFromEditorMsg(msg editor.TaskEditorFinishedMsg) error {
+func (s Service) CreateNoteFromEditorMsg(msg editor.EditorFinishedMsg) error {
 	note := items.Note{
 		Item: items.Item{
 			Title: msg.Title,

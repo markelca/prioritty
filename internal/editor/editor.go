@@ -59,9 +59,6 @@ type EditorFinishedMsg struct {
 	Err    error
 }
 
-// Keeping TaskEditorFinishedMsg as alias for backward compatibility
-type TaskEditorFinishedMsg = EditorFinishedMsg
-
 func EditItem(input EditorInput) (tea.Cmd, error) {
 	tempFile, err := os.CreateTemp(os.TempDir(), "item_*.md")
 	if err != nil {

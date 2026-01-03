@@ -67,7 +67,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			footerHeight: lipgloss.Height(m.footerView()),
 		})
 
-	case editor.TaskEditorFinishedMsg:
+	case editor.EditorFinishedMsg:
 		// Check if the editor operation was cancelled (no content)
 		if msg.Err != nil {
 			if m.params.CreateMode != "" {
