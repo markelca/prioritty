@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Guidelines
+
+- Do not run build or package manager commands (e.g., `make build`, `go build`, `go mod tidy`). Ask the user to run them and confirm when done.
+
 ## Project Overview
 
 Prioritty is a TUI and CLI application for managing tasks and notes. Written in Go 1.23, it uses SQLite for persistence and Bubble Tea for the terminal UI.
