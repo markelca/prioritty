@@ -99,11 +99,11 @@ func (m Model) Init() tea.Cmd {
 }
 
 func (m Model) GetItemAt(index int) items.ItemInterface {
-	if index < 0 || len(m.state.items)-1 < index {
+	displayItems := m.state.getDisplayOrderedItems()
+	if index < 0 || index >= len(displayItems) {
 		return nil
-	} else {
-		return m.state.items[index]
 	}
+	return displayItems[index]
 }
 
 func (m Model) DestroyDemo() {
