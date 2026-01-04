@@ -1,14 +1,47 @@
-package frontmatter
+package markdown
 
 import (
 	"bytes"
 	"fmt"
 	"strings"
 
+	"github.com/markelca/prioritty/pkg/items"
 	"gopkg.in/yaml.v3"
 )
 
 const Delimiter = "---"
+
+// unquotedString is a string type that marshals to YAML without quotes.
+type unquotedString string
+
+func (s unquotedString) MarshalYAML() (interface{}, error) {
+	return &yaml.Node{
+		Kind:  yaml.ScalarNode,
+		Value: string(s),
+	}, nil
+}
+
+// TaskFrontmatter represents the YAML frontmatter for tasks.
+type TaskFrontmatter struct {
+	Title  unquotedString `yaml:"title"`
+	Status unquotedString `yaml:"status"`
+	Tag    unquotedString `yaml:"tag"`
+}
+
+// NoteFrontmatter represents the YAML frontmatter for notes.
+type NoteFrontmatter struct {
+	Title unquotedString `yaml:"title"`
+	Tag   unquotedString `yaml:"tag"`
+}
+
+// ItemInput contains the data to serialize an item to markdown.
+type ItemInput struct {
+	ItemType items.ItemType
+	Title    string
+	Body     string
+	Status   string
+	Tag      string
+}
 
 // Parse extracts frontmatter and body from markdown content.
 // The frontmatter struct must be passed as a pointer.
@@ -42,8 +75,8 @@ func Parse[T any](content string, fm *T) (body string, err error) {
 	return body, nil
 }
 
-// Serialize creates markdown content from frontmatter and body.
-func Serialize[T any](fm T, body string) ([]byte, error) {
+// SerializeFrontmatter creates markdown content from a frontmatter struct and body.
+func SerializeFrontmatter[T any](fm T, body string) ([]byte, error) {
 	var buf bytes.Buffer
 
 	// Write opening delimiter
@@ -71,4 +104,31 @@ func Serialize[T any](fm T, body string) ([]byte, error) {
 	}
 
 	return buf.Bytes(), nil
+}
+
+// Serialize creates markdown content with frontmatter from an ItemInput.
+func Serialize(input ItemInput) (string, error) {
+	var content []byte
+	var err error
+
+	if input.ItemType == items.ItemTypeTask {
+		fm := TaskFrontmatter{
+			Title:  unquotedString(input.Title),
+			Status: unquotedString(input.Status),
+			Tag:    unquotedString(input.Tag),
+		}
+		content, err = SerializeFrontmatter(fm, input.Body)
+	} else {
+		fm := NoteFrontmatter{
+			Title: unquotedString(input.Title),
+			Tag:   unquotedString(input.Tag),
+		}
+		content, err = SerializeFrontmatter(fm, input.Body)
+	}
+
+	if err != nil {
+		return "", err
+	}
+
+	return string(content), nil
 }
