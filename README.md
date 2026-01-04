@@ -13,13 +13,36 @@ A Terminal User Interface (TUI) and CLI application for managing your tasks. Foc
 
 ## Configuration
 You can configure the tool with the `config` command, or by modifying the configuration yaml file. You can also provide a filepath to use another config (`pt --config ./config.yaml`)
+
 `config.yaml:`
 ```yaml
 database_path: "./data/prioritty.db"
 log_file_path: "./logs/prioritty.log"
 default_command: "tui"
 editor: vim
+repository_type: sqlite  # or "obsidian"
 ```
+
+### Repository Types
+
+Prioritty supports two storage backends:
+
+- **sqlite** (default): Traditional SQLite database storage
+- **obsidian**: Store items as markdown files in an Obsidian vault
+
+To use an Obsidian vault:
+```yaml
+repository_type: obsidian
+database_path: /path/to/your/obsidian-vault
+```
+
+Or via environment variables:
+```bash
+export PRIORITTY_REPOSITORY_TYPE=obsidian
+export PRIORITTY_DATABASE_PATH=/path/to/your/obsidian-vault
+```
+
+When using the Obsidian backend, each task/note is stored as a markdown file with YAML frontmatter in the vault root directory.
 
 ## Usage
 ### CLI
@@ -65,6 +88,42 @@ Use "pt [command] --help" for more information about a command.
 ### TUI
 You can also press the `?` key to toggle the full help in TUI mode:
 ![image](https://github.com/user-attachments/assets/bcc53f9c-8250-45e8-bb2d-edaaeebdbf95)
+
+### Frontmatter Syntax
+
+When creating or editing items (via `pt task`, `pt note`, `pt edit`, or pressing `e`/`a` in the TUI), the editor opens with YAML frontmatter format:
+
+**Task example:**
+```yaml
+---
+title: Complete project report
+type: task
+status: in-progress
+tag: work
+---
+Optional body/description here.
+Can span multiple lines.
+```
+
+**Note example:**
+```yaml
+---
+title: Meeting notes
+type: note
+tag: work
+---
+Note content here.
+```
+
+**Supported fields:**
+| Field | Description | Values |
+|-------|-------------|--------|
+| `title` | Item title (required) | Any text |
+| `type` | Item type | `task` or `note` |
+| `status` | Task status (tasks only) | `todo`, `in-progress`, `done`, `cancelled` |
+| `tag` | Single tag name | Any text |
+
+You can view an item's raw frontmatter with `pt show <index> --raw`.
 
 ### Autocompletion
 
