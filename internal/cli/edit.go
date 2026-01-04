@@ -24,6 +24,7 @@ var editCmd = &cobra.Command{
 			return
 		}
 
+		// First get the item to edit
 		m := tui.InitialModel(false)
 		item := m.GetItemAt(index - 1) // Convert to 0-based index
 		if item == nil {
@@ -31,7 +32,7 @@ var editCmd = &cobra.Command{
 			return
 		}
 
-		// Set the item to edit and create edit mode
+		// Create edit model and run
 		editModel := tui.EditModel(item)
 		tea.NewProgram(editModel).Run()
 	},

@@ -17,13 +17,13 @@ var noteCmd = &cobra.Command{
 	Args:    cobra.MaximumNArgs(1),
 	Short:   "Adds a new note",
 	Run: func(cmd *cobra.Command, args []string) {
-		m := tui.InitialModel(false)
 		if len(args) == 0 {
 			// Create with editor
-			m.SetCreateMode(items.ItemTypeNote)
+			m := tui.CreateModel(items.ItemTypeNote)
 			tea.NewProgram(m).Run()
 		} else {
 			// Create with title only
+			m := tui.InitialModel(false)
 			m.Service.AddNote(args[0])
 		}
 	},
