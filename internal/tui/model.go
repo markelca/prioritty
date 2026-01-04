@@ -43,11 +43,19 @@ func sortItemsByTag(itemList []items.ItemInterface) []items.ItemInterface {
 	return result
 }
 
+// Mode represents the current operation mode of the TUI
+type Mode string
+
+const (
+	ModeList   Mode = "list"   // default: browsing items
+	ModeCreate Mode = "create" // creating a new item
+	ModeEdit   Mode = "edit"   // editing an existing item
+)
+
+// Params controls the behavior of the TUI model
 type Params struct {
-	withTui          bool
-	CreateMode       items.ItemType // items.ItemTypeTask or items.ItemTypeNote for creation mode
-	EditMode         bool           // true when editing an existing item
-	inlineCreateType items.ItemType // set when adding via 'a' key in TUI (returns to list, not quit)
+	IsTUI bool // true = return to list after action, false = quit after action
+	Mode  Mode // current operation mode
 }
 
 type Model struct {
@@ -55,9 +63,10 @@ type Model struct {
 	state    State
 	Service  service.Service
 	renderer render.CLI
+	initCmd  tea.Cmd // command to execute on Init(), used for CLI create/edit
 }
 
-func InitialModel(withTui bool) Model {
+func InitialModel(isTUI bool) Model {
 	isDemo := viper.GetBool("demo")
 	repoType := viper.GetString(config.CONF_REPOSITORY_TYPE)
 
@@ -95,34 +104,15 @@ func InitialModel(withTui bool) Model {
 	taskContent := ItemContent{}
 	return Model{
 		state:    State{item: taskContent, items: itemList},
-		params:   Params{withTui: withTui},
+		params:   Params{IsTUI: isTUI},
 		Service:  service,
 		renderer: render.CLI{},
 	}
 }
 
 func (m Model) Init() tea.Cmd {
-	// If in creation mode, immediately open the editor
-	if m.params.CreateMode != "" {
-		cmd, err := m.Service.CreateWithEditor(m.params.CreateMode)
-		if err != nil {
-			log.Println("Error opening editor:", err)
-			return tea.Quit
-		}
-		return cmd
-	}
-	// If in edit mode, immediately open the editor with current item
-	if m.params.EditMode {
-		item := m.state.GetCurrentItem()
-		cmd, err := m.Service.EditWithEditor(item)
-		if err != nil {
-			log.Println("Error opening editor:", err)
-			return tea.Quit
-		}
-		return cmd
-	}
-	// Just return `nil`, which means "no I/O right now, please."
-	return nil
+	// Return any command set during model creation (used for CLI create/edit)
+	return m.initCmd
 }
 
 func (m Model) GetItemAt(index int) items.ItemInterface {
@@ -140,10 +130,6 @@ func (m Model) DestroyDemo() {
 	}
 }
 
-func (m *Model) SetCreateMode(mode items.ItemType) {
-	m.params.CreateMode = mode
-}
-
 // refreshItems reloads the item list from the service.
 func (m *Model) refreshItems() {
 	itemList, err := m.Service.GetAll()
@@ -154,11 +140,32 @@ func (m *Model) refreshItems() {
 	m.state.items = sortItemsByTag(itemList)
 }
 
+// CreateModel returns a model configured for CLI item creation
+func CreateModel(itemType items.ItemType) Model {
+	m := InitialModel(false)
+	m.params.Mode = ModeCreate
+	cmd, err := m.Service.CreateWithEditor(itemType)
+	if err != nil {
+		log.Println("Error opening editor:", err)
+		m.initCmd = tea.Quit
+	} else {
+		m.initCmd = cmd
+	}
+	return m
+}
+
+// EditModel returns a model configured for CLI item editing
 func EditModel(item items.ItemInterface) Model {
-	// Create a minimal model for editing
 	m := InitialModel(false)
 	m.state.items = []items.ItemInterface{item}
 	m.state.cursor = 0
-	m.params.EditMode = true
+	m.params.Mode = ModeEdit
+	cmd, err := m.Service.EditWithEditor(item)
+	if err != nil {
+		log.Println("Error opening editor:", err)
+		m.initCmd = tea.Quit
+	} else {
+		m.initCmd = cmd
+	}
 	return m
 }

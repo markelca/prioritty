@@ -17,13 +17,13 @@ var taskCmd = &cobra.Command{
 	Args:    cobra.MaximumNArgs(1),
 	Short:   "Adds a new task",
 	Run: func(cmd *cobra.Command, args []string) {
-		m := tui.InitialModel(false)
 		if len(args) == 0 {
 			// Create with editor
-			m.SetCreateMode(items.ItemTypeTask)
+			m := tui.CreateModel(items.ItemTypeTask)
 			tea.NewProgram(m).Run()
 		} else {
 			// Create with title only
+			m := tui.InitialModel(false)
 			m.Service.AddTask(args[0])
 		}
 	},

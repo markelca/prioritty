@@ -22,7 +22,7 @@ func (m Model) View() string {
 
 	if len(m.state.items) == 0 {
 		view += "No items found!"
-		if m.params.withTui {
+		if m.params.IsTUI {
 			view += styles.Default.
 				MarginTop(1).
 				SetString(Help.View(keys)).
@@ -87,7 +87,7 @@ func (m Model) View() string {
 		}
 
 		cursor := " "
-		if m.params.withTui && m.state.cursor == index {
+		if m.params.IsTUI && m.state.cursor == index {
 			cursor = ">"
 		}
 
@@ -107,7 +107,7 @@ func (m Model) View() string {
 	view += renderDonePercentage(m.state.items, counts)
 	view += renderSummary(counts)
 
-	if m.params.withTui {
+	if m.params.IsTUI {
 		view += styles.Default.
 			MarginTop(1).
 			SetString(Help.View(keys)).
