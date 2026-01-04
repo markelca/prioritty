@@ -1,6 +1,9 @@
 package items
 
-import "time"
+import (
+	"strings"
+	"time"
+)
 
 // ItemType represents the type of an item (task or note)
 type ItemType string
@@ -9,6 +12,18 @@ const (
 	ItemTypeTask ItemType = "task"
 	ItemTypeNote ItemType = "note"
 )
+
+// ParseItemType converts a string to ItemType. Returns empty string if invalid.
+func ParseItemType(s string) ItemType {
+	switch strings.ToLower(s) {
+	case "task":
+		return ItemTypeTask
+	case "note":
+		return ItemTypeNote
+	default:
+		return ""
+	}
+}
 
 type Base interface {
 	GetId() string

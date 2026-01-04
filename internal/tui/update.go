@@ -53,11 +53,18 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, keys.Show):
 			m.state.item.show(item)
 		case key.Matches(msg, keys.Edit):
-			msg, err := m.Service.EditWithEditor(item)
+			cmd, err := m.Service.EditWithEditor(item)
 			if err != nil {
 				log.Println(err)
 			}
-			return m, msg
+			return m, cmd
+		case key.Matches(msg, keys.Add):
+			m.params.inlineCreateType = items.ItemTypeTask
+			cmd, err := m.Service.AddWithEditor(items.ItemTypeTask)
+			if err != nil {
+				log.Println(err)
+			}
+			return m, cmd
 		}
 	case tea.WindowSizeMsg:
 		m.state.item.init(ItemContentDimensions{
@@ -71,29 +78,47 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// Check if the editor operation was cancelled (no content)
 		if msg.Err != nil {
 			if m.params.CreateMode != "" {
-				// Creation mode - just quit without creating
+				// CLI creation mode - just quit without creating
 				return m, tea.Quit
 			} else if m.params.EditMode {
 				// Standalone edit mode - quit without updating
 				return m, tea.Quit
 			} else {
-				// Interactive TUI mode - return to list without updating
+				// Interactive TUI mode (edit or inline add) - return to list without updating
+				m.params.inlineCreateType = ""
 				return m, tea.ClearScreen
 			}
 		}
 
 		if m.params.CreateMode != "" {
-			// Creation mode
+			// CLI creation mode
+			// Use the type from editor (allows user to change type field)
 			var err error
-			if m.params.CreateMode == items.ItemTypeTask {
+			if msg.ItemType == items.ItemTypeTask {
 				err = m.Service.CreateTaskFromEditorMsg(msg)
-			} else if m.params.CreateMode == items.ItemTypeNote {
+			} else if msg.ItemType == items.ItemTypeNote {
 				err = m.Service.CreateNoteFromEditorMsg(msg)
 			}
 			if err != nil {
 				log.Println("Error creating item:", err)
 			}
 			return m, tea.Quit
+		} else if m.params.inlineCreateType != "" {
+			// Inline add mode (from 'a' key in TUI)
+			// Use the type from editor (allows user to change type field)
+			var err error
+			if msg.ItemType == items.ItemTypeTask {
+				err = m.Service.CreateTaskFromEditorMsg(msg)
+			} else if msg.ItemType == items.ItemTypeNote {
+				err = m.Service.CreateNoteFromEditorMsg(msg)
+			}
+			if err != nil {
+				log.Println("Error creating item:", err)
+			}
+			// Reset inline create mode and refresh list
+			m.params.inlineCreateType = ""
+			m.refreshItems()
+			return m, tea.ClearScreen
 		} else {
 			// Edit mode
 			t := m.state.GetCurrentItem()
@@ -105,7 +130,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				// Standalone edit mode - quit after editing
 				return m, tea.Quit
 			} else {
-				// Interactive TUI mode - return to list
+				// Interactive TUI mode - refresh list and return
+				m.refreshItems()
 				return m, tea.ClearScreen
 			}
 		}

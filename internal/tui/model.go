@@ -44,9 +44,10 @@ func sortItemsByTag(itemList []items.ItemInterface) []items.ItemInterface {
 }
 
 type Params struct {
-	withTui    bool
-	CreateMode items.ItemType // items.ItemTypeTask or items.ItemTypeNote for creation mode
-	EditMode   bool           // true when editing an existing item
+	withTui          bool
+	CreateMode       items.ItemType // items.ItemTypeTask or items.ItemTypeNote for creation mode
+	EditMode         bool           // true when editing an existing item
+	inlineCreateType items.ItemType // set when adding via 'a' key in TUI (returns to list, not quit)
 }
 
 type Model struct {
@@ -141,6 +142,16 @@ func (m Model) DestroyDemo() {
 
 func (m *Model) SetCreateMode(mode items.ItemType) {
 	m.params.CreateMode = mode
+}
+
+// refreshItems reloads the item list from the service.
+func (m *Model) refreshItems() {
+	itemList, err := m.Service.GetAll()
+	if err != nil {
+		log.Println("Error refreshing items:", err)
+		return
+	}
+	m.state.items = sortItemsByTag(itemList)
 }
 
 func EditModel(item items.ItemInterface) Model {
