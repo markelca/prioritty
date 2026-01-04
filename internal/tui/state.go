@@ -7,9 +7,10 @@ import (
 )
 
 type State struct {
-	cursor int
-	items  []items.ItemInterface
-	item   ItemContent
+	cursor      int
+	items       []items.ItemInterface
+	contentView ItemContent // viewport for displaying item details
+	Mode        Mode        // current operation mode
 }
 
 type ItemContent struct {

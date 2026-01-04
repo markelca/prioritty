@@ -28,14 +28,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			Help.ShowAll = !Help.ShowAll
 
 		case key.Matches(msg, keys.Quit):
-			if m.state.item.ready {
-				m.state.item.ready = false
+			if m.state.contentView.ready {
+				m.state.contentView.ready = false
 			} else {
 				return m, tea.Quit
 			}
 
 		case key.Matches(msg, keys.MenuQuit):
-			m.state.item.ready = false
+			m.state.contentView.ready = false
 
 		case key.Matches(msg, keys.HardQuit):
 			return m, tea.Quit
@@ -51,16 +51,16 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.updateStatus(msg, item)
 
 		case key.Matches(msg, keys.Show):
-			m.state.item.show(item)
+			m.state.contentView.show(item)
 		case key.Matches(msg, keys.Edit):
-			m.params.Mode = ModeEdit
+			m.state.Mode = ModeEdit
 			cmd, err := m.Service.EditWithEditor(item)
 			if err != nil {
 				log.Println(err)
 			}
 			return m, cmd
 		case key.Matches(msg, keys.Add):
-			m.params.Mode = ModeCreate
+			m.state.Mode = ModeCreate
 			cmd, err := m.Service.AddWithEditor(items.ItemTypeTask)
 			if err != nil {
 				log.Println(err)
@@ -68,7 +68,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, cmd
 		}
 	case tea.WindowSizeMsg:
-		m.state.item.init(ItemContentDimensions{
+		m.state.contentView.init(ItemContentDimensions{
 			width:        msg.Width,
 			height:       msg.Height,
 			headerHeight: lipgloss.Height(m.headerView()),
@@ -83,11 +83,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, tea.Quit
 			}
 			// TUI mode - return to list
-			m.params.Mode = ModeList
+			m.state.Mode = ModeList
 			return m, tea.ClearScreen
 		}
 
-		switch m.params.Mode {
+		switch m.state.Mode {
 		case ModeCreate:
 			// Create the item using the type from editor (allows user to change type field)
 			var err error
@@ -112,7 +112,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if !m.params.IsTUI {
 			return m, tea.Quit
 		}
-		m.params.Mode = ModeList
+		m.state.Mode = ModeList
 		m.refreshItems()
 		return m, tea.ClearScreen
 	}
@@ -120,14 +120,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// Return the updated model to the Bubble Tea runtime for processing.
 	// Note that we're not returning a command.
 	// return m, nil
-	m.state.item.viewport, cmd = m.state.item.viewport.Update(msg)
+	m.state.contentView.viewport, cmd = m.state.contentView.viewport.Update(msg)
 	cmds = append(cmds, cmd)
 
 	return m, tea.Batch(cmds...)
 }
 
 func (m *Model) move(msg tea.KeyMsg) {
-	style := lipgloss.NewStyle().Width(m.state.item.viewport.Width)
+	style := lipgloss.NewStyle().Width(m.state.contentView.viewport.Width)
 	switch {
 	case key.Matches(msg, keys.Up):
 		if m.state.cursor == 0 {
@@ -144,7 +144,7 @@ func (m *Model) move(msg tea.KeyMsg) {
 	}
 	item := m.state.GetCurrentItem()
 	content := style.Render(item.GetBody())
-	m.state.item.viewport.SetContent(content)
+	m.state.contentView.viewport.SetContent(content)
 }
 
 func (m *Model) updateStatus(msg tea.KeyMsg, item items.ItemInterface) error {

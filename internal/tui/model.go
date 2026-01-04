@@ -55,7 +55,6 @@ const (
 // Params controls the behavior of the TUI model
 type Params struct {
 	IsTUI bool // true = return to list after action, false = quit after action
-	Mode  Mode // current operation mode
 }
 
 type Model struct {
@@ -101,9 +100,8 @@ func InitialModel(isTUI bool) Model {
 	}
 	itemList = sortItemsByTag(itemList)
 
-	taskContent := ItemContent{}
 	return Model{
-		state:    State{item: taskContent, items: itemList},
+		state:    State{contentView: ItemContent{}, items: itemList},
 		params:   Params{IsTUI: isTUI},
 		Service:  service,
 		renderer: render.CLI{},
@@ -143,7 +141,7 @@ func (m *Model) refreshItems() {
 // CreateModel returns a model configured for CLI item creation
 func CreateModel(itemType items.ItemType) Model {
 	m := InitialModel(false)
-	m.params.Mode = ModeCreate
+	m.state.Mode = ModeCreate
 	cmd, err := m.Service.CreateWithEditor(itemType)
 	if err != nil {
 		log.Println("Error opening editor:", err)
@@ -159,7 +157,7 @@ func EditModel(item items.ItemInterface) Model {
 	m := InitialModel(false)
 	m.state.items = []items.ItemInterface{item}
 	m.state.cursor = 0
-	m.params.Mode = ModeEdit
+	m.state.Mode = ModeEdit
 	cmd, err := m.Service.EditWithEditor(item)
 	if err != nil {
 		log.Println("Error opening editor:", err)
