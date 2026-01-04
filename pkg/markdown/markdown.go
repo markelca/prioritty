@@ -149,3 +149,52 @@ func Serialize(input ItemInput) (string, error) {
 
 	return string(content), nil
 }
+
+// taskEditorFrontmatter is used for task editor templates with all fields visible.
+type taskEditorFrontmatter struct {
+	Title  unquotedString `yaml:"title"`
+	Type   unquotedString `yaml:"type"`
+	Status unquotedString `yaml:"status"`
+	Tag    unquotedString `yaml:"tag"`
+}
+
+// noteEditorFrontmatter is used for note editor templates (no status field).
+type noteEditorFrontmatter struct {
+	Title unquotedString `yaml:"title"`
+	Type  unquotedString `yaml:"type"`
+	Tag   unquotedString `yaml:"tag"`
+}
+
+// SerializeForEditor creates markdown content for the editor with all fields visible.
+// Unlike Serialize, this shows empty fields so users know what fields are available.
+func SerializeForEditor(input ItemInput) (string, error) {
+	var content []byte
+	var err error
+
+	if input.ItemType == items.ItemTypeTask {
+		status := input.Status
+		if status == "" {
+			status = string(items.Todo)
+		}
+		fm := taskEditorFrontmatter{
+			Title:  unquotedString(input.Title),
+			Type:   unquotedString(input.ItemType),
+			Status: unquotedString(status),
+			Tag:    unquotedString(input.Tag),
+		}
+		content, err = SerializeFrontmatter(fm, input.Body)
+	} else {
+		fm := noteEditorFrontmatter{
+			Title: unquotedString(input.Title),
+			Type:  unquotedString(input.ItemType),
+			Tag:   unquotedString(input.Tag),
+		}
+		content, err = SerializeFrontmatter(fm, input.Body)
+	}
+
+	if err != nil {
+		return "", err
+	}
+
+	return string(content), nil
+}

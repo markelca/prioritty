@@ -27,12 +27,51 @@ type EditorInput struct {
 
 // EditorFinishedMsg contains the parsed result from the editor.
 type EditorFinishedMsg struct {
-	Id     string
-	Title  string
-	Body   string
-	Status string
-	Tag    string
-	Err    error
+	Id       string
+	ItemType items.ItemType
+	Title    string
+	Body     string
+	Status   string
+	Tag      string
+	Err      error
+}
+
+// AddItem opens the editor with an empty template for creating a new item.
+// Uses SerializeForEditor to show all available fields.
+func AddItem(itemType items.ItemType) (tea.Cmd, error) {
+	tempFile, err := os.CreateTemp(os.TempDir(), "item_*.md")
+	if err != nil {
+		return nil, fmt.Errorf("failed to create temp file: %w", err)
+	}
+
+	content, err := markdown.SerializeForEditor(markdown.ItemInput{
+		ItemType: itemType,
+	})
+	if err != nil {
+		tempFile.Close()
+		return nil, fmt.Errorf("failed to serialize content: %w", err)
+	}
+
+	if _, err := tempFile.WriteString(content); err != nil {
+		tempFile.Close()
+		return nil, fmt.Errorf("failed to write to temp file: %w", err)
+	}
+	tempFile.Close()
+
+	editor, err := getEditor()
+	if err != nil {
+		return nil, err
+	}
+
+	return tea.ExecProcess(exec.Command(editor, tempFile.Name()), func(err error) tea.Msg {
+		defer os.Remove(tempFile.Name())
+		modifiedContent, err := os.ReadFile(tempFile.Name())
+		if err != nil {
+			return EditorFinishedMsg{Err: fmt.Errorf("failed to read modified file: %w", err)}
+		}
+
+		return parseEditorContent(string(modifiedContent), itemType)
+	}), nil
 }
 
 func EditItem(input EditorInput) (tea.Cmd, error) {
@@ -81,6 +120,7 @@ func EditItem(input EditorInput) (tea.Cmd, error) {
 // parsedFrontmatter is used for parsing (uses regular strings)
 type parsedFrontmatter struct {
 	Title  string `yaml:"title"`
+	Type   string `yaml:"type"`
 	Status string `yaml:"status"`
 	Tag    string `yaml:"tag"`
 }
@@ -107,11 +147,18 @@ func parseEditorContent(content string, itemType items.ItemType) EditorFinishedM
 		return EditorFinishedMsg{Err: fmt.Errorf("operation cancelled - no title provided")}
 	}
 
+	// Parse item type, fallback to the original type if not specified or invalid
+	parsedType := items.ParseItemType(fm.Type)
+	if parsedType == "" {
+		parsedType = itemType
+	}
+
 	return EditorFinishedMsg{
-		Title:  title,
-		Body:   strings.TrimSpace(body),
-		Status: fm.Status,
-		Tag:    fm.Tag,
+		ItemType: parsedType,
+		Title:    title,
+		Body:     strings.TrimSpace(body),
+		Status:   fm.Status,
+		Tag:      fm.Tag,
 	}
 }
 

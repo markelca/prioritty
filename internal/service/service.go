@@ -6,6 +6,7 @@ import (
 	"log"
 	"sort"
 
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/markelca/prioritty/internal/editor"
 	"github.com/markelca/prioritty/pkg/items"
 	"github.com/markelca/prioritty/pkg/items/repository"
@@ -67,6 +68,11 @@ func (s Service) RemoveItem(item items.ItemInterface) error {
 func (s Service) UpdateItemFromEditorMsg(i items.ItemInterface, msg editor.EditorFinishedMsg) error {
 	switch v := i.(type) {
 	case *items.Task:
+		// Check if type changed from task to note
+		if msg.ItemType == items.ItemTypeNote {
+			return s.convertTaskToNote(v, msg)
+		}
+		// Update as task
 		v.Title = msg.Title
 		v.Body = msg.Body
 		// Update status if provided
@@ -81,6 +87,11 @@ func (s Service) UpdateItemFromEditorMsg(i items.ItemInterface, msg editor.Edito
 			log.Println("Error updating tag - ", err)
 		}
 	case *items.Note:
+		// Check if type changed from note to task
+		if msg.ItemType == items.ItemTypeTask {
+			return s.convertNoteToTask(v, msg)
+		}
+		// Update as note
 		v.Title = msg.Title
 		v.Body = msg.Body
 		if err := s.UpdateNote(*v); err != nil {
@@ -94,6 +105,26 @@ func (s Service) UpdateItemFromEditorMsg(i items.ItemInterface, msg editor.Edito
 		return fmt.Errorf("Can't update the item, no implementation: %v", v)
 	}
 	return nil
+}
+
+// convertTaskToNote converts a task to a note by deleting the task and creating a note
+func (s Service) convertTaskToNote(task *items.Task, msg editor.EditorFinishedMsg) error {
+	// Use msg.Id which is the original item's ID (set in EditItem from the original item)
+	if err := s.removeTask(msg.Id); err != nil {
+		return fmt.Errorf("failed to remove task during conversion: %w", err)
+	}
+	// Create the new note
+	return s.CreateNoteFromEditorMsg(msg)
+}
+
+// convertNoteToTask converts a note to a task by deleting the note and creating a task
+func (s Service) convertNoteToTask(note *items.Note, msg editor.EditorFinishedMsg) error {
+	// Use msg.Id which is the original item's ID (set in EditItem from the original item)
+	if err := s.removeNote(msg.Id); err != nil {
+		return fmt.Errorf("failed to remove note during conversion: %w", err)
+	}
+	// Create the new task
+	return s.CreateTaskFromEditorMsg(msg)
 }
 
 // updateTagFromEditor updates an item's tag based on the editor message.
@@ -212,4 +243,9 @@ func (s Service) RemoveTag(name string) error {
 
 func (s Service) GetItemsWithTag(name string) ([]items.ItemInterface, error) {
 	return s.repository.GetItemsWithTag(name)
+}
+
+// AddWithEditor opens the editor with an empty template showing all available fields.
+func (s Service) AddWithEditor(itemType items.ItemType) (tea.Cmd, error) {
+	return editor.AddItem(itemType)
 }
