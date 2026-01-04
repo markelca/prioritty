@@ -47,6 +47,6 @@ func init() {
 		}
 	})
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.cobra.yaml)")
-	rootCmd.Flags().Bool("demo", false, "Use a temporal demo database with predefined values")
-	viper.BindPFlag("demo", rootCmd.Flags().Lookup("demo"))
+	rootCmd.PersistentFlags().Bool("demo", false, "Use a temporal demo database with predefined values")
+	viper.BindPFlag("demo", rootCmd.PersistentFlags().Lookup("demo"))
 }
