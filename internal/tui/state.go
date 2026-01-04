@@ -3,7 +3,6 @@ package tui
 import (
 	"github.com/charmbracelet/bubbles/viewport"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/elliotchance/orderedmap/v3"
 	"github.com/markelca/prioritty/pkg/items"
 )
 
@@ -26,36 +25,11 @@ type ItemContentDimensions struct {
 	footerHeight int
 }
 
-// getDisplayOrderedItems returns items in the same order they appear in the view
-// (grouped by tag, with null-tag items under "My Board").
-func (s State) getDisplayOrderedItems() []items.ItemInterface {
-	itemsByTag := orderedmap.NewOrderedMap[items.Tag, []items.ItemInterface]()
-
-	for _, item := range s.items {
-		tag := item.GetTag()
-		if tag != nil {
-			tagItems, _ := itemsByTag.Get(*tag)
-			itemsByTag.Set(*tag, append(tagItems, item))
-		} else {
-			nullTag := items.Tag{}
-			tagItems, _ := itemsByTag.Get(nullTag)
-			itemsByTag.Set(nullTag, append(tagItems, item))
-		}
-	}
-
-	var result []items.ItemInterface
-	for _, itemList := range itemsByTag.AllFromFront() {
-		result = append(result, itemList...)
-	}
-	return result
-}
-
 func (s State) GetCurrentItem() items.ItemInterface {
-	displayItems := s.getDisplayOrderedItems()
-	if s.cursor < 0 || s.cursor >= len(displayItems) {
+	if s.cursor < 0 || s.cursor >= len(s.items) {
 		return nil
 	}
-	return displayItems[s.cursor]
+	return s.items[s.cursor]
 }
 
 func (itemContent *ItemContent) init(dimensions ItemContentDimensions) {

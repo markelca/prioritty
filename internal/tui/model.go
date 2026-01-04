@@ -18,6 +18,31 @@ import (
 
 var Help = help.New()
 
+// sortItemsByTag groups items by tag in the order tags first appear.
+// Items without tags come first (under "My Board").
+func sortItemsByTag(itemList []items.ItemInterface) []items.ItemInterface {
+	var result []items.ItemInterface
+	tagOrder := []string{}
+	itemsByTag := make(map[string][]items.ItemInterface)
+
+	for _, item := range itemList {
+		var tagKey string
+		if tag := item.GetTag(); tag != nil {
+			tagKey = tag.Name
+		}
+
+		if _, exists := itemsByTag[tagKey]; !exists {
+			tagOrder = append(tagOrder, tagKey)
+		}
+		itemsByTag[tagKey] = append(itemsByTag[tagKey], item)
+	}
+
+	for _, tagKey := range tagOrder {
+		result = append(result, itemsByTag[tagKey]...)
+	}
+	return result
+}
+
 type Params struct {
 	withTui    bool
 	CreateMode items.ItemType // items.ItemTypeTask or items.ItemTypeNote for creation mode
@@ -64,6 +89,7 @@ func InitialModel(withTui bool) Model {
 		log.Println("Error - Failed to get the tasks:", err)
 		os.Exit(ExitCodeGetItems)
 	}
+	itemList = sortItemsByTag(itemList)
 
 	taskContent := ItemContent{}
 	return Model{
@@ -99,11 +125,10 @@ func (m Model) Init() tea.Cmd {
 }
 
 func (m Model) GetItemAt(index int) items.ItemInterface {
-	displayItems := m.state.getDisplayOrderedItems()
-	if index < 0 || index >= len(displayItems) {
+	if index < 0 || index >= len(m.state.items) {
 		return nil
 	}
-	return displayItems[index]
+	return m.state.items[index]
 }
 
 func (m Model) DestroyDemo() {

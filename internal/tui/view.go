@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
-	"github.com/elliotchance/orderedmap/v3"
 	"github.com/markelca/prioritty/internal/tui/styles"
 	"github.com/markelca/prioritty/pkg/items"
 )
@@ -32,79 +31,77 @@ func (m Model) View() string {
 		return view
 	}
 
-	itemsByTag := orderedmap.NewOrderedMap[items.Tag, []items.ItemInterface]()
+	// Track current tag to print headers when it changes
+	var currentTag *string
+	tagStats := make(map[string]struct{ completed, total int })
 
+	// First pass: calculate stats per tag
 	for _, item := range m.state.items {
-		tag := item.GetTag()
-		if tag != nil {
-			items, _ := itemsByTag.Get(*tag)
-			itemsByTag.Set(*item.GetTag(), append(items, item))
-		} else {
-			nullTag := items.Tag{}
-			items, _ := itemsByTag.Get(nullTag)
-			itemsByTag.Set(nullTag, append(items, item))
+		tagKey := ""
+		if tag := item.GetTag(); tag != nil {
+			tagKey = tag.Name
+		}
+		if task, ok := item.(*items.Task); ok {
+			stats := tagStats[tagKey]
+			stats.total++
+			if task.Status == items.Done || task.Status == items.Cancelled {
+				stats.completed++
+			}
+			tagStats[tagKey] = stats
 		}
 	}
-	var index int
-	for tag, itemList := range itemsByTag.AllFromFront() {
-		var tagName string
-		if tag.Name == "" {
-			tagName = "My Board"
-		} else {
-			tagName = "@" + tag.Name
+
+	// Second pass: render items
+	for index, item := range m.state.items {
+		tagKey := ""
+		if tag := item.GetTag(); tag != nil {
+			tagKey = tag.Name
 		}
 
-		// Count completed and total tasks for this tag
-		var completedTasks, totalTasks int
-		for _, item := range itemList {
-			if task, ok := item.(*items.Task); ok {
-				totalTasks++
-				if task.Status == items.Done || task.Status == items.Cancelled {
-					completedTasks++
-				}
-			}
-		}
-
-		view += "\n  " + styles.Default.Underline(true).Render(tagName)
-
-		if totalTasks > 0 {
-			view += styles.Secondary.Render(fmt.Sprintf(" [%d/%d]", completedTasks, totalTasks))
-		}
-
-		view += "\n"
-
-		for _, item := range itemList {
-			view += "  "
-			switch v := item.(type) {
-			case *items.Note:
-				counts[items.NoteType] += 1
-			case *items.Task:
-				counts[v.Status] += 1
-			}
-			cursor := " "
-
-			if m.params.withTui && m.state.cursor == index {
-				cursor = ">"
-			}
-
-			if m.params.withTui && m.state.cursor == index {
-				cursor = ">"
-			}
-			var padding string
-			if len(m.state.items) >= 10 {
-				padding = "2"
+		// Print tag header when tag changes
+		if currentTag == nil || *currentTag != tagKey {
+			currentTag = &tagKey
+			var tagName string
+			if tagKey == "" {
+				tagName = "My Board"
 			} else {
-				padding = "1"
+				tagName = "@" + tagKey
 			}
-			view += cursor
-			view += styles.Secondary.
-				SetString(fmt.Sprintf(" %"+padding+"d. ", index+1)).
-				Render()
-			view += item.Render(m.renderer)
 
-			index += 1
+			view += "\n  " + styles.Default.Underline(true).Render(tagName)
+
+			if stats := tagStats[tagKey]; stats.total > 0 {
+				view += styles.Secondary.Render(fmt.Sprintf(" [%d/%d]", stats.completed, stats.total))
+			}
+
+			view += "\n"
 		}
 
+		// Count for summary
+		view += "  "
+		switch v := item.(type) {
+		case *items.Note:
+			counts[items.NoteType] += 1
+		case *items.Task:
+			counts[v.Status] += 1
+		}
+
+		cursor := " "
+		if m.params.withTui && m.state.cursor == index {
+			cursor = ">"
+		}
+
+		var padding string
+		if len(m.state.items) >= 10 {
+			padding = "2"
+		} else {
+			padding = "1"
+		}
+		view += cursor
+		view += styles.Secondary.
+			SetString(fmt.Sprintf(" %"+padding+"d. ", index+1)).
+			Render()
+		view += item.Render(m.renderer)
 	}
 
 	view += renderDonePercentage(m.state.items, counts)
