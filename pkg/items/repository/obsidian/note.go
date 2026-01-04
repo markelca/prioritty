@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/markelca/prioritty/pkg/items"
+	"github.com/markelca/prioritty/pkg/markdown"
 )
 
 // GetNotes returns all notes from the vault.
@@ -23,7 +24,8 @@ func (r *ObsidianRepository) GetNotes() ([]items.Note, error) {
 			continue
 		}
 
-		fm, body, err := parseFrontmatter(content)
+		var fm markdown.Frontmatter
+		body, err := markdown.Parse(string(content), &fm)
 		if err != nil {
 			log.Printf("Warning: failed to parse frontmatter in %s: %v", filePath, err)
 			continue
@@ -51,17 +53,14 @@ func (r *ObsidianRepository) CreateNote(n items.Note) error {
 	// Generate unique filename
 	filePath := uniqueFilename(r.vaultPath, n.Title)
 
-	// Create frontmatter
-	fm := frontmatterFromNote(n)
-
 	// Serialize to markdown
-	content, err := serializeFrontmatter(fm, n.Body)
+	content, err := markdown.Serialize(itemInputFromNote(n))
 	if err != nil {
 		return err
 	}
 
 	// Write file
-	return os.WriteFile(filePath, content, 0644)
+	return os.WriteFile(filePath, []byte(content), 0644)
 }
 
 // UpdateNote updates an existing note file.
@@ -74,8 +73,8 @@ func (r *ObsidianRepository) UpdateNote(n items.Note) error {
 		return err
 	}
 
-	existingFm, _, err := parseFrontmatter(existingContent)
-	if err != nil {
+	var existingFm markdown.Frontmatter
+	if _, err := markdown.Parse(string(existingContent), &existingFm); err != nil {
 		return err
 	}
 
@@ -84,11 +83,8 @@ func (r *ObsidianRepository) UpdateNote(n items.Note) error {
 		n.CreatedAt = parseCreatedAt(existingFm.CreatedAt)
 	}
 
-	// Create frontmatter
-	fm := frontmatterFromNote(n)
-
 	// Serialize to markdown
-	content, err := serializeFrontmatter(fm, n.Body)
+	content, err := markdown.Serialize(itemInputFromNote(n))
 	if err != nil {
 		return err
 	}
@@ -102,7 +98,7 @@ func (r *ObsidianRepository) UpdateNote(n items.Note) error {
 		newPath := uniqueFilename(r.vaultPath, n.Title)
 
 		// Write new file
-		if err := os.WriteFile(newPath, content, 0644); err != nil {
+		if err := os.WriteFile(newPath, []byte(content), 0644); err != nil {
 			return err
 		}
 
@@ -111,7 +107,7 @@ func (r *ObsidianRepository) UpdateNote(n items.Note) error {
 	}
 
 	// Title unchanged, write in place
-	return os.WriteFile(oldPath, content, 0644)
+	return os.WriteFile(oldPath, []byte(content), 0644)
 }
 
 // RemoveNote removes a note file from the vault.
@@ -130,7 +126,8 @@ func (r *ObsidianRepository) SetNoteTag(n items.Note, tag items.Tag) error {
 		return err
 	}
 
-	fm, body, err := parseFrontmatter(content)
+	var fm markdown.Frontmatter
+	body, err := markdown.Parse(string(content), &fm)
 	if err != nil {
 		return err
 	}
@@ -139,7 +136,7 @@ func (r *ObsidianRepository) SetNoteTag(n items.Note, tag items.Tag) error {
 	fm.Tag = tag.Name
 
 	// Serialize and write back
-	newContent, err := serializeFrontmatter(fm, body)
+	newContent, err := fm.Serialize(body)
 	if err != nil {
 		return err
 	}
@@ -157,7 +154,8 @@ func (r *ObsidianRepository) UnsetNoteTag(n items.Note) error {
 		return err
 	}
 
-	fm, body, err := parseFrontmatter(content)
+	var fm markdown.Frontmatter
+	body, err := markdown.Parse(string(content), &fm)
 	if err != nil {
 		return err
 	}
@@ -166,7 +164,7 @@ func (r *ObsidianRepository) UnsetNoteTag(n items.Note) error {
 	fm.Tag = ""
 
 	// Serialize and write back
-	newContent, err := serializeFrontmatter(fm, body)
+	newContent, err := fm.Serialize(body)
 	if err != nil {
 		return err
 	}
