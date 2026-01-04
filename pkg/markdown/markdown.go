@@ -14,7 +14,7 @@ const Delimiter = "---"
 // unquotedString is a string type that marshals to YAML without quotes.
 type unquotedString string
 
-func (s unquotedString) MarshalYAML() (interface{}, error) {
+func (s unquotedString) MarshalYAML() (any, error) {
 	return &yaml.Node{
 		Kind:  yaml.ScalarNode,
 		Value: string(s),

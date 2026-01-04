@@ -80,7 +80,7 @@ func EditItem(input EditorInput) (tea.Cmd, error) {
 		return nil, fmt.Errorf("failed to create temp file: %w", err)
 	}
 
-	content, err := markdown.Serialize(markdown.ItemInput{
+	content, err := markdown.SerializeForEditor(markdown.ItemInput{
 		ItemType: input.ItemType,
 		Title:    input.Title,
 		Body:     input.Body,
