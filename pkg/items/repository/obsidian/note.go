@@ -44,7 +44,7 @@ func (r *ObsidianRepository) GetNotes() ([]items.Note, error) {
 }
 
 // CreateNote creates a new note file in the vault.
-func (r *ObsidianRepository) CreateNote(n items.Note) error {
+func (r *ObsidianRepository) CreateNote(n *items.Note) error {
 	// Set created_at if not set
 	if n.CreatedAt.IsZero() {
 		n.CreatedAt = time.Now()
@@ -54,13 +54,19 @@ func (r *ObsidianRepository) CreateNote(n items.Note) error {
 	filePath := uniqueFilename(r.vaultPath, n.Title)
 
 	// Serialize to markdown
-	content, err := markdown.Serialize(itemInputFromNote(n))
+	content, err := markdown.Serialize(itemInputFromNote(*n))
 	if err != nil {
 		return err
 	}
 
 	// Write file
-	return os.WriteFile(filePath, []byte(content), 0644)
+	if err := os.WriteFile(filePath, []byte(content), 0644); err != nil {
+		return err
+	}
+
+	// Set the ID to the relative path
+	n.Id = relativeID(r.vaultPath, filePath)
+	return nil
 }
 
 // UpdateNote updates an existing note file.

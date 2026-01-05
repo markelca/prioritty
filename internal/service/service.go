@@ -157,13 +157,11 @@ func (s Service) CreateTaskFromEditorMsg(msg editor.EditorFinishedMsg) error {
 		},
 		Status: items.ParseStatus(msg.Status),
 	}
-	if err := s.repository.CreateTask(task); err != nil {
+	if err := s.repository.CreateTask(&task); err != nil {
 		return err
 	}
 	// Set tag if provided
 	if msg.Tag != "" {
-		// Need to get the created task to set the tag
-		// For now, we'll set it directly since the task ID will be the title
 		return s.SetTag(&task, msg.Tag)
 	}
 	return nil
@@ -176,7 +174,7 @@ func (s Service) CreateNoteFromEditorMsg(msg editor.EditorFinishedMsg) error {
 			Body:  msg.Body,
 		},
 	}
-	if err := s.repository.CreateNote(note); err != nil {
+	if err := s.repository.CreateNote(&note); err != nil {
 		return err
 	}
 	// Set tag if provided

@@ -44,7 +44,7 @@ func (r *ObsidianRepository) GetTasks() ([]items.Task, error) {
 }
 
 // CreateTask creates a new task file in the vault.
-func (r *ObsidianRepository) CreateTask(t items.Task) error {
+func (r *ObsidianRepository) CreateTask(t *items.Task) error {
 	// Set created_at if not set
 	if t.CreatedAt.IsZero() {
 		t.CreatedAt = time.Now()
@@ -54,13 +54,19 @@ func (r *ObsidianRepository) CreateTask(t items.Task) error {
 	filePath := uniqueFilename(r.vaultPath, t.Title)
 
 	// Serialize to markdown
-	content, err := markdown.Serialize(itemInputFromTask(t))
+	content, err := markdown.Serialize(itemInputFromTask(*t))
 	if err != nil {
 		return err
 	}
 
 	// Write file
-	return os.WriteFile(filePath, []byte(content), 0644)
+	if err := os.WriteFile(filePath, []byte(content), 0644); err != nil {
+		return err
+	}
+
+	// Set the ID to the relative path
+	t.Id = relativeID(r.vaultPath, filePath)
+	return nil
 }
 
 // UpdateTask updates an existing task file.

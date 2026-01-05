@@ -20,7 +20,7 @@ func (s NoteService) UpdateNote(n items.Note) error {
 func (s NoteService) AddNote(title string) error {
 	t := items.Note{}
 	t.Title = title
-	return s.repository.CreateNote(t)
+	return s.repository.CreateNote(&t)
 }
 
 func (s NoteService) removeNote(id string) error {

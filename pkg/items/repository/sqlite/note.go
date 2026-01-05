@@ -2,6 +2,7 @@ package sqlite
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"strconv"
 	"time"
@@ -76,13 +77,21 @@ func (r *SQLiteRepository) UpdateNote(n items.Note) error {
 	return err
 }
 
-func (r *SQLiteRepository) CreateNote(n items.Note) error {
+func (r *SQLiteRepository) CreateNote(n *items.Note) error {
 	query := `
 		INSERT INTO note (title, body)
 		VALUES (?, ?)
 	`
-	_, err := r.db.Exec(query, n.Title, n.Body)
-	return err
+	result, err := r.db.Exec(query, n.Title, n.Body)
+	if err != nil {
+		return err
+	}
+	id, err := result.LastInsertId()
+	if err != nil {
+		return err
+	}
+	n.Id = fmt.Sprintf("%d", id)
+	return nil
 }
 
 func (r *SQLiteRepository) RemoveNote(id string) error {

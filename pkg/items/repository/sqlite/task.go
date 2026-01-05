@@ -2,6 +2,7 @@ package sqlite
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"strconv"
 	"time"
@@ -89,13 +90,21 @@ func (r *SQLiteRepository) UpdateTaskStatus(t items.Task, s items.Status) error 
 	return nil
 }
 
-func (r *SQLiteRepository) CreateTask(t items.Task) error {
+func (r *SQLiteRepository) CreateTask(t *items.Task) error {
 	query := `
 		INSERT INTO task (title, body, status_id)
 		VALUES (?, ?, ?)
 	`
-	_, err := r.db.Exec(query, t.Title, t.Body, t.Status)
-	return err
+	result, err := r.db.Exec(query, t.Title, t.Body, t.Status)
+	if err != nil {
+		return err
+	}
+	id, err := result.LastInsertId()
+	if err != nil {
+		return err
+	}
+	t.Id = fmt.Sprintf("%d", id)
+	return nil
 }
 
 func (r *SQLiteRepository) RemoveTask(id string) error {

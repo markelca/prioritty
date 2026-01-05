@@ -46,7 +46,7 @@ func (s TaskService) TagItem(items items.ItemInterface, tag string) error {
 func (s TaskService) AddTask(title string) error {
 	t := items.Task{}
 	t.Title = title
-	return s.repository.CreateTask(t)
+	return s.repository.CreateTask(&t)
 }
 
 func (s TaskService) removeTask(id string) error {
