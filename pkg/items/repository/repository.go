@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/markelca/prioritty/internal/config"
 	"github.com/markelca/prioritty/pkg/items"
@@ -48,19 +49,30 @@ type Repository interface {
 	Reset() error
 }
 
+func expandTilde(p string) string {
+	if strings.HasPrefix(p, "~/") {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return p
+		}
+		return path.Join(home, p[2:])
+	}
+	return p
+}
+
 func GetDatabasePath(repoType string, isDemo bool) (dbPath string, err error) {
 	switch repoType {
 	case RepoTypeObsidian:
 		if isDemo {
 			dbPath = path.Join(os.TempDir(), "prioritty_demo_vault")
 		} else {
-			dbPath = viper.GetString(config.CONF_DATABASE_PATH)
+			dbPath = expandTilde(viper.GetString(config.CONF_DATABASE_PATH))
 		}
 	case RepoTypeSQLite:
 		if isDemo {
 			dbPath = path.Join(os.TempDir(), "prioritty_demo.db")
 		} else {
-			dbPath = viper.GetString(config.CONF_DATABASE_PATH)
+			dbPath = expandTilde(viper.GetString(config.CONF_DATABASE_PATH))
 		}
 	default:
 		return "", fmt.Errorf("repository type not supported (%s)", repoType)
