@@ -47,9 +47,10 @@ func sortItemsByTag(itemList []items.ItemInterface) []items.ItemInterface {
 type Mode string
 
 const (
-	ModeList   Mode = "list"   // default: browsing items
-	ModeCreate Mode = "create" // creating a new item
-	ModeEdit   Mode = "edit"   // editing an existing item
+	ModeList          Mode = "list"           // default: browsing items
+	ModeCreate        Mode = "create"         // creating a new item
+	ModeEdit          Mode = "edit"           // editing an existing item
+	ModeDeleteConfirm Mode = "delete_confirm" // confirming item deletion
 )
 
 // Params controls the behavior of the TUI model
