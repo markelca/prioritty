@@ -118,6 +118,11 @@ func (m Model) View() string {
 		view = fmt.Sprintf("%s\n%s\n%s", m.headerView(), m.state.contentView.viewport.View(), m.footerView())
 	}
 
+	// Show delete confirmation dialog
+	if m.state.Mode == ModeDeleteConfirm && m.state.pendingDelete != nil {
+		view += "\n" + styles.RenderDeleteDialog(m.state.pendingDelete.GetTitle())
+	}
+
 	return view
 }
 

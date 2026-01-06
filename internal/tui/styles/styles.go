@@ -59,4 +59,28 @@ var (
 		b.Left = "┤"
 		return TitleStyle.BorderStyle(b)
 	}()
+
+	DeleteDialogStyle = lipgloss.NewStyle().
+				Border(lipgloss.RoundedBorder()).
+				BorderForeground(lipgloss.Color("#f28aa8")).
+				Padding(1, 2).
+				MarginTop(1)
+
+	DeleteDialogTitleStyle = Cancelled.Bold(true)
 )
+
+func RenderDeleteDialog(itemTitle string) string {
+	if len(itemTitle) > 30 {
+		itemTitle = itemTitle[:27] + "..."
+	}
+
+	dialog := DeleteDialogTitleStyle.Render("Delete item?") + "\n\n" +
+		Default.Render("\""+itemTitle+"\"") + "\n\n" +
+		Secondary.Render("Press ") +
+		Done.Render("y") +
+		Secondary.Render(" to confirm, ") +
+		Cancelled.Render("n") +
+		Secondary.Render(" to cancel")
+
+	return DeleteDialogStyle.Render(dialog)
+}

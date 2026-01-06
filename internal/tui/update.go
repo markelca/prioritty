@@ -22,6 +22,33 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 
 	case tea.KeyMsg:
+		// Handle delete confirmation mode separately
+		if m.state.Mode == ModeDeleteConfirm {
+			switch msg.String() {
+			case "y", "Y":
+				if m.state.pendingDelete != nil {
+					err := m.Service.RemoveItem(m.state.pendingDelete)
+					if err != nil {
+						log.Println("Error deleting item:", err)
+					}
+					m.refreshItems()
+					// Adjust cursor if needed
+					if m.state.cursor >= len(m.state.items) && m.state.cursor > 0 {
+						m.state.cursor--
+					}
+				}
+				m.state.pendingDelete = nil
+				m.state.Mode = ModeList
+				return m, nil
+			case "n", "N", "esc":
+				m.state.pendingDelete = nil
+				m.state.Mode = ModeList
+				return m, nil
+			}
+			// Ignore other keys in delete confirm mode
+			return m, nil
+		}
+
 		switch {
 
 		case key.Matches(msg, keys.Help):
@@ -66,6 +93,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				log.Println(err)
 			}
 			return m, cmd
+		case key.Matches(msg, keys.Remove):
+			if item != nil {
+				m.state.pendingDelete = item
+				m.state.Mode = ModeDeleteConfirm
+			}
+			return m, nil
 		}
 	case tea.WindowSizeMsg:
 		m.state.contentView.init(ItemContentDimensions{
