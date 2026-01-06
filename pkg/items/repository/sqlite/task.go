@@ -62,7 +62,7 @@ func (r *SQLiteRepository) GetTasks() ([]items.Task, error) {
 			task.Tag = nil
 		}
 
-		task.Status = items.Status(statusId)
+		task.Status = statusIdToStatus(statusId)
 
 		tasks = append(tasks, task)
 	}

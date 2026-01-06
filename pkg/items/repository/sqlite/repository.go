@@ -12,6 +12,22 @@ import (
 	"github.com/markelca/prioritty/pkg/items/repository"
 )
 
+// statusIdToStatus converts a database status_id to items.Status
+func statusIdToStatus(id int) items.Status {
+	switch id {
+	case 0:
+		return items.Todo
+	case 1:
+		return items.InProgress
+	case 2:
+		return items.Done
+	case 3:
+		return items.Cancelled
+	default:
+		return items.Todo
+	}
+}
+
 type SQLiteRepository struct {
 	db       *sql.DB
 	filepath string
@@ -95,7 +111,7 @@ func (r *SQLiteRepository) CreateTag(name string) (*items.Tag, error) {
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		log.Println("Error getting last inserted tag id: %v", err)
+		log.Printf("Error getting last inserted tag id: %v", err)
 		return nil, err
 	}
 
@@ -175,7 +191,7 @@ func (r *SQLiteRepository) GetItemsWithTag(tagName string) ([]items.ItemInterfac
 			Name: tagName,
 		}
 		task.Tag = &tag
-		task.Status = items.Status(statusId)
+		task.Status = statusIdToStatus(statusId)
 
 		allItems = append(allItems, &task)
 	}
