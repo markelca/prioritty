@@ -28,6 +28,22 @@ func statusIdToStatus(id int) items.Status {
 	}
 }
 
+// statusToStatusId converts items.Status to a database status_id
+func statusToStatusId(s items.Status) int {
+	switch s {
+	case items.Todo:
+		return 0
+	case items.InProgress:
+		return 1
+	case items.Done:
+		return 2
+	case items.Cancelled:
+		return 3
+	default:
+		return 0
+	}
+}
+
 type SQLiteRepository struct {
 	db       *sql.DB
 	filepath string

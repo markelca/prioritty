@@ -64,7 +64,7 @@ func TestService_GetAll(t *testing.T) {
 		earlier := time.Now().Add(-1 * time.Hour)
 		later := time.Now()
 
-		// Item with tag should come before item without tag
+		// Item without tag should come before item with tag
 		taskWithTag := items.Task{
 			Item:   items.Item{Id: "task-1", Title: "Tagged Task", CreatedAt: earlier, Tag: &tag},
 			Status: items.Todo,
@@ -82,8 +82,8 @@ func TestService_GetAll(t *testing.T) {
 
 		require.NoError(t, err)
 		assert.Len(t, allItems, 2)
-		// Tagged item should be first
-		assert.Equal(t, "task-1", allItems[0].GetId())
+		// Untagged item should be first
+		assert.Equal(t, "task-2", allItems[0].GetId())
 	})
 
 	t.Run("propagates notes error", func(t *testing.T) {

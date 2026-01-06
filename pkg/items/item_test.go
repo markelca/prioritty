@@ -85,16 +85,16 @@ func TestItem_After(t *testing.T) {
 		expected bool
 	}{
 		{
-			name:     "item with tag comes before item without tag",
+			name:     "item with tag - After returns false (tagged before untagged)",
 			itemI:    Item{Tag: tag, CreatedAt: now},
 			itemU:    &Task{Item: Item{Tag: nil, CreatedAt: now}},
-			expected: false, // i should come before u, so After returns false
+			expected: false, // After returns false: i is NOT after u
 		},
 		{
-			name:     "item without tag comes after item with tag",
+			name:     "item without tag - After returns true (untagged after tagged)",
 			itemI:    Item{Tag: nil, CreatedAt: now},
 			itemU:    &Task{Item: Item{Tag: tag, CreatedAt: now}},
-			expected: true, // i should come after u
+			expected: true, // After returns true: i IS after u
 		},
 		{
 			name:     "both have tags - earlier created comes after",
@@ -151,13 +151,17 @@ func TestItem_After_WithNotes(t *testing.T) {
 		taskWithTag := Item{Tag: tag, CreatedAt: now}
 		noteWithoutTag := &Note{Item: Item{Tag: nil, CreatedAt: now}}
 
-		assert.False(t, taskWithTag.After(noteWithoutTag), "Item with tag should come before item without tag")
+		// After returns false when tagged item compared to untagged
+		// (tagged is NOT after untagged according to After's logic)
+		assert.False(t, taskWithTag.After(noteWithoutTag))
 	})
 
 	t.Run("task vs note - time comparison", func(t *testing.T) {
 		taskEarlier := Item{Tag: nil, CreatedAt: earlier}
 		noteLater := &Note{Item: Item{Tag: nil, CreatedAt: now}}
 
-		assert.True(t, taskEarlier.After(noteLater), "Earlier item should come after later item (most recent first)")
+		// Earlier.Before(Later) = true, so After returns true
+		// (earlier item comes after later item for most-recent-first sorting)
+		assert.True(t, taskEarlier.After(noteLater))
 	})
 }
