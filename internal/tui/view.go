@@ -120,27 +120,7 @@ func (m Model) View() string {
 
 	// Show delete confirmation dialog
 	if m.state.Mode == ModeDeleteConfirm && m.state.pendingDelete != nil {
-		dialogStyle := lipgloss.NewStyle().
-			Border(lipgloss.RoundedBorder()).
-			BorderForeground(lipgloss.Color("#f28aa8")).
-			Padding(1, 2).
-			MarginTop(1)
-
-		titleStyle := styles.Cancelled.Bold(true)
-		itemTitle := m.state.pendingDelete.GetTitle()
-		if len(itemTitle) > 30 {
-			itemTitle = itemTitle[:27] + "..."
-		}
-
-		dialog := titleStyle.Render("Delete item?") + "\n\n" +
-			styles.Default.Render(fmt.Sprintf("\"%s\"", itemTitle)) + "\n\n" +
-			styles.Secondary.Render("Press ") +
-			styles.Done.Render("y") +
-			styles.Secondary.Render(" to confirm, ") +
-			styles.Cancelled.Render("n") +
-			styles.Secondary.Render(" to cancel")
-
-		view += "\n" + dialogStyle.Render(dialog)
+		view += "\n" + styles.RenderDeleteDialog(m.state.pendingDelete.GetTitle())
 	}
 
 	return view
