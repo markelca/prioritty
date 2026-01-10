@@ -44,7 +44,7 @@ var (
 	DoneTitle = Secondary.
 			Strikethrough(true)
 
-	ContentIcon = Default.SetString("🗐").
+	ContentIcon = Default.SetString("≣").
 			PaddingRight(1).
 			String()
 

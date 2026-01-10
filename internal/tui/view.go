@@ -106,6 +106,7 @@ func (m Model) View() string {
 
 	view += renderDonePercentage(m.state.items, counts)
 	view += renderSummary(counts)
+	view += renderContentCount(m.state.items)
 
 	if m.params.IsTUI {
 		view += styles.Default.
@@ -196,4 +197,17 @@ func (m Model) footerView() string {
 	line := strings.Repeat("─", max(0, m.state.contentView.viewport.Width-lipgloss.Width(info)))
 	footer := lipgloss.JoinHorizontal(lipgloss.Center, line, info, "\n")
 	return footer
+}
+
+func renderContentCount(itemList []items.ItemInterface) string {
+	count := 0
+	for _, item := range itemList {
+		if item.GetBody() != "" {
+			count++
+		}
+	}
+	return fmt.Sprintf("  %s%s\n",
+		styles.ContentIcon,
+		styles.Secondary.Render(fmt.Sprintf("%d items with content", count)),
+	)
 }
