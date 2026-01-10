@@ -30,12 +30,12 @@ func (r *SQLiteRepository) GetTasks() ([]items.Task, error) {
 		var task items.Task
 		var body *string
 		var taskId int
-		var statusId int
+		var status string
 		var tagId sql.NullInt64
 		var tagName sql.NullString
 		var createdAtStr string
 
-		err := rows.Scan(&taskId, &task.Title, &body, &statusId, &createdAtStr, &tagId, &tagName)
+		err := rows.Scan(&taskId, &task.Title, &body, &status, &createdAtStr, &tagId, &tagName)
 		if err != nil {
 			log.Printf("Error scanning task: %v", err)
 			continue
@@ -62,7 +62,7 @@ func (r *SQLiteRepository) GetTasks() ([]items.Task, error) {
 			task.Tag = nil
 		}
 
-		task.Status = statusIdToStatus(statusId)
+		task.Status = items.ParseStatus(status)
 
 		tasks = append(tasks, task)
 	}

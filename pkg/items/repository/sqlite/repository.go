@@ -49,6 +49,8 @@ type SQLiteRepository struct {
 	filepath string
 }
 
+var _ repository.Repository = (*SQLiteRepository)(nil)
+
 func NewSQLiteRepository(db *sql.DB, filepath string) *SQLiteRepository {
 	return &SQLiteRepository{db: db, filepath: filepath}
 }
@@ -179,13 +181,13 @@ func (r *SQLiteRepository) GetItemsWithTag(tagName string) ([]items.ItemInterfac
 	for rows.Next() {
 		var task items.Task
 		var body *string
-		var statusId int
+		var status string
 		var createdAtStr string
 		var taskId int
 		var tagId int
 		var tagName string
 
-		err := rows.Scan(&taskId, &task.Title, &body, &statusId, &createdAtStr, &tagId, &tagName)
+		err := rows.Scan(&taskId, &task.Title, &body, &status, &createdAtStr, &tagId, &tagName)
 		if err != nil {
 			log.Printf("Error scanning task: %v", err)
 			return nil, err
@@ -207,7 +209,7 @@ func (r *SQLiteRepository) GetItemsWithTag(tagName string) ([]items.ItemInterfac
 			Name: tagName,
 		}
 		task.Tag = &tag
-		task.Status = statusIdToStatus(statusId)
+		task.Status = items.ParseStatus(status)
 
 		allItems = append(allItems, &task)
 	}
