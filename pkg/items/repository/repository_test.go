@@ -4,6 +4,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -62,6 +63,27 @@ func TestExpandTilde_ActualHomeDir(t *testing.T) {
 }
 
 func TestGetDatabasePath_SQLite(t *testing.T) {
+	t.Run("non-demo returns configured path", func(t *testing.T) {
+		viper.Set("database_path", "/custom/path/prioritty.db")
+		defer viper.Reset()
+
+		dbPath, err := GetDatabasePath(RepoTypeSQLite, false)
+
+		assert.NoError(t, err)
+		assert.Equal(t, "/custom/path/prioritty.db", dbPath)
+	})
+
+	t.Run("non-demo expands tilde in configured path", func(t *testing.T) {
+		home, _ := os.UserHomeDir()
+		viper.Set("database_path", "~/custom/prioritty.db")
+		defer viper.Reset()
+
+		dbPath, err := GetDatabasePath(RepoTypeSQLite, false)
+
+		assert.NoError(t, err)
+		assert.Equal(t, home+"/custom/prioritty.db", dbPath)
+	})
+
 	t.Run("demo returns temp path", func(t *testing.T) {
 		dbPath, err := GetDatabasePath(RepoTypeSQLite, true)
 
@@ -72,6 +94,27 @@ func TestGetDatabasePath_SQLite(t *testing.T) {
 }
 
 func TestGetDatabasePath_Obsidian(t *testing.T) {
+	t.Run("non-demo returns configured path", func(t *testing.T) {
+		viper.Set("database_path", "/custom/path/vault")
+		defer viper.Reset()
+
+		dbPath, err := GetDatabasePath(RepoTypeObsidian, false)
+
+		assert.NoError(t, err)
+		assert.Equal(t, "/custom/path/vault", dbPath)
+	})
+
+	t.Run("non-demo expands tilde in configured path", func(t *testing.T) {
+		home, _ := os.UserHomeDir()
+		viper.Set("database_path", "~/vaults/notes")
+		defer viper.Reset()
+
+		dbPath, err := GetDatabasePath(RepoTypeObsidian, false)
+
+		assert.NoError(t, err)
+		assert.Equal(t, home+"/vaults/notes", dbPath)
+	})
+
 	t.Run("demo returns temp path", func(t *testing.T) {
 		dbPath, err := GetDatabasePath(RepoTypeObsidian, true)
 
