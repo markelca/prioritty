@@ -6,13 +6,14 @@ import (
 
 	"github.com/markelca/prioritty/pkg/items"
 	"github.com/markelca/prioritty/pkg/items/repository"
+	"github.com/markelca/prioritty/pkg/items/repository/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestTaskService_GetTasks(t *testing.T) {
 	t.Run("returns all tasks", func(t *testing.T) {
-		mockRepo := repository.NewMockRepository()
+		mockRepo := testutils.NewMockRepository()
 		task1 := items.Task{Item: items.Item{Id: "1", Title: "Task 1"}, Status: items.Todo}
 		task2 := items.Task{Item: items.Item{Id: "2", Title: "Task 2"}, Status: items.Done}
 		mockRepo.AddTask(task1)
@@ -27,7 +28,7 @@ func TestTaskService_GetTasks(t *testing.T) {
 	})
 
 	t.Run("returns empty slice when no tasks", func(t *testing.T) {
-		mockRepo := repository.NewMockRepository()
+		mockRepo := testutils.NewMockRepository()
 		svc := NewService(mockRepo)
 
 		tasks, err := svc.GetTasks()
@@ -37,7 +38,7 @@ func TestTaskService_GetTasks(t *testing.T) {
 	})
 
 	t.Run("propagates error", func(t *testing.T) {
-		mockRepo := repository.NewMockRepository()
+		mockRepo := testutils.NewMockRepository()
 		mockRepo.GetTasksError = errors.New("db error")
 		svc := NewService(mockRepo)
 
@@ -50,7 +51,7 @@ func TestTaskService_GetTasks(t *testing.T) {
 
 func TestTaskService_UpdateTask(t *testing.T) {
 	t.Run("updates task", func(t *testing.T) {
-		mockRepo := repository.NewMockRepository()
+		mockRepo := testutils.NewMockRepository()
 		task := items.Task{Item: items.Item{Id: "1", Title: "Original"}, Status: items.Todo}
 		mockRepo.AddTask(task)
 		svc := NewService(mockRepo)
@@ -63,7 +64,7 @@ func TestTaskService_UpdateTask(t *testing.T) {
 	})
 
 	t.Run("propagates error", func(t *testing.T) {
-		mockRepo := repository.NewMockRepository()
+		mockRepo := testutils.NewMockRepository()
 		mockRepo.UpdateTaskError = errors.New("update error")
 		task := items.Task{Item: items.Item{Id: "1"}, Status: items.Todo}
 		mockRepo.AddTask(task)
@@ -77,7 +78,7 @@ func TestTaskService_UpdateTask(t *testing.T) {
 
 func TestTaskService_UpdateStatus(t *testing.T) {
 	t.Run("updates status from todo to done", func(t *testing.T) {
-		mockRepo := repository.NewMockRepository()
+		mockRepo := testutils.NewMockRepository()
 		task := items.Task{Item: items.Item{Id: "1", Title: "Task"}, Status: items.Todo}
 		mockRepo.AddTask(task)
 		svc := NewService(mockRepo)
@@ -90,7 +91,7 @@ func TestTaskService_UpdateStatus(t *testing.T) {
 	})
 
 	t.Run("toggles back to todo when same status", func(t *testing.T) {
-		mockRepo := repository.NewMockRepository()
+		mockRepo := testutils.NewMockRepository()
 		task := items.Task{Item: items.Item{Id: "1", Title: "Task"}, Status: items.Done}
 		mockRepo.AddTask(task)
 		svc := NewService(mockRepo)
@@ -102,7 +103,7 @@ func TestTaskService_UpdateStatus(t *testing.T) {
 	})
 
 	t.Run("propagates repository error", func(t *testing.T) {
-		mockRepo := repository.NewMockRepository()
+		mockRepo := testutils.NewMockRepository()
 		mockRepo.UpdateTaskStatusError = errors.New("status error")
 		task := items.Task{Item: items.Item{Id: "1"}, Status: items.Todo}
 		mockRepo.AddTask(task)
@@ -116,7 +117,7 @@ func TestTaskService_UpdateStatus(t *testing.T) {
 
 func TestTaskService_AddTask(t *testing.T) {
 	t.Run("creates task with title", func(t *testing.T) {
-		mockRepo := repository.NewMockRepository()
+		mockRepo := testutils.NewMockRepository()
 		svc := NewService(mockRepo)
 
 		err := svc.AddTask("New Task")
@@ -127,7 +128,7 @@ func TestTaskService_AddTask(t *testing.T) {
 	})
 
 	t.Run("propagates error", func(t *testing.T) {
-		mockRepo := repository.NewMockRepository()
+		mockRepo := testutils.NewMockRepository()
 		mockRepo.CreateTaskError = errors.New("create error")
 		svc := NewService(mockRepo)
 
@@ -138,7 +139,7 @@ func TestTaskService_AddTask(t *testing.T) {
 }
 
 func TestTaskService_DestroyDemo(t *testing.T) {
-	mockRepo := repository.NewMockRepository()
+	mockRepo := testutils.NewMockRepository()
 	svc := NewService(mockRepo)
 
 	err := svc.DestroyDemo()
@@ -149,7 +150,7 @@ func TestTaskService_DestroyDemo(t *testing.T) {
 
 func TestTaskService_removeTask(t *testing.T) {
 	t.Run("removes existing task", func(t *testing.T) {
-		mockRepo := repository.NewMockRepository()
+		mockRepo := testutils.NewMockRepository()
 		task := items.Task{Item: items.Item{Id: "1", Title: "Task"}, Status: items.Todo}
 		mockRepo.AddTask(task)
 		svc := NewService(mockRepo)
@@ -162,7 +163,7 @@ func TestTaskService_removeTask(t *testing.T) {
 	})
 
 	t.Run("returns error for non-existent task", func(t *testing.T) {
-		mockRepo := repository.NewMockRepository()
+		mockRepo := testutils.NewMockRepository()
 		svc := NewService(mockRepo)
 
 		err := svc.removeTask("non-existent")

@@ -1,11 +1,14 @@
-package repository
+package testutils
 
 import (
+	"slices"
+
 	"github.com/markelca/prioritty/pkg/items"
+	"github.com/markelca/prioritty/pkg/items/repository"
 )
 
 // Ensure MockRepository implements Repository interface
-var _ Repository = (*MockRepository)(nil)
+var _ repository.Repository = (*MockRepository)(nil)
 
 // MockRepository is a test double for Repository that stores data in memory
 type MockRepository struct {
@@ -18,25 +21,25 @@ type MockRepository struct {
 	Calls []string
 
 	// Error injection for testing error paths
-	GetTasksError        error
-	GetNotesError        error
-	CreateTaskError      error
-	CreateNoteError      error
-	UpdateTaskError      error
-	UpdateNoteError      error
-	RemoveTaskError      error
-	RemoveNoteError      error
+	GetTasksError         error
+	GetNotesError         error
+	CreateTaskError       error
+	CreateNoteError       error
+	UpdateTaskError       error
+	UpdateNoteError       error
+	RemoveTaskError       error
+	RemoveNoteError       error
 	UpdateTaskStatusError error
-	SetTaskTagError      error
-	UnsetTaskTagError    error
-	SetNoteTagError      error
-	UnsetNoteTagError    error
-	GetTagError          error
-	GetTagsError         error
-	CreateTagError       error
-	RemoveTagError       error
-	GetItemsWithTagError error
-	ResetError           error
+	SetTaskTagError       error
+	UnsetTaskTagError     error
+	SetNoteTagError       error
+	UnsetNoteTagError     error
+	GetTagError           error
+	GetTagsError          error
+	CreateTagError        error
+	RemoveTagError        error
+	GetItemsWithTagError  error
+	ResetError            error
 }
 
 // NewMockRepository creates a new MockRepository with initialized storage
@@ -56,12 +59,7 @@ func (m *MockRepository) recordCall(method string) {
 
 // HasCall checks if a method was called
 func (m *MockRepository) HasCall(method string) bool {
-	for _, call := range m.Calls {
-		if call == method {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(m.Calls, method)
 }
 
 // CallCount returns the number of times a method was called
@@ -102,7 +100,7 @@ func (m *MockRepository) UpdateTask(task items.Task) error {
 	}
 
 	if _, exists := m.tasks[task.Id]; !exists {
-		return ErrNotFound
+		return repository.ErrNotFound
 	}
 	m.tasks[task.Id] = task
 	return nil
@@ -125,7 +123,7 @@ func (m *MockRepository) RemoveTask(id string) error {
 	}
 
 	if _, exists := m.tasks[id]; !exists {
-		return ErrNotFound
+		return repository.ErrNotFound
 	}
 	delete(m.tasks, id)
 	return nil
@@ -142,7 +140,7 @@ func (m *MockRepository) UpdateTaskStatus(task items.Task, status items.Status) 
 		m.tasks[task.Id] = existing
 		return nil
 	}
-	return ErrNotFound
+	return repository.ErrNotFound
 }
 
 func (m *MockRepository) SetTaskTag(task items.Task, tag items.Tag) error {
@@ -156,7 +154,7 @@ func (m *MockRepository) SetTaskTag(task items.Task, tag items.Tag) error {
 		m.tasks[task.Id] = existing
 		return nil
 	}
-	return ErrNotFound
+	return repository.ErrNotFound
 }
 
 func (m *MockRepository) UnsetTaskTag(task items.Task) error {
@@ -170,7 +168,7 @@ func (m *MockRepository) UnsetTaskTag(task items.Task) error {
 		m.tasks[task.Id] = existing
 		return nil
 	}
-	return ErrNotFound
+	return repository.ErrNotFound
 }
 
 // --- Note Repository Methods ---
@@ -195,7 +193,7 @@ func (m *MockRepository) UpdateNote(note items.Note) error {
 	}
 
 	if _, exists := m.notes[note.Id]; !exists {
-		return ErrNotFound
+		return repository.ErrNotFound
 	}
 	m.notes[note.Id] = note
 	return nil
@@ -218,7 +216,7 @@ func (m *MockRepository) RemoveNote(id string) error {
 	}
 
 	if _, exists := m.notes[id]; !exists {
-		return ErrNotFound
+		return repository.ErrNotFound
 	}
 	delete(m.notes, id)
 	return nil
@@ -235,7 +233,7 @@ func (m *MockRepository) SetNoteTag(note items.Note, tag items.Tag) error {
 		m.notes[note.Id] = existing
 		return nil
 	}
-	return ErrNotFound
+	return repository.ErrNotFound
 }
 
 func (m *MockRepository) UnsetNoteTag(note items.Note) error {
@@ -249,7 +247,7 @@ func (m *MockRepository) UnsetNoteTag(note items.Note) error {
 		m.notes[note.Id] = existing
 		return nil
 	}
-	return ErrNotFound
+	return repository.ErrNotFound
 }
 
 // --- Tag Methods ---
@@ -265,7 +263,7 @@ func (m *MockRepository) GetTag(name string) (*items.Tag, error) {
 			return &tag, nil
 		}
 	}
-	return nil, ErrNotFound
+	return nil, repository.ErrNotFound
 }
 
 func (m *MockRepository) GetTags() ([]items.Tag, error) {
@@ -307,7 +305,7 @@ func (m *MockRepository) RemoveTag(name string) error {
 			return nil
 		}
 	}
-	return ErrNotFound
+	return repository.ErrNotFound
 }
 
 func (m *MockRepository) GetItemsWithTag(tagName string) ([]items.ItemInterface, error) {

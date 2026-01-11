@@ -7,13 +7,13 @@ import (
 
 	"github.com/markelca/prioritty/internal/editor"
 	"github.com/markelca/prioritty/pkg/items"
-	"github.com/markelca/prioritty/pkg/items/repository"
+	"github.com/markelca/prioritty/pkg/items/repository/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestNewService(t *testing.T) {
-	mockRepo := repository.NewMockRepository()
+	mockRepo := testutils.NewMockRepository()
 
 	svc := NewService(mockRepo)
 
@@ -24,7 +24,7 @@ func TestNewService(t *testing.T) {
 
 func TestService_GetAll(t *testing.T) {
 	t.Run("returns tasks and notes combined", func(t *testing.T) {
-		mockRepo := repository.NewMockRepository()
+		mockRepo := testutils.NewMockRepository()
 
 		// Add test data
 		task := items.Task{
@@ -48,7 +48,7 @@ func TestService_GetAll(t *testing.T) {
 	})
 
 	t.Run("returns empty slice when no items", func(t *testing.T) {
-		mockRepo := repository.NewMockRepository()
+		mockRepo := testutils.NewMockRepository()
 		svc := NewService(mockRepo)
 
 		allItems, err := svc.GetAll()
@@ -58,7 +58,7 @@ func TestService_GetAll(t *testing.T) {
 	})
 
 	t.Run("returns items sorted correctly", func(t *testing.T) {
-		mockRepo := repository.NewMockRepository()
+		mockRepo := testutils.NewMockRepository()
 
 		tag := items.Tag{Id: "tag-1", Name: "work"}
 		earlier := time.Now().Add(-1 * time.Hour)
@@ -87,7 +87,7 @@ func TestService_GetAll(t *testing.T) {
 	})
 
 	t.Run("propagates notes error", func(t *testing.T) {
-		mockRepo := repository.NewMockRepository()
+		mockRepo := testutils.NewMockRepository()
 		mockRepo.GetNotesError = errors.New("notes error")
 		svc := NewService(mockRepo)
 
@@ -98,7 +98,7 @@ func TestService_GetAll(t *testing.T) {
 	})
 
 	t.Run("propagates tasks error", func(t *testing.T) {
-		mockRepo := repository.NewMockRepository()
+		mockRepo := testutils.NewMockRepository()
 		mockRepo.GetTasksError = errors.New("tasks error")
 		svc := NewService(mockRepo)
 
@@ -111,7 +111,7 @@ func TestService_GetAll(t *testing.T) {
 
 func TestService_RemoveItem(t *testing.T) {
 	t.Run("removes task", func(t *testing.T) {
-		mockRepo := repository.NewMockRepository()
+		mockRepo := testutils.NewMockRepository()
 		task := items.Task{Item: items.Item{Id: "task-1", Title: "Test"}, Status: items.Todo}
 		mockRepo.AddTask(task)
 		svc := NewService(mockRepo)
@@ -124,7 +124,7 @@ func TestService_RemoveItem(t *testing.T) {
 	})
 
 	t.Run("removes note", func(t *testing.T) {
-		mockRepo := repository.NewMockRepository()
+		mockRepo := testutils.NewMockRepository()
 		note := items.Note{Item: items.Item{Id: "note-1", Title: "Test"}}
 		mockRepo.AddNote(note)
 		svc := NewService(mockRepo)
@@ -137,7 +137,7 @@ func TestService_RemoveItem(t *testing.T) {
 	})
 
 	t.Run("returns error for unknown type", func(t *testing.T) {
-		mockRepo := repository.NewMockRepository()
+		mockRepo := testutils.NewMockRepository()
 		svc := NewService(mockRepo)
 
 		err := svc.RemoveItem(&unknownItem{})
@@ -149,7 +149,7 @@ func TestService_RemoveItem(t *testing.T) {
 
 func TestService_SetTag(t *testing.T) {
 	t.Run("creates new tag and sets on task", func(t *testing.T) {
-		mockRepo := repository.NewMockRepository()
+		mockRepo := testutils.NewMockRepository()
 		task := items.Task{Item: items.Item{Id: "task-1", Title: "Test"}, Status: items.Todo}
 		mockRepo.AddTask(task)
 		svc := NewService(mockRepo)
@@ -163,7 +163,7 @@ func TestService_SetTag(t *testing.T) {
 	})
 
 	t.Run("uses existing tag", func(t *testing.T) {
-		mockRepo := repository.NewMockRepository()
+		mockRepo := testutils.NewMockRepository()
 		existingTag := items.Tag{Id: "tag-1", Name: "work"}
 		mockRepo.AddTag(existingTag)
 		task := items.Task{Item: items.Item{Id: "task-1", Title: "Test"}, Status: items.Todo}
@@ -179,7 +179,7 @@ func TestService_SetTag(t *testing.T) {
 	})
 
 	t.Run("sets tag on note", func(t *testing.T) {
-		mockRepo := repository.NewMockRepository()
+		mockRepo := testutils.NewMockRepository()
 		note := items.Note{Item: items.Item{Id: "note-1", Title: "Test"}}
 		mockRepo.AddNote(note)
 		svc := NewService(mockRepo)
@@ -191,7 +191,7 @@ func TestService_SetTag(t *testing.T) {
 	})
 
 	t.Run("returns error for unknown type", func(t *testing.T) {
-		mockRepo := repository.NewMockRepository()
+		mockRepo := testutils.NewMockRepository()
 		svc := NewService(mockRepo)
 
 		err := svc.SetTag(&unknownItem{}, "tag")
@@ -202,7 +202,7 @@ func TestService_SetTag(t *testing.T) {
 
 func TestService_UnsetTag(t *testing.T) {
 	t.Run("unsets tag from task", func(t *testing.T) {
-		mockRepo := repository.NewMockRepository()
+		mockRepo := testutils.NewMockRepository()
 		tag := items.Tag{Id: "tag-1", Name: "work"}
 		task := items.Task{Item: items.Item{Id: "task-1", Title: "Test", Tag: &tag}, Status: items.Todo}
 		mockRepo.AddTask(task)
@@ -215,7 +215,7 @@ func TestService_UnsetTag(t *testing.T) {
 	})
 
 	t.Run("unsets tag from note", func(t *testing.T) {
-		mockRepo := repository.NewMockRepository()
+		mockRepo := testutils.NewMockRepository()
 		tag := items.Tag{Id: "tag-1", Name: "docs"}
 		note := items.Note{Item: items.Item{Id: "note-1", Title: "Test", Tag: &tag}}
 		mockRepo.AddNote(note)
@@ -229,7 +229,7 @@ func TestService_UnsetTag(t *testing.T) {
 }
 
 func TestService_GetTags(t *testing.T) {
-	mockRepo := repository.NewMockRepository()
+	mockRepo := testutils.NewMockRepository()
 	tag1 := items.Tag{Id: "1", Name: "work"}
 	tag2 := items.Tag{Id: "2", Name: "docs"}
 	mockRepo.AddTag(tag1)
@@ -245,7 +245,7 @@ func TestService_GetTags(t *testing.T) {
 
 func TestService_RemoveTag(t *testing.T) {
 	t.Run("removes tag with no items", func(t *testing.T) {
-		mockRepo := repository.NewMockRepository()
+		mockRepo := testutils.NewMockRepository()
 		tag := items.Tag{Id: "1", Name: "unused"}
 		mockRepo.AddTag(tag)
 		svc := NewService(mockRepo)
@@ -257,7 +257,7 @@ func TestService_RemoveTag(t *testing.T) {
 	})
 
 	t.Run("prevents removal when tag is in use", func(t *testing.T) {
-		mockRepo := repository.NewMockRepository()
+		mockRepo := testutils.NewMockRepository()
 		tag := items.Tag{Id: "1", Name: "work"}
 		mockRepo.AddTag(tag)
 		task := items.Task{
@@ -276,7 +276,7 @@ func TestService_RemoveTag(t *testing.T) {
 }
 
 func TestService_GetItemsWithTag(t *testing.T) {
-	mockRepo := repository.NewMockRepository()
+	mockRepo := testutils.NewMockRepository()
 	tag := items.Tag{Id: "1", Name: "work"}
 	mockRepo.AddTag(tag)
 	task := items.Task{
@@ -295,7 +295,7 @@ func TestService_GetItemsWithTag(t *testing.T) {
 
 func TestService_CreateTaskFromEditorMsg(t *testing.T) {
 	t.Run("creates task without tag", func(t *testing.T) {
-		mockRepo := repository.NewMockRepository()
+		mockRepo := testutils.NewMockRepository()
 		svc := NewService(mockRepo)
 
 		msg := editor.EditorFinishedMsg{
@@ -312,7 +312,7 @@ func TestService_CreateTaskFromEditorMsg(t *testing.T) {
 	})
 
 	t.Run("creates task with tag", func(t *testing.T) {
-		mockRepo := repository.NewMockRepository()
+		mockRepo := testutils.NewMockRepository()
 		svc := NewService(mockRepo)
 
 		msg := editor.EditorFinishedMsg{
@@ -330,7 +330,7 @@ func TestService_CreateTaskFromEditorMsg(t *testing.T) {
 	})
 
 	t.Run("propagates create error", func(t *testing.T) {
-		mockRepo := repository.NewMockRepository()
+		mockRepo := testutils.NewMockRepository()
 		mockRepo.CreateTaskError = errors.New("create failed")
 		svc := NewService(mockRepo)
 
@@ -344,7 +344,7 @@ func TestService_CreateTaskFromEditorMsg(t *testing.T) {
 
 func TestService_CreateNoteFromEditorMsg(t *testing.T) {
 	t.Run("creates note without tag", func(t *testing.T) {
-		mockRepo := repository.NewMockRepository()
+		mockRepo := testutils.NewMockRepository()
 		svc := NewService(mockRepo)
 
 		msg := editor.EditorFinishedMsg{
@@ -360,7 +360,7 @@ func TestService_CreateNoteFromEditorMsg(t *testing.T) {
 	})
 
 	t.Run("creates note with tag", func(t *testing.T) {
-		mockRepo := repository.NewMockRepository()
+		mockRepo := testutils.NewMockRepository()
 		svc := NewService(mockRepo)
 
 		msg := editor.EditorFinishedMsg{
@@ -379,7 +379,7 @@ func TestService_CreateNoteFromEditorMsg(t *testing.T) {
 
 func TestService_UpdateItemFromEditorMsg(t *testing.T) {
 	t.Run("updates task", func(t *testing.T) {
-		mockRepo := repository.NewMockRepository()
+		mockRepo := testutils.NewMockRepository()
 		task := items.Task{
 			Item:   items.Item{Id: "task-1", Title: "Old Title"},
 			Status: items.Todo,
@@ -403,7 +403,7 @@ func TestService_UpdateItemFromEditorMsg(t *testing.T) {
 	})
 
 	t.Run("updates note", func(t *testing.T) {
-		mockRepo := repository.NewMockRepository()
+		mockRepo := testutils.NewMockRepository()
 		note := items.Note{
 			Item: items.Item{Id: "note-1", Title: "Old Title"},
 		}
@@ -424,7 +424,7 @@ func TestService_UpdateItemFromEditorMsg(t *testing.T) {
 	})
 
 	t.Run("converts task to note", func(t *testing.T) {
-		mockRepo := repository.NewMockRepository()
+		mockRepo := testutils.NewMockRepository()
 		task := items.Task{
 			Item:   items.Item{Id: "task-1", Title: "Task"},
 			Status: items.Todo,
@@ -447,7 +447,7 @@ func TestService_UpdateItemFromEditorMsg(t *testing.T) {
 	})
 
 	t.Run("converts note to task", func(t *testing.T) {
-		mockRepo := repository.NewMockRepository()
+		mockRepo := testutils.NewMockRepository()
 		note := items.Note{
 			Item: items.Item{Id: "note-1", Title: "Note"},
 		}
@@ -469,7 +469,7 @@ func TestService_UpdateItemFromEditorMsg(t *testing.T) {
 	})
 
 	t.Run("updates tag when changed", func(t *testing.T) {
-		mockRepo := repository.NewMockRepository()
+		mockRepo := testutils.NewMockRepository()
 		task := items.Task{
 			Item:   items.Item{Id: "task-1", Title: "Task"},
 			Status: items.Todo,
@@ -490,7 +490,7 @@ func TestService_UpdateItemFromEditorMsg(t *testing.T) {
 	})
 
 	t.Run("removes tag when empty", func(t *testing.T) {
-		mockRepo := repository.NewMockRepository()
+		mockRepo := testutils.NewMockRepository()
 		tag := items.Tag{Id: "1", Name: "work"}
 		task := items.Task{
 			Item:   items.Item{Id: "task-1", Title: "Task", Tag: &tag},
@@ -515,10 +515,10 @@ func TestService_UpdateItemFromEditorMsg(t *testing.T) {
 // unknownItem is a test type that implements ItemInterface but isn't Task or Note
 type unknownItem struct{}
 
-func (u *unknownItem) GetId() string               { return "unknown" }
-func (u *unknownItem) GetTitle() string            { return "Unknown" }
-func (u *unknownItem) GetBody() string             { return "" }
-func (u *unknownItem) GetTag() *items.Tag          { return nil }
-func (u *unknownItem) GetCreatedAt() time.Time     { return time.Time{} }
+func (u *unknownItem) GetId() string                  { return "unknown" }
+func (u *unknownItem) GetTitle() string               { return "Unknown" }
+func (u *unknownItem) GetBody() string                { return "" }
+func (u *unknownItem) GetTag() *items.Tag             { return nil }
+func (u *unknownItem) GetCreatedAt() time.Time        { return time.Time{} }
 func (u *unknownItem) After(items.ItemInterface) bool { return false }
 func (u *unknownItem) Render(r items.Renderer) string { return r.Render(u) }

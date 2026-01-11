@@ -6,13 +6,14 @@ import (
 
 	"github.com/markelca/prioritty/pkg/items"
 	"github.com/markelca/prioritty/pkg/items/repository"
+	"github.com/markelca/prioritty/pkg/items/repository/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestNoteService_GetNotes(t *testing.T) {
 	t.Run("returns all notes", func(t *testing.T) {
-		mockRepo := repository.NewMockRepository()
+		mockRepo := testutils.NewMockRepository()
 		note1 := items.Note{Item: items.Item{Id: "1", Title: "Note 1"}}
 		note2 := items.Note{Item: items.Item{Id: "2", Title: "Note 2"}}
 		mockRepo.AddNote(note1)
@@ -27,7 +28,7 @@ func TestNoteService_GetNotes(t *testing.T) {
 	})
 
 	t.Run("returns empty slice when no notes", func(t *testing.T) {
-		mockRepo := repository.NewMockRepository()
+		mockRepo := testutils.NewMockRepository()
 		svc := NewService(mockRepo)
 
 		notes, err := svc.GetNotes()
@@ -37,7 +38,7 @@ func TestNoteService_GetNotes(t *testing.T) {
 	})
 
 	t.Run("propagates error", func(t *testing.T) {
-		mockRepo := repository.NewMockRepository()
+		mockRepo := testutils.NewMockRepository()
 		mockRepo.GetNotesError = errors.New("db error")
 		svc := NewService(mockRepo)
 
@@ -50,7 +51,7 @@ func TestNoteService_GetNotes(t *testing.T) {
 
 func TestNoteService_UpdateNote(t *testing.T) {
 	t.Run("updates note", func(t *testing.T) {
-		mockRepo := repository.NewMockRepository()
+		mockRepo := testutils.NewMockRepository()
 		note := items.Note{Item: items.Item{Id: "1", Title: "Original"}}
 		mockRepo.AddNote(note)
 		svc := NewService(mockRepo)
@@ -63,7 +64,7 @@ func TestNoteService_UpdateNote(t *testing.T) {
 	})
 
 	t.Run("propagates error", func(t *testing.T) {
-		mockRepo := repository.NewMockRepository()
+		mockRepo := testutils.NewMockRepository()
 		mockRepo.UpdateNoteError = errors.New("update error")
 		note := items.Note{Item: items.Item{Id: "1"}}
 		mockRepo.AddNote(note)
@@ -77,7 +78,7 @@ func TestNoteService_UpdateNote(t *testing.T) {
 
 func TestNoteService_AddNote(t *testing.T) {
 	t.Run("creates note with title", func(t *testing.T) {
-		mockRepo := repository.NewMockRepository()
+		mockRepo := testutils.NewMockRepository()
 		svc := NewService(mockRepo)
 
 		err := svc.AddNote("New Note")
@@ -88,7 +89,7 @@ func TestNoteService_AddNote(t *testing.T) {
 	})
 
 	t.Run("propagates error", func(t *testing.T) {
-		mockRepo := repository.NewMockRepository()
+		mockRepo := testutils.NewMockRepository()
 		mockRepo.CreateNoteError = errors.New("create error")
 		svc := NewService(mockRepo)
 
@@ -100,7 +101,7 @@ func TestNoteService_AddNote(t *testing.T) {
 
 func TestNoteService_removeNote(t *testing.T) {
 	t.Run("removes existing note", func(t *testing.T) {
-		mockRepo := repository.NewMockRepository()
+		mockRepo := testutils.NewMockRepository()
 		note := items.Note{Item: items.Item{Id: "1", Title: "Note"}}
 		mockRepo.AddNote(note)
 		svc := NewService(mockRepo)
@@ -113,7 +114,7 @@ func TestNoteService_removeNote(t *testing.T) {
 	})
 
 	t.Run("returns error for non-existent note", func(t *testing.T) {
-		mockRepo := repository.NewMockRepository()
+		mockRepo := testutils.NewMockRepository()
 		svc := NewService(mockRepo)
 
 		err := svc.removeNote("non-existent")
