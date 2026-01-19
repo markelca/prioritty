@@ -1,4 +1,4 @@
-package testutils
+package testutil
 
 import (
 	"slices"
@@ -7,11 +7,11 @@ import (
 	"github.com/markelca/prioritty/pkg/items/repository"
 )
 
-// Ensure MockRepository implements Repository interface
-var _ repository.Repository = (*MockRepository)(nil)
+// Ensure FakeRepository implements Repository interface
+var _ repository.Repository = (*FakeRepository)(nil)
 
-// MockRepository is a test double for Repository that stores data in memory
-type MockRepository struct {
+// FakeRepository is a test double for Repository that stores data in memory
+type FakeRepository struct {
 	// Storage
 	tasks map[string]items.Task
 	notes map[string]items.Note
@@ -42,9 +42,9 @@ type MockRepository struct {
 	ResetError            error
 }
 
-// NewMockRepository creates a new MockRepository with initialized storage
-func NewMockRepository() *MockRepository {
-	return &MockRepository{
+// NewFakeRepository creates a new FakeRepository with initialized storage
+func NewFakeRepository() *FakeRepository {
+	return &FakeRepository{
 		tasks: make(map[string]items.Task),
 		notes: make(map[string]items.Note),
 		tags:  make(map[string]items.Tag),
@@ -53,17 +53,17 @@ func NewMockRepository() *MockRepository {
 }
 
 // recordCall adds a method call to the call tracking list
-func (m *MockRepository) recordCall(method string) {
+func (m *FakeRepository) recordCall(method string) {
 	m.Calls = append(m.Calls, method)
 }
 
 // HasCall checks if a method was called
-func (m *MockRepository) HasCall(method string) bool {
+func (m *FakeRepository) HasCall(method string) bool {
 	return slices.Contains(m.Calls, method)
 }
 
 // CallCount returns the number of times a method was called
-func (m *MockRepository) CallCount(method string) int {
+func (m *FakeRepository) CallCount(method string) int {
 	count := 0
 	for _, call := range m.Calls {
 		if call == method {
@@ -74,13 +74,13 @@ func (m *MockRepository) CallCount(method string) int {
 }
 
 // ResetCalls clears the call tracking list
-func (m *MockRepository) ResetCalls() {
+func (m *FakeRepository) ResetCalls() {
 	m.Calls = []string{}
 }
 
 // --- Task Repository Methods ---
 
-func (m *MockRepository) GetTasks() ([]items.Task, error) {
+func (m *FakeRepository) GetTasks() ([]items.Task, error) {
 	m.recordCall("GetTasks")
 	if m.GetTasksError != nil {
 		return nil, m.GetTasksError
@@ -93,7 +93,7 @@ func (m *MockRepository) GetTasks() ([]items.Task, error) {
 	return result, nil
 }
 
-func (m *MockRepository) UpdateTask(task items.Task) error {
+func (m *FakeRepository) UpdateTask(task items.Task) error {
 	m.recordCall("UpdateTask")
 	if m.UpdateTaskError != nil {
 		return m.UpdateTaskError
@@ -106,7 +106,7 @@ func (m *MockRepository) UpdateTask(task items.Task) error {
 	return nil
 }
 
-func (m *MockRepository) CreateTask(task *items.Task) error {
+func (m *FakeRepository) CreateTask(task *items.Task) error {
 	m.recordCall("CreateTask")
 	if m.CreateTaskError != nil {
 		return m.CreateTaskError
@@ -116,7 +116,7 @@ func (m *MockRepository) CreateTask(task *items.Task) error {
 	return nil
 }
 
-func (m *MockRepository) RemoveTask(id string) error {
+func (m *FakeRepository) RemoveTask(id string) error {
 	m.recordCall("RemoveTask")
 	if m.RemoveTaskError != nil {
 		return m.RemoveTaskError
@@ -129,7 +129,7 @@ func (m *MockRepository) RemoveTask(id string) error {
 	return nil
 }
 
-func (m *MockRepository) UpdateTaskStatus(task items.Task, status items.Status) error {
+func (m *FakeRepository) UpdateTaskStatus(task items.Task, status items.Status) error {
 	m.recordCall("UpdateTaskStatus")
 	if m.UpdateTaskStatusError != nil {
 		return m.UpdateTaskStatusError
@@ -143,7 +143,7 @@ func (m *MockRepository) UpdateTaskStatus(task items.Task, status items.Status) 
 	return repository.ErrNotFound
 }
 
-func (m *MockRepository) SetTaskTag(task items.Task, tag items.Tag) error {
+func (m *FakeRepository) SetTaskTag(task items.Task, tag items.Tag) error {
 	m.recordCall("SetTaskTag")
 	if m.SetTaskTagError != nil {
 		return m.SetTaskTagError
@@ -157,7 +157,7 @@ func (m *MockRepository) SetTaskTag(task items.Task, tag items.Tag) error {
 	return repository.ErrNotFound
 }
 
-func (m *MockRepository) UnsetTaskTag(task items.Task) error {
+func (m *FakeRepository) UnsetTaskTag(task items.Task) error {
 	m.recordCall("UnsetTaskTag")
 	if m.UnsetTaskTagError != nil {
 		return m.UnsetTaskTagError
@@ -173,7 +173,7 @@ func (m *MockRepository) UnsetTaskTag(task items.Task) error {
 
 // --- Note Repository Methods ---
 
-func (m *MockRepository) GetNotes() ([]items.Note, error) {
+func (m *FakeRepository) GetNotes() ([]items.Note, error) {
 	m.recordCall("GetNotes")
 	if m.GetNotesError != nil {
 		return nil, m.GetNotesError
@@ -186,7 +186,7 @@ func (m *MockRepository) GetNotes() ([]items.Note, error) {
 	return result, nil
 }
 
-func (m *MockRepository) UpdateNote(note items.Note) error {
+func (m *FakeRepository) UpdateNote(note items.Note) error {
 	m.recordCall("UpdateNote")
 	if m.UpdateNoteError != nil {
 		return m.UpdateNoteError
@@ -199,7 +199,7 @@ func (m *MockRepository) UpdateNote(note items.Note) error {
 	return nil
 }
 
-func (m *MockRepository) CreateNote(note *items.Note) error {
+func (m *FakeRepository) CreateNote(note *items.Note) error {
 	m.recordCall("CreateNote")
 	if m.CreateNoteError != nil {
 		return m.CreateNoteError
@@ -209,7 +209,7 @@ func (m *MockRepository) CreateNote(note *items.Note) error {
 	return nil
 }
 
-func (m *MockRepository) RemoveNote(id string) error {
+func (m *FakeRepository) RemoveNote(id string) error {
 	m.recordCall("RemoveNote")
 	if m.RemoveNoteError != nil {
 		return m.RemoveNoteError
@@ -222,7 +222,7 @@ func (m *MockRepository) RemoveNote(id string) error {
 	return nil
 }
 
-func (m *MockRepository) SetNoteTag(note items.Note, tag items.Tag) error {
+func (m *FakeRepository) SetNoteTag(note items.Note, tag items.Tag) error {
 	m.recordCall("SetNoteTag")
 	if m.SetNoteTagError != nil {
 		return m.SetNoteTagError
@@ -236,7 +236,7 @@ func (m *MockRepository) SetNoteTag(note items.Note, tag items.Tag) error {
 	return repository.ErrNotFound
 }
 
-func (m *MockRepository) UnsetNoteTag(note items.Note) error {
+func (m *FakeRepository) UnsetNoteTag(note items.Note) error {
 	m.recordCall("UnsetNoteTag")
 	if m.UnsetNoteTagError != nil {
 		return m.UnsetNoteTagError
@@ -252,7 +252,7 @@ func (m *MockRepository) UnsetNoteTag(note items.Note) error {
 
 // --- Tag Methods ---
 
-func (m *MockRepository) GetTag(name string) (*items.Tag, error) {
+func (m *FakeRepository) GetTag(name string) (*items.Tag, error) {
 	m.recordCall("GetTag")
 	if m.GetTagError != nil {
 		return nil, m.GetTagError
@@ -266,7 +266,7 @@ func (m *MockRepository) GetTag(name string) (*items.Tag, error) {
 	return nil, repository.ErrNotFound
 }
 
-func (m *MockRepository) GetTags() ([]items.Tag, error) {
+func (m *FakeRepository) GetTags() ([]items.Tag, error) {
 	m.recordCall("GetTags")
 	if m.GetTagsError != nil {
 		return nil, m.GetTagsError
@@ -279,7 +279,7 @@ func (m *MockRepository) GetTags() ([]items.Tag, error) {
 	return result, nil
 }
 
-func (m *MockRepository) CreateTag(name string) (*items.Tag, error) {
+func (m *FakeRepository) CreateTag(name string) (*items.Tag, error) {
 	m.recordCall("CreateTag")
 	if m.CreateTagError != nil {
 		return nil, m.CreateTagError
@@ -293,7 +293,7 @@ func (m *MockRepository) CreateTag(name string) (*items.Tag, error) {
 	return &tag, nil
 }
 
-func (m *MockRepository) RemoveTag(name string) error {
+func (m *FakeRepository) RemoveTag(name string) error {
 	m.recordCall("RemoveTag")
 	if m.RemoveTagError != nil {
 		return m.RemoveTagError
@@ -308,7 +308,7 @@ func (m *MockRepository) RemoveTag(name string) error {
 	return repository.ErrNotFound
 }
 
-func (m *MockRepository) GetItemsWithTag(tagName string) ([]items.ItemInterface, error) {
+func (m *FakeRepository) GetItemsWithTag(tagName string) ([]items.ItemInterface, error) {
 	m.recordCall("GetItemsWithTag")
 	if m.GetItemsWithTagError != nil {
 		return nil, m.GetItemsWithTagError
@@ -333,7 +333,7 @@ func (m *MockRepository) GetItemsWithTag(tagName string) ([]items.ItemInterface,
 	return result, nil
 }
 
-func (m *MockRepository) Reset() error {
+func (m *FakeRepository) Reset() error {
 	m.recordCall("Reset")
 	if m.ResetError != nil {
 		return m.ResetError
@@ -348,22 +348,22 @@ func (m *MockRepository) Reset() error {
 // --- Test Helper Methods ---
 
 // AddTask adds a task directly to the mock storage (bypasses CreateTask)
-func (m *MockRepository) AddTask(task items.Task) {
+func (m *FakeRepository) AddTask(task items.Task) {
 	m.tasks[task.Id] = task
 }
 
 // AddNote adds a note directly to the mock storage (bypasses CreateNote)
-func (m *MockRepository) AddNote(note items.Note) {
+func (m *FakeRepository) AddNote(note items.Note) {
 	m.notes[note.Id] = note
 }
 
 // AddTag adds a tag directly to the mock storage (bypasses CreateTag)
-func (m *MockRepository) AddTag(tag items.Tag) {
+func (m *FakeRepository) AddTag(tag items.Tag) {
 	m.tags[tag.Id] = tag
 }
 
 // GetTaskById retrieves a task by ID from mock storage
-func (m *MockRepository) GetTaskById(id string) (*items.Task, bool) {
+func (m *FakeRepository) GetTaskById(id string) (*items.Task, bool) {
 	task, exists := m.tasks[id]
 	if !exists {
 		return nil, false
@@ -372,7 +372,7 @@ func (m *MockRepository) GetTaskById(id string) (*items.Task, bool) {
 }
 
 // GetNoteById retrieves a note by ID from mock storage
-func (m *MockRepository) GetNoteById(id string) (*items.Note, bool) {
+func (m *FakeRepository) GetNoteById(id string) (*items.Note, bool) {
 	note, exists := m.notes[id]
 	if !exists {
 		return nil, false
@@ -381,16 +381,16 @@ func (m *MockRepository) GetNoteById(id string) (*items.Note, bool) {
 }
 
 // TaskCount returns the number of tasks in storage
-func (m *MockRepository) TaskCount() int {
+func (m *FakeRepository) TaskCount() int {
 	return len(m.tasks)
 }
 
 // NoteCount returns the number of notes in storage
-func (m *MockRepository) NoteCount() int {
+func (m *FakeRepository) NoteCount() int {
 	return len(m.notes)
 }
 
 // TagCount returns the number of tags in storage
-func (m *MockRepository) TagCount() int {
+func (m *FakeRepository) TagCount() int {
 	return len(m.tags)
 }
